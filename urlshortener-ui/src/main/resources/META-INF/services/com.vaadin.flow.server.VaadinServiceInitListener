@@ -1,2 +1,3 @@
 com.svenruppert.urlshortener.ui.vaadin.AppServiceInitListener
 com.svenruppert.urlshortener.ui.vaadin.security.bootstrap.JSentinelBootstrapInitListener
+com.svenruppert.urlshortener.ui.vaadin.extension.OpenCoreRouteInitializer

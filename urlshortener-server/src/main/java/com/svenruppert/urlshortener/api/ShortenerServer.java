@@ -239,6 +239,19 @@ public class ShortenerServer
             EventsRestRoutes.EVENT_NAME, 15_000L, 128));
     logger().info("Signed security-event stream registered at {}", EventsRestRoutes.STREAM);
 
+    // Open-core seam (V00.18.00 P030): endpoints contributed by plug-in jars
+    // via ServiceLoader. They run behind the SAME security pipeline
+    // (secured() -> SecurityHttpHandler with @RequiresPermission) and against
+    // the same stores; duplicate plug-in paths abort in the registry, a
+    // collision with a community route aborts in createContext — fail fast
+    // either way. A plug-in-free classpath makes this a no-op.
+    var serverContext = new com.svenruppert.urlshortener.api.extension.ServerContext(
+        urlMappingStore, campaignStore, statisticsStore, preferencesStore);
+    for (var contribution : com.svenruppert.urlshortener.api.extension.HandlerRegistry.discover()) {
+      secured(serverAdmin, contribution.path(), contribution.create(serverContext));
+      logger().info("Contributed endpoint registered at {}", contribution.path());
+    }
+
 
     var execRedirect = Executors.newVirtualThreadPerTaskExecutor();
     serverRedirect.setExecutor(execRedirect);

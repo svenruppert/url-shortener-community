@@ -130,6 +130,10 @@ public class MainLayout
 
     addToDrawer(appTitle, scroller);
     addToNavbar(viewHeader);
+    // Open-core seam (V00.18.00 P030): navbar components contributed by
+    // plug-in jars — a no-op without plug-ins on the classpath.
+    com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry.navbarComponents()
+        .forEach(contribution -> addToNavbar(contribution.create()));
 
     setPrimarySection(Section.DRAWER);
   }
@@ -154,6 +158,17 @@ public class MainLayout
           new SideNavItem(tr(K_NAV_USERS, "Users"), "/" + UserManagementView.PATH, USERS.create()),
           new SideNavItem(tr(K_NAV_AUDIT, "Audit log"), "/" + AuditView.PATH, RECORDS.create())
       );
+    }
+    // Open-core seam (V00.18.00 P030): drawer entries contributed by plug-in
+    // jars, appended after the community entries. Visibility is a UI nicety —
+    // access control stays server-side.
+    for (var item : com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry.menuItems()) {
+      if (item.adminOnly() && !isCurrentUserAdmin()) {
+        continue;
+      }
+      sideNav.addItem(item.icon() == null
+          ? new SideNavItem(tr(item.i18nKey(), item.fallback()), "/" + item.path())
+          : new SideNavItem(tr(item.i18nKey(), item.fallback()), "/" + item.path(), item.icon().create()));
     }
     return sideNav;
   }
