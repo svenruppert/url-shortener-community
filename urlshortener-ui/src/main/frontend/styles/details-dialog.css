@@ -1,0 +1,48 @@
+/* frontend/styles/details-dialog.css */
+
+/* main DetailsDialog sizing (moved from setWidth("820px")) */
+.details-dialog::part(overlay) {
+    width: 820px;
+    max-width: 95vw;
+}
+
+/* Header layout: you can't class the header slot, but you CAN style it via part */
+.details-dialog::part(header) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--lumo-space-s);
+}
+
+/* Your header layouts */
+.details-dialog__header-left,
+.details-dialog__header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-xs);
+}
+
+/* Content padding around the form */
+.details-dialog__form {
+    padding: var(--lumo-space-s) var(--lumo-space-m);
+}
+
+/* URL field ellipsis (moved from tfUrl.getStyle...) */
+.details-dialog__url input {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Footer alignment */
+.details-dialog::part(footer) {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--lumo-space-s);
+}
+
+/* Alias dialog sizing (moved from setWidth("70vw") + max-width style) */
+.details-dialog__alias-dialog::part(overlay) {
+    width: 70vw;
+    max-width: 1100px;
+}

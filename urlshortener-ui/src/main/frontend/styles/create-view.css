@@ -1,0 +1,30 @@
+.create-root {
+    width: 100%;
+    height: 100%;
+}
+
+/* optional: give the split layout a little breathing room */
+.create-split {
+    width: 100%;
+    height: 100%;
+}
+
+/* columns */
+.create-col {
+    gap: var(--lumo-space-m);
+}
+
+/* FormLayout itself doesn't need much, but you can adjust spacing */
+.create-form {
+    width: 100%;
+}
+
+/* action bar */
+.create-actions {
+    gap: var(--lumo-space-s);
+}
+
+/* replaces editor.getStyle().set("padding", "var(--lumo-space-m)") */
+.create-editor {
+    padding: var(--lumo-space-m);
+}

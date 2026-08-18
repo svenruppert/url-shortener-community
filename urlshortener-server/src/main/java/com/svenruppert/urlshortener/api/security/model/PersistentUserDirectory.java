@@ -1,0 +1,224 @@
+package com.svenruppert.urlshortener.api.security.model;
+
+import com.svenruppert.dependencies.core.logger.HasLogger;
+import com.svenruppert.jsentinel.audit.AuditEvent;
+import com.svenruppert.jsentinel.audit.JSentinelAuditService;
+import com.svenruppert.jsentinel.audit.RoleAssigned;
+import com.svenruppert.jsentinel.audit.RoleRevoked;
+import com.svenruppert.jsentinel.audit.UserCreated;
+import com.svenruppert.jsentinel.audit.UserDeleted;
+import com.svenruppert.jsentinel.authentication.PasswordHasher;
+import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
+import com.svenruppert.urlshortener.api.security.roles.AuthorizationRole;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
+
+/**
+ * Persistent {@link UserDirectory} backed by an injected
+ * {@link UserDirectoryPersistence} (Eclipse-Store in production,
+ * in-memory in tests). Keeps an in-memory working copy for fast
+ * reads; every mutation pushes a fresh snapshot to the persistence
+ * layer. Failures are logged at {@code ERROR} before propagating so
+ * callers that catch blanket {@code RuntimeException} still leave a
+ * diagnostic trail.
+ *
+ * <p>Unlike the previous plaintext-seeded {@link InMemoryUserDirectory}
+ * this directory ships EMPTY — the first admin is created through the
+ * token-based bootstrap flow.
+ */
+public final class PersistentUserDirectory implements UserDirectory, HasLogger {
+
+  private final UserDirectoryPersistence persistence;
+  private final PasswordHasher hasher;
+  private final Map<String, StoredUser> byUsername = new ConcurrentHashMap<>();
+  private final Map<Long, ApiUser> byId = new ConcurrentHashMap<>();
+
+  public PersistentUserDirectory(UserDirectoryPersistence persistence,
+                                 PasswordHasher hasher) {
+    this.persistence = Objects.requireNonNull(persistence, "persistence");
+    this.hasher = Objects.requireNonNull(hasher, "hasher");
+    Map<String, StoredUser> snapshot = persistence.load();
+    snapshot.forEach((username, stored) -> {
+      byUsername.put(username, stored);
+      byId.put(stored.user().id(), stored.user());
+    });
+    logger().info("PersistentUserDirectory loaded {} user(s)", snapshot.size());
+  }
+
+  @Override
+  public Optional<ApiUser> findByCredentials(Credentials credentials) {
+    if (credentials == null
+        || credentials.username() == null
+        || credentials.password() == null) {
+      return Optional.empty();
+    }
+    StoredUser stored = byUsername.get(credentials.username());
+    if (stored == null) return Optional.empty();
+    char[] raw = credentials.password().toCharArray();
+    if (!hasher.verify(raw, stored.passwordHash())) return Optional.empty();
+    if (hasher.needsRehash(stored.passwordHash())) {
+      try {
+        String fresh = hasher.hash(raw);
+        byUsername.put(credentials.username(), new StoredUser(stored.user(), fresh));
+        save();
+      } catch (RuntimeException ignored) {
+        // login already succeeded against the existing hash;
+        // failure to upgrade is not a security failure
+      }
+    }
+    return Optional.of(stored.user());
+  }
+
+  @Override
+  public Optional<ApiUser> findById(Long id) {
+    return Optional.ofNullable(byId.get(id));
+  }
+
+  @Override
+  public Optional<ApiUser> findByUsername(String username) {
+    if (username == null) return Optional.empty();
+    StoredUser stored = byUsername.get(username);
+    return stored == null ? Optional.empty() : Optional.of(stored.user());
+  }
+
+  @Override
+  public Stream<ApiUser> all() {
+    return byUsername.values().stream().map(StoredUser::user);
+  }
+
+  @Override
+  public boolean hasAnyAdministrator() {
+    return byUsername.values().stream()
+        .anyMatch(stored -> stored.user().roles().contains(AuthorizationRole.ADMIN));
+  }
+
+  @Override
+  public synchronized void addUser(String username, String plaintextPassword, ApiUser user) {
+    Objects.requireNonNull(username);
+    Objects.requireNonNull(plaintextPassword);
+    Objects.requireNonNull(user);
+    String hash = hasher.hash(plaintextPassword.toCharArray());
+    byUsername.put(username, new StoredUser(user, hash));
+    byId.put(user.id(), user);
+    save();
+    audit(new UserCreated(Instant.now(Clock.systemUTC()), username, firstRoleOf(user), null));
+  }
+
+  @Override
+  public synchronized void registerWithHashedPassword(String username, String passwordHash, ApiUser user) {
+    if (byUsername.containsKey(username)) {
+      throw new IllegalStateException("user already exists: " + username);
+    }
+    byUsername.put(username, new StoredUser(user, passwordHash));
+    byId.put(user.id(), user);
+    save();
+  }
+
+  @Override
+  public synchronized void deleteUser(Long id) {
+    ApiUser removed = byId.remove(id);
+    if (removed == null) return;
+    String username = byUsername.entrySet().stream()
+        .filter(e -> e.getValue().user().equals(removed))
+        .map(Map.Entry::getKey).findFirst().orElse(null);
+    byUsername.values().removeIf(stored -> stored.user().equals(removed));
+    save();
+    if (username != null) {
+      audit(new UserDeleted(Instant.now(Clock.systemUTC()), username, null));
+    }
+  }
+
+  @Override
+  public synchronized void assignRole(Long id, AuthorizationRole role) {
+    Objects.requireNonNull(role, "role");
+    if (id == null) return;
+    ApiUser current = byId.get(id);
+    if (current == null || current.roles().contains(role)) return;
+    EnumSet<AuthorizationRole> next = roleSetOf(current);
+    next.add(role);
+    replace(current, new ApiUser(current.id(), current.name(), next));
+    save();
+    audit(new RoleAssigned(Instant.now(Clock.systemUTC()),
+        current.id().toString(), role.name(), null));
+  }
+
+  @Override
+  public synchronized void revokeRole(Long id, AuthorizationRole role) {
+    Objects.requireNonNull(role, "role");
+    if (id == null) return;
+    ApiUser current = byId.get(id);
+    if (current == null || !current.roles().contains(role)) return;
+    EnumSet<AuthorizationRole> next = roleSetOf(current);
+    next.remove(role);
+    replace(current, new ApiUser(current.id(), current.name(), next));
+    save();
+    audit(new RoleRevoked(Instant.now(Clock.systemUTC()),
+        current.id().toString(), role.name(), null));
+  }
+
+  @Override
+  public synchronized void updatePassword(Long id, String newPlaintextPassword) {
+    Objects.requireNonNull(newPlaintextPassword, "newPlaintextPassword");
+    if (id == null) return;
+    ApiUser current = byId.get(id);
+    if (current == null) return;
+    String username = byUsername.entrySet().stream()
+        .filter(e -> e.getValue().user().equals(current))
+        .map(Map.Entry::getKey).findFirst().orElse(null);
+    if (username == null) return;
+    String hash = hasher.hash(newPlaintextPassword.toCharArray());
+    byUsername.put(username, new StoredUser(current, hash));
+    save();
+  }
+
+  @Override
+  public PasswordHasher passwordHasher() {
+    return hasher;
+  }
+
+  private void save() {
+    try {
+      Map<String, StoredUser> snapshot = new LinkedHashMap<>(byUsername);
+      persistence.save(snapshot);
+    } catch (RuntimeException failure) {
+      logger().error("Failed to persist user directory ({} user(s) in memory): {}",
+          byUsername.size(), failure.toString(), failure);
+      throw failure;
+    }
+  }
+
+  private void replace(ApiUser oldUser, ApiUser newUser) {
+    byId.put(newUser.id(), newUser);
+    byUsername.replaceAll((username, stored) ->
+        stored.user().equals(oldUser) ? new StoredUser(newUser, stored.passwordHash()) : stored);
+  }
+
+  private static EnumSet<AuthorizationRole> roleSetOf(ApiUser user) {
+    EnumSet<AuthorizationRole> set = EnumSet.noneOf(AuthorizationRole.class);
+    set.addAll(user.roles());
+    return set;
+  }
+
+  private static String firstRoleOf(ApiUser user) {
+    if (user.roles().contains(AuthorizationRole.ADMIN)) return AuthorizationRole.ADMIN.name();
+    if (user.roles().contains(AuthorizationRole.USER)) return AuthorizationRole.USER.name();
+    return "USER";
+  }
+
+  private static void audit(AuditEvent event) {
+    try {
+      JSentinelAuditService sink = JSentinelServiceResolver.securityAuditService();
+      sink.publish(event);
+    } catch (RuntimeException ignored) {
+      // audit must never block user-management calls
+    }
+  }
+}

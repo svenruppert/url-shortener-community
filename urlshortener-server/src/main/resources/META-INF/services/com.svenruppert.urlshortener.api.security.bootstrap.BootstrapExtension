@@ -1,0 +1,3 @@
+com.svenruppert.urlshortener.api.security.bootstrap.DefaultBootstrapExtension
+com.svenruppert.urlshortener.api.security.bootstrap.PersistenceBootstrapExtension
+com.svenruppert.urlshortener.api.security.bootstrap.HardeningBootstrapExtension

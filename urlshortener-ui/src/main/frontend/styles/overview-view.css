@@ -1,0 +1,47 @@
+/* Hide the download anchor (moved from inline style) */
+.overview-view__export-anchor {
+    display: none;
+}
+
+/* Grid height (moved from grid.setHeight("70vh")) */
+.overview-view__grid {
+    height: 70vh;
+}
+
+/* Paging bar (optional tidy layout) */
+.overview-view__pagingbar {
+    gap: var(--lumo-space-s);
+    align-items: center;
+}
+
+/* URL column: ellipsis (moved from anchor inline style) */
+.overview-view__url {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 100%;
+}
+
+/* Shortcode monospace (moved from inline style) */
+.overview-view__shortcode {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Active column: clickable cursor */
+.overview-view__active-icon {
+    cursor: pointer;
+}
+
+/* Active icon colors via state classes (moved from icon.setColor) */
+.overview-view__active-icon.is-active {
+    color: var(--lumo-success-color);
+}
+.overview-view__active-icon.is-inactive {
+    color: var(--lumo-error-color);
+}
+
+/* Optional: row-actions spacing */
+.overview-view__row-actions {
+    gap: var(--lumo-space-xs);
+}

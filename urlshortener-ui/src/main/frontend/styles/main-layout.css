@@ -1,0 +1,15 @@
+.mainlayout{
+    .title {
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    .header {
+        width: 100%;
+    }
+    .spacer {
+        flex: 1 1 auto;
+    }
+    .right {
+        margin-left: auto;
+    }
+}

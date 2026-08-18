@@ -1,0 +1,56 @@
+/* Root container */
+.store-indicator {
+    /* nichts Layout-kritisches hier – nur Optik */
+}
+
+/* Icon baseline */
+.store-indicator__icon {
+    width: 16px;
+    height: 16px;
+    color: var(--lumo-secondary-text-color);
+}
+
+/* Badge baseline */
+.store-indicator__badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.4rem;
+    background-color: var(--lumo-contrast-10pct);
+    color: var(--lumo-body-text-color);
+}
+
+/* Details baseline */
+.store-indicator__details {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* ----- STATES ----- */
+
+/* EclipseStore = grün */
+.store-indicator.store-indicator--eclipse .store-indicator__badge {
+    background-color: var(--lumo-success-color-10pct);
+    color: var(--lumo-success-text-color);
+}
+.store-indicator.store-indicator--eclipse .store-indicator__icon {
+    color: var(--lumo-success-color);
+}
+
+/* InMemory = blau */
+.store-indicator.store-indicator--memory .store-indicator__badge {
+    background-color: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+}
+.store-indicator.store-indicator--memory .store-indicator__icon {
+    color: var(--lumo-primary-color);
+}
+
+/* Unavailable = rot */
+.store-indicator.store-indicator--unavailable .store-indicator__badge {
+    background-color: var(--lumo-error-color-10pct);
+    color: var(--lumo-error-text-color);
+}
+.store-indicator.store-indicator--unavailable .store-indicator__icon {
+    color: var(--lumo-error-color);
+}

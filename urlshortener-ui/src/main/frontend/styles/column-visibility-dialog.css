@@ -1,0 +1,36 @@
+/* Root Dialog */
+.column-visibility-dialog {
+    /* Optional: Mindestbreite/Maxbreite für bessere UX */
+    min-width: 340px;
+    max-width: 900px;
+}
+
+/* FormLayout: Innenabstände / optische Luft */
+.column-visibility-dialog__form {
+    padding: var(--lumo-space-m);
+}
+
+/* Checkboxen: einheitliche Zeilenhöhe, nicht zu “gequetscht” */
+.column-visibility-dialog__checkbox {
+    /* Checkbox ist ein Web Component Host; padding wirkt auf den Host */
+    padding: var(--lumo-space-xs) 0;
+}
+
+/* Footer über Shadow DOM part */
+.column-visibility-dialog::part(footer) {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--lumo-space-s);
+    padding: var(--lumo-space-s) var(--lumo-space-m);
+    border-top: 1px solid var(--lumo-contrast-10pct);
+}
+
+/* Optional: Button-Reihenfolge / responsive Verhalten */
+@media (max-width: 420px) {
+    .column-visibility-dialog__footer {
+        justify-content: stretch;
+    }
+    .column-visibility-dialog__footer > * {
+        flex: 1;
+    }
+}

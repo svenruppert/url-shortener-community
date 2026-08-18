@@ -1,0 +1,22 @@
+.statistics-filter-bar {
+  padding: var(--lumo-space-s);
+  background: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.statistics-filter-bar__search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.statistics-filter-bar__date-range {
+  width: 140px;
+}
+
+.statistics-filter-bar__granularity {
+  width: 120px;
+}
+
+.statistics-filter-bar__pagesize {
+  width: 100px;
+}

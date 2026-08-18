@@ -1,0 +1,34 @@
+/* Root */
+.login-view {
+    background:
+            radial-gradient(circle at top,
+            var(--lumo-primary-color-10pct),
+            var(--lumo-base-color) 60%);
+}
+
+/* Form-Container */
+.login-view__form {
+    width: 340px;
+    max-width: 90vw;
+    padding: var(--lumo-space-l);
+    border-radius: var(--lumo-border-radius-l);
+    background: var(--lumo-base-color);
+    box-shadow: var(--lumo-box-shadow-m);
+}
+
+/* Eingabefeld */
+.login-view__field {
+    width: 100%;
+}
+
+/* Button */
+.login-view__button {
+    width: 100%;
+}
+
+/* Optional: Abstand zwischen Titel und Formular */
+.login-view__form h2 {
+    margin-bottom: var(--lumo-space-s);
+}
+
+

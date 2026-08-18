@@ -1,0 +1,55 @@
+/* frontend/styles/bulk-actions-bar.css */
+
+.bulk-actions-bar {
+  background: var(--lumo-contrast-5pct);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--lumo-border-radius-m);
+  border-bottom: 1px solid var(--lumo-contrast-20pct);
+
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+}
+
+.bulk-actions-bar__info {
+  opacity: 0.7;
+  font-size: var(--lumo-font-size-s);
+  margin-right: var(--lumo-space-m);
+}
+
+.bulk-actions-bar__btn {
+  margin-left: 0.2rem;
+}
+
+/* Icon sizing */
+.bulk-actions-bar__icon,
+.bulk-actions-bar__btn vaadin-icon,
+.bulk-actions-bar__btn iron-icon {
+  width: 30px;
+  height: 30px;
+}
+
+/* Roles -> colors */
+.bulk-actions-bar__btn--danger .bulk-actions-bar__icon,
+.bulk-actions-bar__btn--danger vaadin-icon,
+.bulk-actions-bar__btn--danger iron-icon {
+  color: var(--lumo-error-color);
+}
+
+.bulk-actions-bar__btn--success .bulk-actions-bar__icon,
+.bulk-actions-bar__btn--success vaadin-icon,
+.bulk-actions-bar__btn--success iron-icon {
+  color: var(--lumo-success-color);
+}
+
+.bulk-actions-bar__btn--primary .bulk-actions-bar__icon,
+.bulk-actions-bar__btn--primary vaadin-icon,
+.bulk-actions-bar__btn--primary iron-icon {
+  color: var(--lumo-primary-color);
+}
+
+.bulk-actions-bar__btn--neutral .bulk-actions-bar__icon,
+.bulk-actions-bar__btn--neutral vaadin-icon,
+.bulk-actions-bar__btn--neutral iron-icon {
+  color: var(--lumo-secondary-text-color);
+}

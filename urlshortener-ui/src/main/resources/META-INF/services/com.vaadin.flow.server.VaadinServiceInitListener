@@ -1,0 +1,2 @@
+com.svenruppert.urlshortener.ui.vaadin.AppServiceInitListener
+com.svenruppert.urlshortener.ui.vaadin.security.bootstrap.JSentinelBootstrapInitListener

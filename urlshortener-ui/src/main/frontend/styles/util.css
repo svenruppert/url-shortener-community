@@ -1,0 +1,31 @@
+/* Shared utility classes — replaces ad-hoc inline getStyle().set(...) (P070). */
+
+.u-hidden {
+  display: none;
+}
+
+.u-bold {
+  font-weight: bold;
+}
+
+.u-fw-600 {
+  font-weight: 600;
+}
+
+.u-gap-4 {
+  gap: 4px;
+}
+
+.u-gap-6 {
+  gap: 6px;
+}
+
+.u-gap-8 {
+  gap: 8px;
+}
+
+.u-warn-icon {
+  color: var(--lumo-error-color);
+  font-size: var(--lumo-icon-size-s);
+  flex-shrink: 0;
+}
