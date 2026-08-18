@@ -167,6 +167,11 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <warName>${warName}</warName>
+                    <!-- Open-core seam (V00.18.00 P050): additionally attach the
+                         ui classes as ui-<version>-classes.jar so enterprise
+                         plug-ins can compile against the UI SPI (classifier
+                         "classes", scope provided). The war itself is unchanged. -->
+                    <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
         </plugins>
