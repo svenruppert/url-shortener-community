@@ -1,0 +1,65 @@
+__MACOSX
+.DS_Store
+
+# Legacy import fixtures (real exports) — drop locally to run LegacyImportFixtureIT; never committed
+urlshortener-client/src/test/resources/fixtures/*.zip
+urlshortener-client/src/test/resources/fixtures/*.ndjson
+urlshortener-client/src/test/resources/fixtures/*.json
+
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+/urlshortener-ui/src/main/frontend/generated/
+/Archiv.zip
+/_backup/
+/_logs/
+/data/
+/.claude/
+/.ai/
+/urlshortener-server/data/
+/urlshortener-ui/src/main/bundles/dev.bundle
+/urlshortener-ui/src/main/bundles/prod.bundle
+
+# jSentinel/EclipseStore local test data
+urlshortener-*/data/
+urlshortener-ui/node_modules/
+urlshortener-ui/package.json
+urlshortener-ui/package-lock.json
+urlshortener-ui/tsconfig.json
+urlshortener-ui/types.d.ts
+urlshortener-ui/.npmrc
+urlshortener-ui/vite.generated.ts

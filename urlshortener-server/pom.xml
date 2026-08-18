@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.svenruppert.urlshortener</groupId>
+        <artifactId>root</artifactId>
+        <version>00.18.00-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>server</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <!-- PIT mutation-coverage floor (baseline 2026-07-22: 29%). -->
+        <mutation.threshold>25</mutation.threshold>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.svenruppert.urlshortener</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.store</groupId>
+            <artifactId>storage-embedded</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.serializer</groupId>
+            <artifactId>serializer</artifactId>
+        </dependency>
+
+        <!-- jSentinel REST security stack -->
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-autoservice-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-dx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-dx-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-persistence-eclipsestore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-crypto-bc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-credentials-hibp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-events</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-events-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-jwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-identity-oidc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.svenruppert.jsentinel</groupId>
+            <artifactId>jSentinel-test-oidc</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+
+
+    <build>
+        <finalName>${restServiceName}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Redirect jSentinel/EclipseStore storage into target/
+                         so tests never create the repo-rooted storage tree
+                         and mvn clean resets all persistence state. -->
+                    <systemPropertyVariables>
+                        <app.storage.dir>${project.build.directory}/test-data</app.storage.dir>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <!-- Order matters: processor BEFORE annotations,
+                             otherwise the JDK silently emits nothing. -->
+                        <path>
+                            <groupId>com.svenruppert.jsentinel</groupId>
+                            <artifactId>jSentinel-autoservice-processor</artifactId>
+                            <version>${jsentinel.version}</version>
+                        </path>
+                        <path>
+                            <groupId>com.svenruppert.jsentinel</groupId>
+                            <artifactId>jSentinel-autoservice-annotations</artifactId>
+                            <version>${jsentinel.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <!-- Drop signature files of the SIGNED deps only
+                                     (BouncyCastle); keeping them fails java -jar with
+                                     "Invalid signature file digest" after shading.
+                                     SEC-L6 (V00.17.00 P080): scoped to org.bouncycastle
+                                     instead of *:* so a future signed dependency is not
+                                     silently stripped of its signature. -->
+                                <filter>
+                                    <artifact>org.bouncycastle:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.svenruppert.urlshortener.api.ShortenerServer</mainClass>
+                                    <manifestEntries>
+                                        <!-- Eclipse-Serializer (jSentinel persistence) reaches
+                                             jdk.internal.misc.Unsafe reflectively; make java -jar
+                                             work without an extra CLI flag. -->
+                                        <Add-Exports>java.base/jdk.internal.misc</Add-Exports>
+                                        <Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
+                                    </manifestEntries>
+                                </transformer>
+                                <!-- merge META-INF/services across jSentinel jars -->
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
