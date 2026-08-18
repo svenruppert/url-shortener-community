@@ -23,7 +23,7 @@ public class UrlMappingListRequest {
   private String sort; // createdAt|shortCode|originalUrl|expiresAt
   private String dir; // asc|desc
   private Boolean active;
-  private String tag; // filter to links carrying this tag (normalized server-side)
+  private String tag; // filter resolved by the link-meta plug-in (P085); ignored by a plug-in-free community server
 
   private UrlMappingListRequest() {
   }

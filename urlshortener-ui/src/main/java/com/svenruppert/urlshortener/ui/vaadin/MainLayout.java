@@ -19,8 +19,6 @@ import com.svenruppert.urlshortener.ui.vaadin.views.YoutubeView;
 import com.svenruppert.urlshortener.ui.vaadin.views.audit.AuditView;
 import com.svenruppert.urlshortener.ui.vaadin.views.login.LoginView;
 import com.svenruppert.urlshortener.ui.vaadin.views.overview.OverviewView;
-import com.svenruppert.urlshortener.ui.vaadin.views.campaign.CampaignsView;
-import com.svenruppert.urlshortener.ui.vaadin.views.tag.TagsView;
 import com.svenruppert.urlshortener.ui.vaadin.views.profile.ProfileView;
 import com.svenruppert.urlshortener.ui.vaadin.views.statistics.StatisticsView;
 import com.svenruppert.urlshortener.ui.vaadin.views.users.UserManagementView;
@@ -66,8 +64,6 @@ public class MainLayout
   private static final String K_NAV_CREATE = "nav.create";
   private static final String K_NAV_BULK_CREATE = "nav.bulkCreate";
   private static final String K_NAV_STATISTICS = "nav.statistics";
-  private static final String K_NAV_CAMPAIGNS = "nav.campaigns";
-  private static final String K_NAV_TAGS = "nav.tags";
   private static final String K_NAV_YOUTUBE = "nav.youtube";
   private static final String K_NAV_ABOUT = "nav.about";
   private static final String K_NAV_PROFILE = "nav.profile";
@@ -145,8 +141,6 @@ public class MainLayout
         new SideNavItem(tr(K_NAV_CREATE, "Create"), "/" + CreateView.PATH, DASHBOARD.create()),
         new SideNavItem(tr(K_NAV_BULK_CREATE, "Bulk Create"), "/" + BulkCreateView.PATH, COPY_O.create()),
         new SideNavItem(tr(K_NAV_STATISTICS, "Statistics"), "/" + StatisticsView.PATH, CHART.create()),
-        new SideNavItem(tr(K_NAV_CAMPAIGNS, "Campaigns"), "/" + CampaignsView.PATH, BULLSEYE.create()),
-        new SideNavItem(tr(K_NAV_TAGS, "Tags"), "/" + TagsView.PATH, TAGS.create()),
         new SideNavItem(tr(K_NAV_YOUTUBE, "Youtube"), "/" + YoutubeView.PATH, CART.create()),
         new SideNavItem(tr(K_NAV_PROFILE, "Profile"), "/" + ProfileView.PATH, USER.create()),
         new SideNavItem(tr(K_NAV_ABOUT, "About"), "/" + AboutView.PATH, USER_HEART.create())

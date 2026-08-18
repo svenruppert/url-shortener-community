@@ -26,12 +26,17 @@ Enterprise features plug in via `ServiceLoader` — community sources are never
 changed for a new commercial feature:
 
 - **UI SPI** `com.svenruppert.urlshortener.ui.vaadin.extension`
-  (`FeatureContribution` → routes, drawer entries, navbar components;
-  contributed routes are registered dynamically under `MainLayout`, community
-  views keep their static `@Route`).
+  (`FeatureContribution` → routes, drawer entries, navbar components, link
+  create-form sections and details-dialog sections; contributed routes are
+  registered dynamically under `MainLayout`, community views keep their
+  static `@Route`).
 - **Server SPI** `com.svenruppert.urlshortener.api.extension`
   (`HandlerContribution` + `ServerContext`; contributed endpoints run behind
   the standard security pipeline, duplicate paths fail fast at startup).
+  Since P085 the context also exposes `LinkMetaStorage` (raw persistent maps
+  for the link-meta plug-in family) and `LinkLifecycleContribution` hooks
+  (create-time metadata from the raw request JSON, delete cascades, list
+  filters).
 - A **boundary test** in server and ui fails the build if community sources
   ever reference `urlshortener.enterprise`.
 

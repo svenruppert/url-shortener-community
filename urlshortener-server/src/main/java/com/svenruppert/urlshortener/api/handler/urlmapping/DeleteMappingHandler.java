@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
-import com.svenruppert.urlshortener.api.store.campaign.CampaignStore;
+import com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks;
 import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingUpdater;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
 import com.svenruppert.urlshortener.core.AliasPolicy;
@@ -27,11 +27,11 @@ public final class DeleteMappingHandler
   private static final String INTERNAL_ERROR = "{\"error\":\"internal_error\"}";
   private static final String NOT_OWNER = "{\"error\":\"forbidden\",\"message\":\"not the owner of this alias\"}";
   private final UrlMappingUpdater updater;
-  private final CampaignStore campaigns;
+  private final LinkLifecycleHooks hooks;
 
-  public DeleteMappingHandler(UrlMappingUpdater updater, CampaignStore campaigns) {
+  public DeleteMappingHandler(UrlMappingUpdater updater, LinkLifecycleHooks hooks) {
     this.updater = updater;
-    this.campaigns = campaigns;
+    this.hooks = hooks;
   }
 
   @Override
@@ -69,7 +69,7 @@ public final class DeleteMappingHandler
       boolean removed = updater.delete(shortCode);
       if (removed) {
         com.svenruppert.urlshortener.api.security.LinkOwnershipStore.INSTANCE.remove(shortCode);
-        campaigns.onLinkDeleted(shortCode); // cascade: drop membership/tags/label
+        hooks.linkDeleted(shortCode); // plug-in cascade (V00.18.00 P085)
         exchange.sendResponseHeaders(NO_CONTENT.code(), -1);
       } else {
         writeJson(exchange, fromCode(404), SHORT_CODE_NOT_FOUND);

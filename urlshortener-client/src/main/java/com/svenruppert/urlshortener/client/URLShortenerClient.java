@@ -605,28 +605,12 @@ public class URLShortenerClient implements HasLogger {
   public BulkShortenResponse bulkShorten(List<String> urls,
                                          java.time.Instant defaultExpiresAt,
                                          Boolean defaultActive) throws IOException {
-    return bulkShorten(urls, defaultExpiresAt, defaultActive, null, null, null);
-  }
-
-  /**
-   * Bulk-creates links and applies optional batch-wide campaign metadata to every
-   * created link, assigned atomically server-side: {@code defaultCampaignId}
-   * (membership), {@code defaultTags} (m2m, normalized) and a placement
-   * {@code defaultLabel}. Blank/empty values are ignored.
-   */
-  public BulkShortenResponse bulkShorten(List<String> urls,
-                                         java.time.Instant defaultExpiresAt,
-                                         Boolean defaultActive,
-                                         String defaultCampaignId,
-                                         List<String> defaultTags,
-                                         String defaultLabel) throws IOException {
     if (urls == null || urls.isEmpty()) {
       throw new IllegalArgumentException("urls must not be null or empty");
     }
-    logger().info("bulkShorten - {} URLs, expiresAt={}, active={}, campaignId={}, tags={}, label={}",
-                  urls.size(), defaultExpiresAt, defaultActive, defaultCampaignId, defaultTags, defaultLabel);
-    final String jsonBody = toJson(new BulkShortenRequest(urls, defaultExpiresAt, defaultActive,
-                                                          defaultCampaignId, defaultTags, defaultLabel));
+    logger().info("bulkShorten - {} URLs, expiresAt={}, active={}",
+                  urls.size(), defaultExpiresAt, defaultActive);
+    final String jsonBody = toJson(new BulkShortenRequest(urls, defaultExpiresAt, defaultActive));
     final URI uri = serverBaseAdmin.resolve(PATH_ADMIN_SHORTEN_BULK);
     final Response resp = postJson(uri, jsonBody);
     logger().info("bulkShorten - response code {}", resp.code());
@@ -686,24 +670,9 @@ public class URLShortenerClient implements HasLogger {
                                              String url,
                                              Instant expiredAtOrNull,
                                              Boolean activeOrNull) throws IOException {
-    return createCustomMapping(shortURL, url, expiredAtOrNull, activeOrNull, null, null, null);
-  }
 
-  /**
-   * Creates a link and, in the same request, atomically assigns optional campaign
-   * metadata server-side: {@code campaignId} (membership), {@code tags} (m2m,
-   * normalized) and a placement {@code label}. Blank/empty values are ignored.
-   */
-  public ShortUrlMapping createCustomMapping(String shortURL,
-                                             String url,
-                                             Instant expiredAtOrNull,
-                                             Boolean activeOrNull,
-                                             String campaignId,
-                                             List<String> tags,
-                                             String label) throws IOException {
-
-    logger().info("Create custom mapping shortURL='{}' url='{}' expiredAt='{}' active='{}' campaignId='{}' tags='{}' label='{}'",
-                  shortURL, url, expiredAtOrNull, activeOrNull, campaignId, tags, label);
+    logger().info("Create custom mapping shortURL='{}' url='{}' expiredAt='{}' active='{}'",
+                  shortURL, url, expiredAtOrNull, activeOrNull);
 
     var urlValidation = UrlValidator.validate(url);
     if (!urlValidation.valid()) {
@@ -719,7 +688,7 @@ public class URLShortenerClient implements HasLogger {
     }
 
     final ShortenRequest shortenRequest =
-        new ShortenRequest(url, shortURL, expiredAtOrNull, activeOrNull, campaignId, tags, label);
+        new ShortenRequest(url, shortURL, expiredAtOrNull, activeOrNull);
 
     final String jsonBody = toJson(shortenRequest);
     logger().info("createCustomMapping - body - '{}'", jsonBody);

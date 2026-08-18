@@ -21,6 +21,10 @@ import java.util.List;
  *       inactive state.  Defaults to {@code true} when absent so that links are
  *       immediately usable, matching the original bulk-create intent.</li>
  * </ul>
+ *
+ * <p>Plug-in metadata ({@code defaultCampaignId}/{@code defaultTags}/{@code
+ * defaultLabel}) no longer lives here (V00.18.00 P085, D2) — plug-ins parse
+ * their own fields from the raw request JSON; unknown fields are ignored.
  */
 public final class BulkShortenRequest {
 
@@ -33,10 +37,6 @@ public final class BulkShortenRequest {
   private List<String> urls;
   private Instant defaultExpiresAt;
   private Boolean defaultActive;
-  // Optional create-time campaign metadata applied to every link in the batch.
-  private String defaultCampaignId;
-  private List<String> defaultTags;
-  private String defaultLabel;
 
   public BulkShortenRequest() {
   }
@@ -49,14 +49,6 @@ public final class BulkShortenRequest {
     this.urls = urls;
     this.defaultExpiresAt = defaultExpiresAt;
     this.defaultActive = defaultActive;
-  }
-
-  public BulkShortenRequest(List<String> urls, Instant defaultExpiresAt, Boolean defaultActive,
-                            String defaultCampaignId, List<String> defaultTags, String defaultLabel) {
-    this(urls, defaultExpiresAt, defaultActive);
-    this.defaultCampaignId = defaultCampaignId;
-    this.defaultTags = defaultTags;
-    this.defaultLabel = defaultLabel;
   }
 
   // ── Accessors ──────────────────────────────────────────────────────────────
@@ -96,32 +88,5 @@ public final class BulkShortenRequest {
   /** Returns the effective active flag, defaulting to {@code true} when absent. */
   public boolean effectiveActive() {
     return defaultActive == null || defaultActive;
-  }
-
-  /** Optional campaign every created link in this batch is assigned to. */
-  public String getDefaultCampaignId() {
-    return defaultCampaignId;
-  }
-
-  public void setDefaultCampaignId(String defaultCampaignId) {
-    this.defaultCampaignId = defaultCampaignId;
-  }
-
-  /** Optional tag set applied to every created link in this batch. */
-  public List<String> getDefaultTags() {
-    return defaultTags;
-  }
-
-  public void setDefaultTags(List<String> defaultTags) {
-    this.defaultTags = defaultTags;
-  }
-
-  /** Optional placement label applied to every created link in this batch. */
-  public String getDefaultLabel() {
-    return defaultLabel;
-  }
-
-  public void setDefaultLabel(String defaultLabel) {
-    this.defaultLabel = defaultLabel;
   }
 }

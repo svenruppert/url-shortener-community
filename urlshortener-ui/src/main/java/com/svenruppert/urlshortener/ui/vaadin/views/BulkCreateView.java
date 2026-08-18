@@ -3,9 +3,7 @@ package com.svenruppert.urlshortener.ui.vaadin.views;
 
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.urlshortener.client.CampaignClient;
 import com.svenruppert.urlshortener.client.URLShortenerClient;
-import com.svenruppert.urlshortener.core.campaign.Campaign;
 import com.svenruppert.urlshortener.core.urlmapping.BulkShortenRequest;
 import com.svenruppert.urlshortener.core.urlmapping.BulkShortenResponse;
 import com.svenruppert.urlshortener.core.urlmapping.BulkShortenResponse.BulkShortenItemResult;
@@ -16,12 +14,12 @@ import com.svenruppert.urlshortener.core.urlmapping.BulkValidateResponse.Validat
 import com.svenruppert.urlshortener.ui.vaadin.MainLayout;
 import com.svenruppert.urlshortener.ui.vaadin.security.AppRole;
 import com.svenruppert.urlshortener.ui.vaadin.security.VisibleFor;
-import com.svenruppert.urlshortener.ui.vaadin.tools.CampaignClientFactory;
+import com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry;
+import com.svenruppert.urlshortener.ui.vaadin.extension.LinkFormContribution;
+import com.svenruppert.urlshortener.ui.vaadin.extension.LinkFormSection;
 import com.svenruppert.urlshortener.ui.vaadin.tools.I18nSupport;
 import com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks;
 import com.svenruppert.urlshortener.ui.vaadin.tools.UrlShortenerClientFactory;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -76,9 +74,6 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
   private static final String K_PH_URLS             = "bulkCreate.field.urls.placeholder";
   private static final String K_LABEL_EXPIRES_DATE  = "bulkCreate.field.expiresDate";
   private static final String K_LABEL_ACTIVE        = "bulkCreate.field.active";
-  private static final String K_LABEL_CAMPAIGN      = "bulkCreate.field.campaign";
-  private static final String K_LABEL_TAGS          = "bulkCreate.field.tags";
-  private static final String K_LABEL_LABEL         = "bulkCreate.field.label";
   private static final String K_BTN_VALIDATE        = "bulkCreate.btn.validate";
   private static final String K_BTN_CREATE          = "bulkCreate.btn.create";
   private static final String K_BTN_RESET           = "common.reset";
@@ -129,11 +124,12 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
   private final TextArea       urlsArea        = new TextArea();
   private final DateTimePicker expiresDateTime = new DateTimePicker();
   private final Checkbox       cbActive        = new Checkbox(true);
-  private final CampaignClient campaignClient  = CampaignClientFactory.newInstance();
-  private final ComboBox<Campaign> campaignBox = new ComboBox<>();
-  private final MultiSelectComboBox<String> tagsBox = new MultiSelectComboBox<>();
-  private final TextField      labelField      = new TextField();
-  private final Set<String>    tagItems        = new LinkedHashSet<>();
+  // Open-core seam (V00.18.00 P085): plug-in sections (e.g. campaign/tags/
+  // label) render next to the batch options and apply metadata post-create.
+  private final List<LinkFormSection> pluginSections =
+      FeatureRegistry.linkFormContributions().stream()
+          .map(LinkFormContribution::createSection)
+          .toList();
   private final Span       previewLabel      = new Span();
   private final Button     primaryButton     = new Button();
   private final Button     resetButton       = new Button();
@@ -167,36 +163,6 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
     expiresDateTime.setWeekNumbersVisible(true);
     cbActive.setLabel(tr(K_LABEL_ACTIVE, "Active"));
 
-    // Campaign metadata applied to the whole batch
-    campaignBox.setLabel(tr(K_LABEL_CAMPAIGN, "Campaign"));
-    campaignBox.setItemLabelGenerator(Campaign::name);
-    campaignBox.setClearButtonVisible(true);
-    campaignClient.list()
-        .peek(campaignBox::setItems)
-        .peekFailure(err -> logger().warn("could not load campaigns: {}", err));
-
-    labelField.setLabel(tr(K_LABEL_LABEL, "Placement label"));
-
-    tagsBox.setLabel(tr(K_LABEL_TAGS, "Tags"));
-    tagsBox.setAllowCustomValue(true);
-    tagsBox.setClearButtonVisible(true);
-    tagsBox.setItems(tagItems);
-    campaignClient.listTags()
-        .peek(tags -> {
-          tags.forEach(t -> tagItems.add(t.tag()));
-          tagsBox.setItems(tagItems); // offer existing tags as suggestions (free entry still works)
-        })
-        .peekFailure(err -> logger().info("could not load tags: {}", err));
-    tagsBox.addCustomValueSetListener(e -> {
-      String v = e.getDetail() == null ? "" : e.getDetail().trim().toLowerCase(Locale.ROOT);
-      if (v.isEmpty()) return;
-      Set<String> selected = new LinkedHashSet<>(tagsBox.getSelectedItems());
-      selected.add(v);
-      tagItems.add(v);
-      tagsBox.setItems(tagItems);
-      tagsBox.setValue(selected);
-    });
-
     // Preview line
     previewLabel.getStyle()
         .set("font-size", "var(--lumo-font-size-s)")
@@ -220,7 +186,8 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
     retryFailedButton.setVisible(false);
     retryFailedButton.addClickListener(_ -> retryFailed());
 
-    var optionsRow = new HorizontalLayout(expiresDateTime, cbActive, campaignBox, labelField, tagsBox);
+    var optionsRow = new HorizontalLayout(expiresDateTime, cbActive);
+    pluginSections.forEach(section -> optionsRow.add(section.component()));
     optionsRow.setAlignItems(Alignment.END);
 
     var actionRow = new HorizontalLayout(
@@ -554,10 +521,8 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
 
     try {
       final BulkShortenResponse response = client.bulkShorten(
-          urls, computeExpiresAt().orElse(null), cbActive.getValue(),
-          campaignBox.getValue() == null ? null : campaignBox.getValue().id(),
-          tagsBox.getValue().isEmpty() ? null : new ArrayList<>(tagsBox.getValue()),
-          (labelField.getValue() == null || labelField.getValue().isBlank()) ? null : labelField.getValue().trim());
+          urls, computeExpiresAt().orElse(null), cbActive.getValue());
+      notifyPluginSections(response);
 
       // Build lookup: originalUrl → result
       final Map<String, BulkShortenItemResult> byUrl = new HashMap<>();
@@ -740,10 +705,8 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
 
     try {
       final BulkShortenResponse response = client.bulkShorten(
-          urls, computeExpiresAt().orElse(null), cbActive.getValue(),
-          campaignBox.getValue() == null ? null : campaignBox.getValue().id(),
-          tagsBox.getValue().isEmpty() ? null : new ArrayList<>(tagsBox.getValue()),
-          (labelField.getValue() == null || labelField.getValue().isBlank()) ? null : labelField.getValue().trim());
+          urls, computeExpiresAt().orElse(null), cbActive.getValue());
+      notifyPluginSections(response);
 
       final Map<String, BulkShortenItemResult> byUrl = new HashMap<>();
       for (final var r : response.getResults()) {
@@ -769,6 +732,17 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
       logger().error("Retry failed", e);
       notify("Error: " + e.getMessage(), false);
     }
+  }
+
+  /** Plug-in sections apply their metadata to every successfully created link. */
+  private void notifyPluginSections(BulkShortenResponse response) {
+    if (pluginSections.isEmpty()) return;
+    final List<String> createdCodes = response.getResults().stream()
+        .filter(BulkShortenItemResult::isSuccess)
+        .map(BulkShortenItemResult::getShortCode)
+        .toList();
+    if (createdCodes.isEmpty()) return;
+    pluginSections.forEach(section -> section.onLinksCreated(createdCodes));
   }
 
   // ── Copy all short URLs ────────────────────────────────────────────────────

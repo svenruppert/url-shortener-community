@@ -1,6 +1,6 @@
 package com.svenruppert.urlshortener.api.store.provider.eclipsestore.patitions;
 
-import com.svenruppert.urlshortener.api.store.campaign.AbstractCampaignStore;
+import com.svenruppert.urlshortener.api.extension.LinkMetaStorage;
 import com.svenruppert.urlshortener.api.store.provider.eclipsestore.DataRoot;
 import com.svenruppert.urlshortener.core.campaign.Campaign;
 import org.eclipse.store.storage.types.StorageManager;
@@ -9,16 +9,18 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * EclipseStore-backed campaign store: campaigns, memberships, tags and labels
- * live in {@link DataRoot} and are persisted on every mutation, so they survive
- * a server restart.
+ * Persistent backing for the link-meta plug-in seam (V00.18.00 P085): the
+ * campaign/tag/label maps live in {@link DataRoot} exactly as before the
+ * open-core split, so pre-split data stays loadable — dormant without a
+ * plug-in, re-awakened by a licensed one (D4). Community code never touches
+ * these maps.
  */
-public final class EclipseCampaignStore
-    extends AbstractCampaignStore {
+public final class EclipseLinkMetaStorage
+    implements LinkMetaStorage {
 
   private final StorageManager storage;
 
-  public EclipseCampaignStore(StorageManager storage) {
+  public EclipseLinkMetaStorage(StorageManager storage) {
     this.storage = storage;
   }
 
@@ -27,32 +29,32 @@ public final class EclipseCampaignStore
   }
 
   @Override
-  protected Map<String, Campaign> campaignsMap() {
+  public Map<String, Campaign> campaigns() {
     return dataRoot().campaigns();
   }
 
   @Override
-  protected Map<String, String> campaignOfLinkMap() {
+  public Map<String, String> campaignOfLink() {
     return dataRoot().campaignOfLink();
   }
 
   @Override
-  protected Map<String, Set<String>> linkTagsMap() {
+  public Map<String, Set<String>> linkTags() {
     return dataRoot().linkTags();
   }
 
   @Override
-  protected Map<String, String> linkLabelsMap() {
+  public Map<String, String> linkLabels() {
     return dataRoot().linkLabels();
   }
 
   @Override
-  protected Map<String, Boolean> knownTagsMap() {
+  public Map<String, Boolean> knownTags() {
     return dataRoot().knownTags();
   }
 
   @Override
-  protected void persist() {
+  public void persist() {
     storage.store(dataRoot().campaigns());
     storage.store(dataRoot().campaignOfLink());
     storage.store(dataRoot().linkTags());

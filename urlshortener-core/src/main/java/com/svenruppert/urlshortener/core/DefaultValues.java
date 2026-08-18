@@ -83,11 +83,6 @@ public final class DefaultValues {
   public static final String PATH_ADMIN_PREFERENCES_COLUMNS_EDIT = PATH_PREFIX + "/admin/preferences/columns/edit";
   public static final String PATH_ADMIN_PREFERENCES_COLUMNS_SINGLE = PATH_PREFIX + "/admin/preferences/columns/single";
 
-  // Campaign / tag / label API paths
-  public static final String PATH_ADMIN_CAMPAIGNS = PATH_PREFIX + "/campaigns";
-  public static final String PATH_ADMIN_LINK_META = PATH_PREFIX + "/link-meta";
-  public static final String PATH_ADMIN_TAGS = PATH_PREFIX + "/tags";
-
   // Statistics API paths
   public static final String PATH_ADMIN_STATISTICS = PATH_PREFIX + "/statistics";
   public static final String PATH_ADMIN_STATISTICS_COUNT = PATH_ADMIN_STATISTICS + "/count";

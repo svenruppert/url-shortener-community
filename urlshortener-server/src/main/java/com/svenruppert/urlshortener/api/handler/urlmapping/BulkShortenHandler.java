@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
-import com.svenruppert.urlshortener.api.store.campaign.CampaignStore;
+import com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks;
 import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingStore;
 import com.svenruppert.urlshortener.api.utils.ErrorResponses;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
@@ -57,11 +57,11 @@ import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
 public class BulkShortenHandler implements HttpHandler, HasLogger {
 
   private final UrlMappingStore store;
-  private final CampaignStore campaignStore;
+  private final LinkLifecycleHooks hooks;
 
-  public BulkShortenHandler(UrlMappingStore store, CampaignStore campaignStore) {
+  public BulkShortenHandler(UrlMappingStore store, LinkLifecycleHooks hooks) {
     this.store = store;
-    this.campaignStore = campaignStore;
+    this.hooks = hooks;
   }
 
   @Override
@@ -121,9 +121,9 @@ public class BulkShortenHandler implements HttpHandler, HasLogger {
           com.svenruppert.urlshortener.api.security.LinkOwnershipStore.INSTANCE.record(
               mapping.shortCode(),
               com.svenruppert.urlshortener.api.security.OwnerGuard.currentUserId(ex));
-          // optional batch-wide campaign metadata applied to every created link
-          LinkMetaAssigner.apply(campaignStore, mapping.shortCode(),
-                                 req.getDefaultCampaignId(), req.getDefaultTags(), req.getDefaultLabel());
+          // plug-in hook (V00.18.00 P085): batch-wide metadata rides along in
+          // the raw JSON; without a plug-in this is a no-op
+          hooks.linkCreated(mapping.shortCode(), body, true);
           results.add(BulkShortenItemResult.success(i, url, mapping.shortCode(), shortUrl));
         } else {
           final AtomicReference<String> errorMsg = new AtomicReference<>("Creation failed");

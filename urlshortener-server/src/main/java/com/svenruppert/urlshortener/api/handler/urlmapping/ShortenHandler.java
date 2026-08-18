@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.functional.result.Result;
 import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
-import com.svenruppert.urlshortener.api.store.campaign.CampaignStore;
+import com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks;
 import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingStore;
 import com.svenruppert.urlshortener.api.utils.ErrorResponses;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
@@ -38,11 +38,11 @@ public class ShortenHandler
     implements HttpHandler, HasLogger {
 
   private final UrlMappingStore store;
-  private final CampaignStore campaignStore;
+  private final LinkLifecycleHooks hooks;
 
-  public ShortenHandler(UrlMappingStore store, CampaignStore campaignStore) {
+  public ShortenHandler(UrlMappingStore store, LinkLifecycleHooks hooks) {
     this.store = store;
-    this.campaignStore = campaignStore;
+    this.hooks = hooks;
   }
 
   @Override
@@ -79,9 +79,9 @@ public class ShortenHandler
             com.svenruppert.urlshortener.api.security.LinkOwnershipStore.INSTANCE.record(
                 success.shortCode(),
                 com.svenruppert.urlshortener.api.security.OwnerGuard.currentUserId(ex));
-            // optional create-time campaign metadata (owner just recorded above)
-            LinkMetaAssigner.apply(campaignStore, success.shortCode(),
-                                   req.getCampaignId(), req.getTags(), req.getLabel());
+            // plug-in hook (V00.18.00 P085): create-time metadata rides along
+            // in the raw JSON; without a plug-in this is a no-op
+            hooks.linkCreated(success.shortCode(), body, false);
           })
           .peekFailure(failed -> logger().info("mapping created failed - {}", failed));
 

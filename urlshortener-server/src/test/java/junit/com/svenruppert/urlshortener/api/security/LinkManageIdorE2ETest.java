@@ -5,7 +5,6 @@ import com.svenruppert.dependencies.core.net.MediaType;
 import com.svenruppert.urlshortener.api.ShortenerServer;
 import com.svenruppert.urlshortener.api.security.LinkOwnershipStore;
 import com.svenruppert.urlshortener.core.JsonUtils;
-import com.svenruppert.urlshortener.core.campaign.Campaign;
 import com.svenruppert.urlshortener.core.urlmapping.ShortUrlMapping;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * V00.17.00 P030 — two-user IDOR regression suite for the manage paths
- * (SEC-H1 edit, SEC-H2 toggle, SEC-L1 meta GET + campaign link-remove) plus
+ * (SEC-H1 edit, SEC-H2 toggle) plus
  * the fail-closed semantics for unowned codes. Real in-process server, no
  * mocks: seeded admin (id 1) + user (id 2), and a third regular user created
  * through the admin API so USER↔USER isolation is proven without the admin
@@ -146,39 +145,6 @@ class LinkManageIdorE2ETest
         "the owner must still toggle the link");
     assertEquals(OK.code(), toggle(adminToken, code, true).statusCode(),
         "link:read:all must bypass");
-  }
-
-  // --- SEC-L1: meta GET + campaign link-remove ------------------------------
-
-  @Test
-  void foreignMetaReadAndCampaignRemoveAreDenied()
-      throws Exception {
-    String code = createLinkAs(ownerToken, "https://example.org/l1");
-
-    assertEquals(FORBIDDEN.code(),
-        send(request(PATH_ADMIN_LINK_META + "/" + code, attackerToken).GET().build()).statusCode(),
-        "a foreign USER must not read link meta (SEC-L1)");
-    assertEquals(OK.code(),
-        send(request(PATH_ADMIN_LINK_META + "/" + code, ownerToken).GET().build()).statusCode(),
-        "the owner must still read link meta");
-
-    var campaignRes = send(request(PATH_ADMIN_CAMPAIGNS, ownerToken)
-        .POST(body(JsonUtils.toJson(Map.of("name", "l1-campaign")))).build());
-    assertEquals(CREATED.code(), campaignRes.statusCode(), campaignRes.body());
-    String campaignId = JsonUtils.fromJson(campaignRes.body(), Campaign.class).id();
-    assertEquals(NO_CONTENT.code(),
-        send(request(PATH_ADMIN_CAMPAIGNS + "/" + campaignId + "/links/" + code, ownerToken)
-            .POST(HttpRequest.BodyPublishers.noBody()).build()).statusCode(),
-        "owner must assign own link");
-
-    assertEquals(FORBIDDEN.code(),
-        send(request(PATH_ADMIN_CAMPAIGNS + "/" + campaignId + "/links/" + code, attackerToken)
-            .DELETE().build()).statusCode(),
-        "a foreign USER must not remove the link from the campaign (SEC-L1)");
-    assertEquals(NO_CONTENT.code(),
-        send(request(PATH_ADMIN_CAMPAIGNS + "/" + campaignId + "/links/" + code, ownerToken)
-            .DELETE().build()).statusCode(),
-        "the owner must still remove the link");
   }
 
   // --- fail-closed: unowned codes are admin-only ----------------------------

@@ -30,4 +30,14 @@ public interface FeatureContribution {
   default List<NavbarContribution> navbarComponents() {
     return List.of();
   }
+
+  /** Plug-in sections for the link-create forms (Create / Bulk-Create view). */
+  default List<LinkFormContribution> linkFormContributions() {
+    return List.of();
+  }
+
+  /** Plug-in sections for the link-details dialog. */
+  default List<LinkDetailsContribution> linkDetailsContributions() {
+    return List.of();
+  }
 }

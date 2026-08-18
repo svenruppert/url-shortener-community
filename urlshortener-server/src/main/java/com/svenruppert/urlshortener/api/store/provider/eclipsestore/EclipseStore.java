@@ -7,11 +7,11 @@ import com.svenruppert.urlshortener.api.security.LinkOwnershipStore;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
 import com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider;
 import com.svenruppert.urlshortener.api.security.roles.AuthorizationRole;
-import com.svenruppert.urlshortener.api.store.campaign.CampaignStore;
+import com.svenruppert.urlshortener.api.extension.LinkMetaStorage;
 import com.svenruppert.urlshortener.api.store.preferences.PreferencesStore;
 import com.svenruppert.urlshortener.api.store.provider.eclipsestore.patitions.EclipseApiKeyStore;
 import com.svenruppert.urlshortener.api.store.provider.eclipsestore.patitions.EclipseLinkOwnershipStore;
-import com.svenruppert.urlshortener.api.store.provider.eclipsestore.patitions.EclipseCampaignStore;
+import com.svenruppert.urlshortener.api.store.provider.eclipsestore.patitions.EclipseLinkMetaStorage;
 import com.svenruppert.urlshortener.api.store.provider.eclipsestore.patitions.EclipsePreferencesStore;
 import com.svenruppert.urlshortener.api.store.provider.eclipsestore.patitions.EclipseStatisticsStore;
 import com.svenruppert.urlshortener.api.store.provider.eclipsestore.patitions.EclipseUrlMappingStore;
@@ -37,7 +37,7 @@ public final class EclipseStore
   private final EclipseUrlMappingStore eclipseUrlMappingStore;
   private final EclipsePreferencesStore preferencesStore;
   private final EclipseStatisticsStore statisticsStore;
-  private final EclipseCampaignStore campaignStore;
+  private final EclipseLinkMetaStorage linkMetaStorage;
 
 
   public EclipseStore(String storageDir,
@@ -93,7 +93,7 @@ public final class EclipseStore
     LinkOwnershipStore.INSTANCE.useBackend(new EclipseLinkOwnershipStore(storage));
     backfillOwnershipToFirstAdmin(dataRoot());
 
-    this.campaignStore = new EclipseCampaignStore(storage);
+    this.linkMetaStorage = new EclipseLinkMetaStorage(storage);
   }
 
   /**
@@ -124,8 +124,9 @@ public final class EclipseStore
         assignment.size(), firstAdmin.get().name(), adminId);
   }
 
-  public CampaignStore getCampaignStore() {
-    return campaignStore;
+  /** Raw link-meta maps for the plug-in seam (V00.18.00 P085) — dormant without a plug-in. */
+  public LinkMetaStorage getLinkMetaStorage() {
+    return linkMetaStorage;
   }
 
   public UrlMappingStore getUrlMappingStore() {

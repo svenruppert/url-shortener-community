@@ -1,25 +1,22 @@
 package com.svenruppert.urlshortener.core.urlmapping;
 
 
-
-
-
 import com.fasterxml.jackson.annotation.JsonAlias;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 
+/**
+ * Create request for a single link. Plug-in metadata (campaign/tags/label)
+ * no longer lives here (V00.18.00 P085, D2) — plug-ins parse their own
+ * fields from the raw request JSON; unknown fields are ignored on parse.
+ */
 public final class ShortenRequest {
   private String url;
   @JsonAlias("alias")
   private String shortURL;
   private Instant expiresAt;
   private Boolean active;
-  // Optional create-time campaign metadata (assigned server-side after creation).
-  private String campaignId;
-  private List<String> tags;
-  private String label;
 
   public ShortenRequest() {
   }
@@ -29,14 +26,6 @@ public final class ShortenRequest {
     this.shortURL = shortURL;
     this.expiresAt = expiresAt;
     this.active = active;
-  }
-
-  public ShortenRequest(String url, String shortURL, Instant expiresAt, Boolean active,
-                        String campaignId, List<String> tags, String label) {
-    this(url, shortURL, expiresAt, active);
-    this.campaignId = campaignId;
-    this.tags = tags;
-    this.label = label;
   }
 
   public Instant getExpiresAt() {
@@ -75,30 +64,6 @@ public final class ShortenRequest {
     this.active = active;
   }
 
-  public String getCampaignId() {
-    return campaignId;
-  }
-
-  public void setCampaignId(String campaignId) {
-    this.campaignId = campaignId;
-  }
-
-  public List<String> getTags() {
-    return tags;
-  }
-
-  public void setTags(List<String> tags) {
-    this.tags = tags;
-  }
-
-  public String getLabel() {
-    return label;
-  }
-
-  public void setLabel(String label) {
-    this.label = label;
-  }
-
   @Override
   public String toString() {
     return "ShortenRequest{" +
@@ -106,9 +71,6 @@ public final class ShortenRequest {
         ", shortURL='" + shortURL + '\'' +
         ", expiresAt='" + expiresAt + '\'' +
         ", active='" + active + '\'' +
-        ", campaignId='" + campaignId + '\'' +
-        ", tags=" + tags +
-        ", label='" + label + '\'' +
         '}';
   }
 

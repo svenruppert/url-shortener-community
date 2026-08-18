@@ -121,7 +121,7 @@ public class ShortenerServer
     UrlMappingStore urlMappingStore;
     PreferencesStore preferencesStore;
     StatisticsStore statisticsStore;
-    com.svenruppert.urlshortener.api.store.campaign.CampaignStore campaignStore;
+    com.svenruppert.urlshortener.api.extension.LinkMetaStorage linkMetaStorage;
     ImportStagingStore importStagingStore = new InMemoryImportStagingStore();
 
     if (persistent) {
@@ -133,7 +133,7 @@ public class ShortenerServer
       urlMappingStore = eclipseStore.getUrlMappingStore();
       preferencesStore = eclipseStore.getPreferencesStore();
       statisticsStore = eclipseStore.getStatisticsStore();
-      campaignStore = eclipseStore.getCampaignStore();
+      linkMetaStorage = eclipseStore.getLinkMetaStorage();
 
       // Start background threads for statistics processing
       eclipseStore.start();
@@ -153,9 +153,16 @@ public class ShortenerServer
       urlMappingStore = new InMemoryUrlMappingStore(shortCodeGenerator);
       preferencesStore = new InMemoryPreferencesStore();
       statisticsStore = new InMemoryStatisticsStore(Clock.systemUTC());
-      campaignStore = new com.svenruppert.urlshortener.api.store.provider.inmemory.InMemoryCampaignStore();
-      // statisticsStore remains null for in-memory mode
+      linkMetaStorage = new com.svenruppert.urlshortener.api.store.provider.inmemory.InMemoryLinkMetaStorage();
     }
+
+    // Open-core seam (V00.18.00 P085): the plug-in context and the link
+    // lifecycle hooks are discovered BEFORE handler registration — the
+    // community handlers only ever talk to the hook facade, never to a
+    // feature store. A plug-in-free classpath yields empty hooks.
+    var serverContext = new com.svenruppert.urlshortener.api.extension.ServerContext(
+        urlMappingStore, linkMetaStorage, statisticsStore, preferencesStore);
+    var lifecycleHooks = com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks.discover(serverContext);
 
     logger().info("Starting URL Shortener server (redirect) with parameters: host={}, port={}", hostRedirect, portRedirect);
     this.serverRedirect = HttpServer.create(new InetSocketAddress(hostRedirect, portRedirect), 0);
@@ -186,12 +193,12 @@ public class ShortenerServer
     secured(serverAdmin, PATH_ADMIN_AUDIT, new AuditHandler());
 
     secured(serverAdmin, PATH_ADMIN_VALIDATE_BULK, new BulkValidateHandler(urlMappingStore));
-    secured(serverAdmin, PATH_ADMIN_SHORTEN_BULK, new BulkShortenHandler(urlMappingStore, campaignStore));
-    secured(serverAdmin, PATH_ADMIN_SHORTEN, new ShortenHandler(urlMappingStore, campaignStore));
-    secured(serverAdmin, PATH_ADMIN_LIST, new ListHandler(urlMappingStore, campaignStore));
-    secured(serverAdmin, PATH_ADMIN_LIST_COUNT, new ListCountHandler(urlMappingStore, campaignStore));
+    secured(serverAdmin, PATH_ADMIN_SHORTEN_BULK, new BulkShortenHandler(urlMappingStore, lifecycleHooks));
+    secured(serverAdmin, PATH_ADMIN_SHORTEN, new ShortenHandler(urlMappingStore, lifecycleHooks));
+    secured(serverAdmin, PATH_ADMIN_LIST, new ListHandler(urlMappingStore, lifecycleHooks));
+    secured(serverAdmin, PATH_ADMIN_LIST_COUNT, new ListCountHandler(urlMappingStore, lifecycleHooks));
     secured(serverAdmin, PATH_ADMIN_EDIT, new EditMappingHandler(urlMappingStore));
-    secured(serverAdmin, PATH_ADMIN_DELETE, new DeleteMappingHandler(urlMappingStore, campaignStore));
+    secured(serverAdmin, PATH_ADMIN_DELETE, new DeleteMappingHandler(urlMappingStore, lifecycleHooks));
     secured(serverAdmin, PATH_ADMIN_TOGGLE_ACTIVE, new ToggleActiveHandler(urlMappingStore));
     secured(serverAdmin, PATH_ADMIN_STORE_INFO, new StoreInfoHandler(urlMappingStore, startedAt));
     secured(serverAdmin, PATH_ADMIN_HEALTH, new HealthHandler());
@@ -218,17 +225,6 @@ public class ShortenerServer
     secured(serverAdmin, PATH_ADMIN_STATISTICS_IMPORT, new StatisticsImportHandler(statisticsStore));
     logger().info("Statistics API handlers registered");
 
-    // Link campaigns / tags / labels (V00.16.00)
-    var campaignStatistics =
-        new com.svenruppert.urlshortener.api.store.campaign.CampaignStatisticsService(campaignStore, statisticsStore);
-    secured(serverAdmin, PATH_ADMIN_CAMPAIGNS,
-        new com.svenruppert.urlshortener.api.handler.campaign.CampaignsHandler(campaignStore, campaignStatistics));
-    secured(serverAdmin, PATH_ADMIN_LINK_META,
-        new com.svenruppert.urlshortener.api.handler.campaign.LinkMetaHandler(campaignStore));
-    secured(serverAdmin, PATH_ADMIN_TAGS,
-        new com.svenruppert.urlshortener.api.handler.campaign.TagsHandler(campaignStore));
-    logger().info("Campaign API handlers registered");
-
     // P280: signed security-event SSE stream for SIEM integration. The
     // SseStreamHttpHandler self-resolves the subject; wrapping it in secure()
     // additionally rejects unauthenticated requests via the standard pipeline.
@@ -245,8 +241,6 @@ public class ShortenerServer
     // the same stores; duplicate plug-in paths abort in the registry, a
     // collision with a community route aborts in createContext — fail fast
     // either way. A plug-in-free classpath makes this a no-op.
-    var serverContext = new com.svenruppert.urlshortener.api.extension.ServerContext(
-        urlMappingStore, campaignStore, statisticsStore, preferencesStore);
     for (var contribution : com.svenruppert.urlshortener.api.extension.HandlerRegistry.discover()) {
       secured(serverAdmin, contribution.path(), contribution.create(serverContext));
       logger().info("Contributed endpoint registered at {}", contribution.path());

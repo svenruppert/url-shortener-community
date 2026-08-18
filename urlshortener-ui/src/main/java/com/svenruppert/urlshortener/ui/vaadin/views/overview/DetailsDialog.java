@@ -3,7 +3,6 @@ package com.svenruppert.urlshortener.ui.vaadin.views.overview;
 
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.urlshortener.client.CampaignClient;
 import com.svenruppert.urlshortener.client.URLShortenerClient;
 import com.svenruppert.urlshortener.core.auth.UserSummary;
 import com.svenruppert.urlshortener.core.urlmapping.ShortUrlMapping;
@@ -11,7 +10,8 @@ import com.svenruppert.urlshortener.core.validation.UrlValidator;
 import com.svenruppert.urlshortener.ui.vaadin.components.MultiAliasEditorStrict;
 import com.svenruppert.urlshortener.ui.vaadin.events.MappingCreatedOrChanged;
 import com.svenruppert.urlshortener.ui.vaadin.tools.AdminClientFactory;
-import com.svenruppert.urlshortener.ui.vaadin.tools.CampaignClientFactory;
+import com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry;
+import com.svenruppert.urlshortener.ui.vaadin.extension.LinkDetailsSection;
 import com.svenruppert.urlshortener.ui.vaadin.tools.I18nSupport;
 import com.svenruppert.urlshortener.ui.vaadin.tools.UrlShortenerClientFactory;
 import com.svenruppert.urlshortener.ui.vaadin.tools.UsersClientFactory;
@@ -21,7 +21,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -44,13 +43,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.SHORTCODE_BASE_URL;
 import static com.svenruppert.urlshortener.ui.vaadin.components.ExpiryBadgeFactory.computeStatusText;
@@ -81,7 +76,6 @@ public class DetailsDialog
   private static final String K_F_CREATED = "overview.details.field.createdOn";
   private static final String K_F_EXPIRES = "overview.details.field.expires";
   private static final String K_F_ACTIVE = "overview.details.field.active";
-  private static final String K_F_TAGS = "overview.details.field.tags";
 
   private static final String K_NO_EXPIRY = "overview.details.noExpiry"; // No expiry date
 
@@ -119,12 +113,11 @@ public class DetailsDialog
   private final TextField tfCreated = new TextField();
   private final TextField tfExpires = new TextField();
   private final Checkbox cbActive = new Checkbox();
-  private final MultiSelectComboBox<String> tagsField = new MultiSelectComboBox<>();
   private final Span statusPill = new Span();
 
-  private final CampaignClient campaignClient = CampaignClientFactory.newInstance();
-  private final Set<String> tagItems = new LinkedHashSet<>();
-  private Set<String> loadedTags = new LinkedHashSet<>();
+  // Open-core seam (V00.18.00 P085): plug-in sections (e.g. the tag field)
+  // render in the form and follow the dialog's edit/save/cancel cycle.
+  private final List<LinkDetailsSection> pluginSections;
 
   private final Button openBtn = new Button(new Icon(VaadinIcon.EXTERNAL_LINK));
   private final Button copyShortBtn = new Button(new Icon(VaadinIcon.COPY));
@@ -206,7 +199,9 @@ public class DetailsDialog
     getHeader().add(leftHeader, rightHeader);
 
     configureFields();
-    loadTagsMeta();
+    this.pluginSections = FeatureRegistry.linkDetailsContributions().stream()
+        .map(contribution -> contribution.createSection(shortCode))
+        .toList();
 
     var form = new FormLayout();
     form.addClassName(C_FORM);
@@ -214,9 +209,12 @@ public class DetailsDialog
         new FormLayout.ResponsiveStep("0", 1),
         new FormLayout.ResponsiveStep("600px", 2)
     );
-    form.add(tfShort, tfCreated, tfUrl, cbActive, tagsField, tfExpires, buildExpiresRow(), statusPill);
+    form.add(tfShort, tfCreated, tfUrl, cbActive, tfExpires, buildExpiresRow(), statusPill);
     form.setColspan(tfUrl, 2);
-    form.setColspan(tagsField, 2);
+    pluginSections.forEach(section -> {
+      form.add(section.component());
+      form.setColspan(section.component(), 2);
+    });
     // Admin-only owner transfer (V00.17.00 P020) — server-side enforced via
     // the linkOwnerManage permission; hidden entirely for regular users.
     if (isCurrentUserAdmin()) {
@@ -279,7 +277,6 @@ public class DetailsDialog
     tfCreated.setLabel(tr(K_F_CREATED, "Created on"));
     tfExpires.setLabel(tr(K_F_EXPIRES, "Expires"));
     cbActive.setLabel(tr(K_F_ACTIVE, "Active"));
-    tagsField.setLabel(tr(K_F_TAGS, "Tags"));
 
     openBtn.setText(tr(K_BTN_OPEN, "Open"));
     copyShortBtn.setText(tr(K_BTN_COPY_SHORT, "Copy ShortURL"));
@@ -321,38 +318,9 @@ public class DetailsDialog
     statusPill.setText(statusText.text());
     statusPill.getElement().getThemeList().add(statusText.theme());
 
-    tagsField.setAllowCustomValue(true);
-    tagsField.setClearButtonVisible(true);
-    tagsField.setReadOnly(true);
-    tagsField.setItems(tagItems);
-    tagsField.addCustomValueSetListener(e -> {
-      String v = e.getDetail() == null ? "" : e.getDetail().trim().toLowerCase(Locale.ROOT);
-      if (v.isEmpty()) return;
-      Set<String> selected = new LinkedHashSet<>(tagsField.getSelectedItems());
-      selected.add(v);
-      tagItems.add(v);
-      tagsField.setItems(tagItems);
-      tagsField.setValue(selected);
-    });
   }
 
   /** Loads the tag registry (as suggestions) and the link's current tags (as the value). */
-  private void loadTagsMeta() {
-    // registry tags → offered as suggestions (SDK calls are synchronous, so this runs before the value is set)
-    campaignClient.listTags()
-        .peek(all -> all.forEach(t -> tagItems.add(t.tag())))
-        .peekFailure(err -> logger().info("could not load tag registry for {}: {}", shortCode, err));
-    campaignClient.linkMetaTyped(shortCode)
-        .peek(meta -> {
-          List<String> tags = meta.tags() == null ? List.of() : meta.tags();
-          tagItems.addAll(tags);
-          loadedTags = new LinkedHashSet<>(tags);
-          tagsField.setItems(tagItems);
-          tagsField.setValue(loadedTags);
-        })
-        .peekFailure(err -> logger().warn("could not load tags for {}: {}", shortCode, err));
-  }
-
   private Component buildExpiresRow() {
     expiresField.setStep(Duration.ofMinutes(30));
     expiresField.setWidthFull();
@@ -399,7 +367,7 @@ public class DetailsDialog
 
     cancelBtn.addClickListener(_ -> {
       binder.readBean(item);
-      tagsField.setValue(loadedTags); // discard unsaved tag edits
+      pluginSections.forEach(LinkDetailsSection::onDiscard); // discard unsaved plug-in edits
       switchToEdit(false);
     });
   }
@@ -408,7 +376,7 @@ public class DetailsDialog
     tfUrl.setReadOnly(!enable);
     tfExpires.setVisible(!enable);
     cbActive.setReadOnly(!enable);
-    tagsField.setReadOnly(!enable);
+    pluginSections.forEach(section -> section.editMode(enable));
 
     expiresField.setVisible(enable);
     expiresField.setReadOnly(!enable);
@@ -434,18 +402,13 @@ public class DetailsDialog
 
       boolean ok = client.edit(item.shortCode(), newUrl, expires, cbActive.getValue());
 
-      // Persist tags independently — only when they actually changed.
-      Set<String> newTags = new LinkedHashSet<>(tagsField.getValue());
-      boolean tagsChanged = !newTags.equals(loadedTags);
-      boolean tagsOk = false;
-      if (tagsChanged) {
-        var r = campaignClient.setTags(item.shortCode(), new ArrayList<>(newTags));
-        tagsOk = r.isSuccess();
-        if (tagsOk) loadedTags = newTags;
-        else r.peekFailure(err -> logger().warn("setTags failed for {}: {}", item.shortCode(), err));
+      // Plug-in sections persist their own edits independently.
+      boolean pluginChanged = false;
+      for (LinkDetailsSection section : pluginSections) {
+        pluginChanged |= section.onSave(item.shortCode());
       }
 
-      if (ok || tagsOk) {
+      if (ok || pluginChanged) {
         Notifications.saved();
         fireEvent(new SavedEvent(this, item.shortCode()));
         switchToEdit(false);

@@ -3,23 +3,21 @@ package com.svenruppert.urlshortener.ui.vaadin.views;
 
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.urlshortener.client.CampaignClient;
 import com.svenruppert.urlshortener.client.URLShortenerClient;
-import com.svenruppert.urlshortener.core.campaign.Campaign;
 import com.svenruppert.urlshortener.core.urlmapping.ShortenRequest;
 import com.svenruppert.urlshortener.core.validation.UrlValidator;
 import com.svenruppert.urlshortener.ui.vaadin.MainLayout;
 import com.svenruppert.urlshortener.ui.vaadin.security.AppRole;
 import com.svenruppert.urlshortener.ui.vaadin.security.VisibleFor;
 import com.svenruppert.urlshortener.ui.vaadin.components.MultiAliasEditorStrict;
-import com.svenruppert.urlshortener.ui.vaadin.tools.CampaignClientFactory;
+import com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry;
+import com.svenruppert.urlshortener.ui.vaadin.extension.LinkFormContribution;
+import com.svenruppert.urlshortener.ui.vaadin.extension.LinkFormSection;
 import com.svenruppert.urlshortener.ui.vaadin.tools.I18nSupport;
 import com.svenruppert.urlshortener.ui.vaadin.tools.UrlShortenerClientFactory;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -37,11 +35,8 @@ import com.vaadin.flow.router.Route;
 import java.io.IOException;
 import java.time.*;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.SHORTCODE_BASE_URL;
 
@@ -71,9 +66,6 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
   private static final String K_FIELD_EXPIRES_DATE = "create.field.expiresDate";
   private static final String K_FIELD_NO_EXPIRY = "create.field.noExpiry";
   private static final String K_FIELD_ACTIVE = "create.field.active";
-  private static final String K_FIELD_CAMPAIGN = "create.field.campaign";
-  private static final String K_FIELD_TAGS = "create.field.tags";
-  private static final String K_FIELD_LABEL = "create.field.label";
 
   private static final String K_BTN_SAVE = "common.save";
   private static final String K_BTN_RESET = "common.reset";
@@ -93,11 +85,12 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
   private final Checkbox noExpiry = new Checkbox();
   private final Checkbox cbActive = new Checkbox();
 
-  private final CampaignClient campaignClient = CampaignClientFactory.newInstance();
-  private final ComboBox<Campaign> campaignBox = new ComboBox<>();
-  private final MultiSelectComboBox<String> tagsBox = new MultiSelectComboBox<>();
-  private final TextField labelField = new TextField();
-  private final Set<String> tagItems = new LinkedHashSet<>();
+  // Open-core seam (V00.18.00 P085): plug-in sections (e.g. campaign/tags/
+  // label) render inside the form and apply their metadata post-create.
+  private final List<LinkFormSection> pluginSections =
+      FeatureRegistry.linkFormContributions().stream()
+          .map(LinkFormContribution::createSection)
+          .toList();
 
   public CreateView() {
     addClassName(C_ROOT);
@@ -121,17 +114,19 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
     resetButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
     configureExpiryFields();
-    configureCampaignFields();
 
     FormLayout form = new FormLayout();
     form.addClassName(C_FORM);
-    form.add(urlField, noExpiry, cbActive, expiresDateTime, campaignBox, labelField, tagsBox);
+    form.add(urlField, noExpiry, cbActive, expiresDateTime);
     form.setResponsiveSteps(
         new FormLayout.ResponsiveStep("0", 1),
         new FormLayout.ResponsiveStep("900px", 2)
     );
     form.setColspan(urlField, 2);
-    form.setColspan(tagsBox, 2);
+    pluginSections.forEach(section -> {
+      form.add(section.component());
+      form.setColspan(section.component(), 2);
+    });
 
     HorizontalLayout actions = new HorizontalLayout(saveAllButton, resetButton);
     actions.addClassName(C_ACTIONS);
@@ -180,14 +175,8 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
 
       Optional<Instant> expiresAt = computeExpiresAt();
 
-      // Optional campaign metadata applied to every alias created in this batch.
-      Campaign selectedCampaign = campaignBox.getValue();
-      String campaignId = selectedCampaign == null ? null : selectedCampaign.id();
-      List<String> tags = tagsBox.getValue().isEmpty() ? null : new ArrayList<>(tagsBox.getValue());
-      String label = (labelField.getValue() == null || labelField.getValue().isBlank())
-          ? null : labelField.getValue().trim();
-
       int ok = 0;
+      List<String> created = new ArrayList<>();
       for (String alias : validAliases) {
         try {
           var activeState = cbActive.getValue();
@@ -195,16 +184,20 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
               alias,
               urlField.getValue(),
               expiresAt.orElse(null),
-              activeState,
-              campaignId,
-              tags,
-              label
+              activeState
           );
-          if (customMapping != null) editor.markSaved(alias);
+          if (customMapping != null) {
+            editor.markSaved(alias);
+            created.add(customMapping.shortCode());
+          }
           ok++;
         } catch (Exception ex) {
           editor.markError(alias, String.valueOf(ex.getMessage()));
         }
+      }
+      // plug-in sections apply their metadata to the created links
+      if (!created.isEmpty()) {
+        pluginSections.forEach(section -> section.onLinksCreated(created));
       }
 
       Notification.show(
@@ -249,36 +242,6 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
     expiresDateTime.setLabel(tr(K_FIELD_EXPIRES_DATE, "Expires (date)"));
     noExpiry.setLabel(tr(K_FIELD_NO_EXPIRY, "No expiry"));
     cbActive.setLabel(tr(K_FIELD_ACTIVE, "Active"));
-    campaignBox.setLabel(tr(K_FIELD_CAMPAIGN, "Campaign"));
-    tagsBox.setLabel(tr(K_FIELD_TAGS, "Tags"));
-    labelField.setLabel(tr(K_FIELD_LABEL, "Placement label"));
-  }
-
-  private void configureCampaignFields() {
-    campaignBox.setItemLabelGenerator(Campaign::name);
-    campaignBox.setClearButtonVisible(true);
-    campaignClient.list()
-        .peek(campaignBox::setItems)
-        .peekFailure(err -> logger().warn("could not load campaigns: {}", err));
-
-    tagsBox.setAllowCustomValue(true);
-    tagsBox.setClearButtonVisible(true);
-    tagsBox.setItems(tagItems);
-    campaignClient.listTags()
-        .peek(tags -> {
-          tags.forEach(t -> tagItems.add(t.tag()));
-          tagsBox.setItems(tagItems); // offer existing tags as suggestions (free entry still works)
-        })
-        .peekFailure(err -> logger().info("could not load tags: {}", err));
-    tagsBox.addCustomValueSetListener(e -> {
-      String v = e.getDetail() == null ? "" : e.getDetail().trim().toLowerCase(Locale.ROOT);
-      if (v.isEmpty()) return;
-      Set<String> selected = new LinkedHashSet<>(tagsBox.getSelectedItems());
-      selected.add(v);
-      tagItems.add(v);
-      tagsBox.setItems(tagItems);
-      tagsBox.setValue(selected);
-    });
   }
 
   private void configureExpiryFields() {
@@ -317,9 +280,6 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
     urlField.clear();
     noExpiry.clear();
     expiresDateTime.clear();
-    campaignBox.clear();
-    tagsBox.clear();
-    labelField.clear();
     binder.setBean(new ShortenRequest(null, null, null, null));
     urlField.setInvalid(false);
   }

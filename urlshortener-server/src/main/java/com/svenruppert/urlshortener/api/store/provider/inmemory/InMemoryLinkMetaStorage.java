@@ -1,15 +1,15 @@
 package com.svenruppert.urlshortener.api.store.provider.inmemory;
 
-import com.svenruppert.urlshortener.api.store.campaign.AbstractCampaignStore;
+import com.svenruppert.urlshortener.api.extension.LinkMetaStorage;
 import com.svenruppert.urlshortener.core.campaign.Campaign;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Non-persistent campaign store (used in the non-persistent server profile + tests). */
-public final class InMemoryCampaignStore
-    extends AbstractCampaignStore {
+/** Non-persistent link-meta seam backing (in-memory server profile + tests). */
+public final class InMemoryLinkMetaStorage
+    implements LinkMetaStorage {
 
   private final Map<String, Campaign> campaigns = new ConcurrentHashMap<>();
   private final Map<String, String> campaignOfLink = new ConcurrentHashMap<>();
@@ -18,27 +18,31 @@ public final class InMemoryCampaignStore
   private final Map<String, Boolean> knownTags = new ConcurrentHashMap<>();
 
   @Override
-  protected Map<String, Campaign> campaignsMap() {
+  public Map<String, Campaign> campaigns() {
     return campaigns;
   }
 
   @Override
-  protected Map<String, String> campaignOfLinkMap() {
+  public Map<String, String> campaignOfLink() {
     return campaignOfLink;
   }
 
   @Override
-  protected Map<String, Set<String>> linkTagsMap() {
+  public Map<String, Set<String>> linkTags() {
     return linkTags;
   }
 
   @Override
-  protected Map<String, String> linkLabelsMap() {
+  public Map<String, String> linkLabels() {
     return linkLabels;
   }
 
   @Override
-  protected Map<String, Boolean> knownTagsMap() {
+  public Map<String, Boolean> knownTags() {
     return knownTags;
+  }
+
+  @Override
+  public void persist() {
   }
 }

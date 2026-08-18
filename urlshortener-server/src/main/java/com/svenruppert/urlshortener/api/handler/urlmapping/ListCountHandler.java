@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
-import com.svenruppert.urlshortener.api.store.campaign.CampaignStore;
+import com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks;
 import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingFilter;
 import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingLookup;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
@@ -23,26 +23,20 @@ public final class ListCountHandler
     implements HttpHandler, HasLogger {
 
   private final UrlMappingLookup store;
-  private final CampaignStore campaignStore;
+  private final LinkLifecycleHooks hooks;
 
-  public ListCountHandler(UrlMappingLookup store, CampaignStore campaignStore) {
+  public ListCountHandler(UrlMappingLookup store, LinkLifecycleHooks hooks) {
     this.store = store;
-    this.campaignStore = campaignStore;
+    this.hooks = hooks;
   }
 
-  private Set<String> tagRestriction(Map<String, List<String>> query) {
-    String tag = first(query, "tag");
-    if (tag == null || tag.isBlank()) return null;
-    return campaignStore.linksOfTag(tag);
-  }
-
-  /** SEC-M2 (V00.17.00 P050): tag filter intersected with the caller's read-scope. */
+  /** SEC-M2 (V00.17.00 P050): plug-in restriction intersected with the caller's read-scope. */
   private Set<String> combinedRestriction(Map<String, List<String>> query, HttpExchange ex) {
-    Set<String> tags = tagRestriction(query);
+    Set<String> contributed = hooks.listRestriction(query);
     Set<String> owned = com.svenruppert.urlshortener.api.security.OwnerGuard.readRestriction(ex);
-    if (owned == null) return tags;
-    if (tags == null) return owned;
-    Set<String> both = new java.util.LinkedHashSet<>(tags);
+    if (owned == null) return contributed;
+    if (contributed == null) return owned;
+    Set<String> both = new java.util.LinkedHashSet<>(contributed);
     both.retainAll(owned);
     return both;
   }

@@ -64,19 +64,25 @@ class EclipseStoreMigrationIT {
       links = store.getUrlMappingStore().countAll();
       assertTrue(links > 0, "existing links from the old production store must survive the migration");
 
-      var campaigns = store.getCampaignStore();
-      assertNotNull(campaigns.tagCounts(), "tag registry (knownTags) + linkTags partitions initialized on load");
-      assertNotNull(campaigns.listAll(), "campaigns partition initialized on load");
+      // P085: the link-meta partitions stay in DataRoot behind the plug-in
+      // seam — dormant without a plug-in, but initialized and persistable.
+      var linkMeta = store.getLinkMetaStorage();
+      assertNotNull(linkMeta.knownTags(), "tag registry (knownTags) partition initialized on load");
+      assertNotNull(linkMeta.linkTags(), "linkTags partition initialized on load");
+      assertNotNull(linkMeta.campaigns(), "campaigns partition initialized on load");
+      assertNotNull(linkMeta.campaignOfLink(), "campaignOfLink partition initialized on load");
+      assertNotNull(linkMeta.linkLabels(), "linkLabels partition initialized on load");
 
-      // exercise the new first-class-tag feature against the just-migrated store
-      campaigns.createTag("migration-smoke");
-      assertTrue(campaigns.tagCounts().containsKey("migration-smoke"));
+      // exercise the seam against the just-migrated store (what a plug-in does)
+      linkMeta.knownTags().put("migration-smoke", Boolean.TRUE);
+      linkMeta.persist();
+      assertTrue(linkMeta.knownTags().containsKey("migration-smoke"));
     }
 
     // reopen: the additive migration and the new tag must have persisted, no data lost
     try (EclipseStore reopened = new EclipseStore(copy.toString(), new ShortCodeGenerator(1), Clock.systemUTC())) {
       assertEquals(links, reopened.getUrlMappingStore().countAll(), "no link loss across the migration restart");
-      assertTrue(reopened.getCampaignStore().tagCounts().containsKey("migration-smoke"),
+      assertTrue(reopened.getLinkMetaStorage().knownTags().containsKey("migration-smoke"),
           "migration + registry persisted across restart");
     }
 

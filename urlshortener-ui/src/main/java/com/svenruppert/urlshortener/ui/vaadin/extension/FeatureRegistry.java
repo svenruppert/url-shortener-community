@@ -49,4 +49,12 @@ public final class FeatureRegistry {
   public static List<NavbarContribution> navbarComponents() {
     return Holder.ALL.stream().flatMap(c -> c.navbarComponents().stream()).toList();
   }
+
+  public static List<LinkFormContribution> linkFormContributions() {
+    return Holder.ALL.stream().flatMap(c -> c.linkFormContributions().stream()).toList();
+  }
+
+  public static List<LinkDetailsContribution> linkDetailsContributions() {
+    return Holder.ALL.stream().flatMap(c -> c.linkDetailsContributions().stream()).toList();
+  }
 }

@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.dependencies.core.net.MediaType;
 import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
-import com.svenruppert.urlshortener.api.store.campaign.CampaignStore;
+import com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks;
 import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingFilter;
 import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingLookup;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
@@ -40,35 +40,25 @@ public class ListHandler
           .withZone(ZoneOffset.UTC);
 
   private final UrlMappingLookup store;
-  private final CampaignStore campaignStore;
+  private final LinkLifecycleHooks hooks;
 
-  public ListHandler(UrlMappingLookup store, CampaignStore campaignStore) {
+  public ListHandler(UrlMappingLookup store, LinkLifecycleHooks hooks) {
     this.store = store;
-    this.campaignStore = campaignStore;
+    this.hooks = hooks;
   }
 
   /**
-   * Resolves the {@code tag} query parameter into a short-code restriction:
-   * {@code null} when no tag is given (no restriction), otherwise the (possibly
-   * empty) set of links carrying that tag.
-   */
-  private Set<String> tagRestriction(Map<String, List<String>> query) {
-    String tag = first(query, "tag");
-    if (tag == null || tag.isBlank()) return null;
-    return campaignStore.linksOfTag(tag);
-  }
-
-  /**
-   * SEC-M2 (V00.17.00 P050): tag filter intersected with the caller's
-   * read-scope — non-admins only ever see links they own; {@code null} means
-   * unrestricted (admin with {@code link:read:all}).
+   * SEC-M2 (V00.17.00 P050): the plug-in list restriction (e.g. a tag filter,
+   * V00.18.00 P085) intersected with the caller's read-scope — non-admins
+   * only ever see links they own; {@code null} means unrestricted (admin
+   * with {@code link:read:all}).
    */
   private Set<String> combinedRestriction(Map<String, List<String>> query, HttpExchange ex) {
-    Set<String> tags = tagRestriction(query);
+    Set<String> contributed = hooks.listRestriction(query);
     Set<String> owned = com.svenruppert.urlshortener.api.security.OwnerGuard.readRestriction(ex);
-    if (owned == null) return tags;
-    if (tags == null) return owned;
-    Set<String> both = new java.util.LinkedHashSet<>(tags);
+    if (owned == null) return contributed;
+    if (contributed == null) return owned;
+    Set<String> both = new java.util.LinkedHashSet<>(contributed);
     both.retainAll(owned);
     return both;
   }
@@ -129,7 +119,7 @@ public class ListHandler
         responseJson = listFiltered(ex);
       } else {
         logger().info("undefined path {}", path);
-        ex.sendResponseHeaders(404, -1);
+        ex.sendResponseHeaders(com.svenruppert.dependencies.core.net.HttpStatus.NOT_FOUND.code(), -1);
         return;
       }
       SuccessResponses.okJson(ex, responseJson);
