@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://jetty.org/configure_10_0.dtd">
+<!-- Open-core dev seam (V00.18.00): jetty:run picks up plug-in class dirs /
+     jars from -Djetty.extraClasspath=dir1,dir2 so contributed features are
+     discoverable in dev mode. Without the property this is a no-op and the
+     webapp runs community-only. -->
+<Configure class="org.eclipse.jetty.ee11.maven.plugin.MavenWebAppContext">
+  <Set name="extraClasspath">
+    <SystemProperty name="jetty.extraClasspath" default=""/>
+  </Set>
+</Configure>

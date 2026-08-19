@@ -134,6 +134,10 @@
                     <webApp>
                         <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
                     </webApp>
+                    <!-- Open-core dev seam (V00.18.00): the context XML reads
+                         -Djetty.extraClasspath=dir1,dir2 at runtime so plug-in
+                         class dirs join the webapp classpath; unset = no-op. -->
+                    <contextXml>${project.basedir}/src/main/jetty/dev-context.xml</contextXml>
                 </configuration>
             </plugin>
             <!--
