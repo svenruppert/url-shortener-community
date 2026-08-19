@@ -13,7 +13,8 @@ import com.svenruppert.urlshortener.core.statistics.StatisticsConfigResponse;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.svenruppert.dependencies.core.net.HttpStatus.fromCode;
+import static com.svenruppert.dependencies.core.net.HttpStatus.BAD_REQUEST;
+import static com.svenruppert.dependencies.core.net.HttpStatus.OK;
 import static com.svenruppert.urlshortener.api.utils.JsonWriter.writeJson;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -57,7 +58,7 @@ public class StatisticsConfigHandler
       throws IOException {
     StatisticsConfig config = statisticsStore.getConfig();
     StatisticsConfigResponse response = StatisticsConfigResponse.from(config);
-    writeJson(exchange, fromCode(200), response);
+    writeJson(exchange, OK, response);
   }
 
   private void handlePut(HttpExchange exchange)
@@ -75,7 +76,7 @@ public class StatisticsConfigHandler
       if (request.hotWindowDays() < 1 ||
           request.writerBatchSize() < 1 ||
           request.aggregatorIntervalSeconds() < 60) {
-        writeJson(exchange, fromCode(400), ERROR_INVALID_CONFIG);
+        writeJson(exchange, BAD_REQUEST, ERROR_INVALID_CONFIG);
         return;
       }
 
@@ -88,11 +89,11 @@ public class StatisticsConfigHandler
       statisticsStore.updateConfig(newConfig);
 
       StatisticsConfigResponse response = StatisticsConfigResponse.from(statisticsStore.getConfig());
-      writeJson(exchange, fromCode(200), response);
+      writeJson(exchange, OK, response);
 
     } catch (Exception e) {
       logger().warn("Failed to parse config update request: {}", e.getMessage());
-      writeJson(exchange, fromCode(400), ERROR_INVALID_JSON);
+      writeJson(exchange, BAD_REQUEST, ERROR_INVALID_JSON);
     }
   }
 

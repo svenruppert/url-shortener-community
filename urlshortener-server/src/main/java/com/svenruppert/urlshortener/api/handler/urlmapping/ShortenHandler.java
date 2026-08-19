@@ -105,7 +105,7 @@ public class ShortenHandler
             final Headers h = ex.getResponseHeaders();
             h.add("Location", "/r/" + mapping.shortCode());
             try {
-              SuccessResponses.withStatus(ex, 201, mapping);
+              SuccessResponses.withStatus(ex, com.svenruppert.dependencies.core.net.HttpStatus.CREATED.code(), mapping);
             } catch (IOException e) {
               throw new RuntimeException(e);
             }

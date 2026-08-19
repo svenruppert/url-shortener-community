@@ -11,8 +11,11 @@ import com.svenruppert.urlshortener.core.AliasPolicy;
 
 import java.io.IOException;
 
+import static com.svenruppert.dependencies.core.net.HttpStatus.BAD_REQUEST;
+import static com.svenruppert.dependencies.core.net.HttpStatus.FORBIDDEN;
+import static com.svenruppert.dependencies.core.net.HttpStatus.INTERNAL_SERVER_ERROR;
+import static com.svenruppert.dependencies.core.net.HttpStatus.NOT_FOUND;
 import static com.svenruppert.dependencies.core.net.HttpStatus.NO_CONTENT;
-import static com.svenruppert.dependencies.core.net.HttpStatus.fromCode;
 import static com.svenruppert.urlshortener.api.utils.JsonWriter.writeJson;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ADMIN_DELETE;
 
@@ -44,7 +47,7 @@ public final class DeleteMappingHandler
 
     if (!path.startsWith(PATH_ADMIN_DELETE)) {
       logger().warn("no matches - {}", path);
-      writeJson(exchange, fromCode(400), BAD_REQUEST_ERROR_RESPONSE);
+      writeJson(exchange, BAD_REQUEST, BAD_REQUEST_ERROR_RESPONSE);
       return;
     }
 
@@ -54,14 +57,14 @@ public final class DeleteMappingHandler
     var validated = AliasPolicy.validate(shortCode);
     if (!validated.valid()) {
       logger().info("Invalid shortCode/alias, aborting");
-      writeJson(exchange, fromCode(400), INVALID_SHORT_CODE_ERROR_JSON);
+      writeJson(exchange, BAD_REQUEST, INVALID_SHORT_CODE_ERROR_JSON);
       return;
     }
 
     // Owner model (P210): only the owner or a link:read:all holder may delete.
     if (!com.svenruppert.urlshortener.api.security.OwnerGuard.canManage(exchange, shortCode)) {
       logger().info("delete denied — not owner of '{}'", shortCode);
-      writeJson(exchange, fromCode(403), NOT_OWNER);
+      writeJson(exchange, FORBIDDEN, NOT_OWNER);
       return;
     }
 
@@ -72,11 +75,11 @@ public final class DeleteMappingHandler
         hooks.linkDeleted(shortCode); // plug-in cascade (V00.18.00 P085)
         exchange.sendResponseHeaders(NO_CONTENT.code(), -1);
       } else {
-        writeJson(exchange, fromCode(404), SHORT_CODE_NOT_FOUND);
+        writeJson(exchange, NOT_FOUND, SHORT_CODE_NOT_FOUND);
       }
     } catch (Exception e) {
       logger().error("Delete failed for shortCode={}", shortCode, e);
-      writeJson(exchange, fromCode(500), INTERNAL_ERROR);
+      writeJson(exchange, INTERNAL_SERVER_ERROR, INTERNAL_ERROR);
     }
   }
 }

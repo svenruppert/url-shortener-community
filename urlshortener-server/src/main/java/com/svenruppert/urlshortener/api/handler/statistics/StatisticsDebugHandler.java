@@ -9,7 +9,7 @@ import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
 
 import java.io.IOException;
 
-import static com.svenruppert.dependencies.core.net.HttpStatus.fromCode;
+import static com.svenruppert.dependencies.core.net.HttpStatus.OK;
 import static com.svenruppert.urlshortener.api.utils.JsonWriter.writeJson;
 
 /**
@@ -34,6 +34,6 @@ public class StatisticsDebugHandler
     logger().info("StatisticsDebugHandler invoked");
 
     var debugInfo = statisticsStore.getDebugInfo();
-    writeJson(exchange, fromCode(200), debugInfo);
+    writeJson(exchange, OK, debugInfo);
   }
 }

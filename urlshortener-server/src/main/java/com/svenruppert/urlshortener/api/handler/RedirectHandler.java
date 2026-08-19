@@ -50,12 +50,12 @@ public class RedirectHandler
 
     final String path = exchange.getRequestURI().getPath();
     if (path == null || !path.startsWith(PATH_REDIRECT)) {
-      exchange.sendResponseHeaders(400, -1);
+      exchange.sendResponseHeaders(HttpStatus.BAD_REQUEST.code(), -1);
       return;
     }
     final String code = path.substring((PATH_REDIRECT).length());
     if (code.isBlank()) {
-      exchange.sendResponseHeaders(400, -1);
+      exchange.sendResponseHeaders(HttpStatus.BAD_REQUEST.code(), -1);
       return;
     }
     // A shortcode is a single path segment. Multi-segment paths like
@@ -64,7 +64,7 @@ public class RedirectHandler
     // the store (avoids per-request lookups and log spam on the hot path).
     if (code.indexOf('/') >= 0) {
       logger().debug("Ignoring non-shortcode path {}", code);
-      exchange.sendResponseHeaders(404, -1);
+      exchange.sendResponseHeaders(HttpStatus.NOT_FOUND.code(), -1);
       return;
     }
     logger().debug("Looking for short code {}", code);
@@ -72,20 +72,20 @@ public class RedirectHandler
 
     if (mappingOpt.isEmpty()) {
       logger().debug("No mapping found for short code {}", code);
-      exchange.sendResponseHeaders(404, -1);
+      exchange.sendResponseHeaders(HttpStatus.NOT_FOUND.code(), -1);
       return;
     }
 
     var mapping = mappingOpt.get();
     if (isExpired(mapping)) {
       logger().info("Short code {} is expired at {}", code, mapping.expiresAt().orElse(null));
-      exchange.sendResponseHeaders(410, -1);
+      exchange.sendResponseHeaders(HttpStatus.GONE.code(), -1);
       return;
     }
 
     if (!mapping.active()) {
       logger().info("Short code {} is inactive", code);
-      exchange.sendResponseHeaders(404, -1);
+      exchange.sendResponseHeaders(HttpStatus.NOT_FOUND.code(), -1);
       return;
     }
 
@@ -93,7 +93,7 @@ public class RedirectHandler
     recordRedirectEvent(exchange, code);
 
     exchange.getResponseHeaders().add("Location", mapping.originalUrl());
-    exchange.sendResponseHeaders(302, -1);
+    exchange.sendResponseHeaders(HttpStatus.FOUND.code(), -1);
   }
 
   private void recordRedirectEvent(HttpExchange exchange, String shortCode) {
