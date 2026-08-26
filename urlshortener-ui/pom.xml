@@ -5,12 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.svenruppert.urlshortener</groupId>
-        <artifactId>root</artifactId>
+        <artifactId>urlshortener-community-root</artifactId>
         <version>00.18.00-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ui</artifactId>
+    <artifactId>urlshortener-ui</artifactId>
     <packaging>war</packaging>
+
+    <name>URL-Shortener Community — UI</name>
 
     <dependencyManagement>
         <dependencies>
@@ -58,12 +60,12 @@
 
         <dependency>
             <groupId>com.svenruppert.urlshortener</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>urlshortener-core</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.svenruppert.urlshortener</groupId>
-            <artifactId>client</artifactId>
+            <artifactId>urlshortener-client</artifactId>
         </dependency>
 
         <dependency>

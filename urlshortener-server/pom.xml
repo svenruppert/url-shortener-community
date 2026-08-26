@@ -5,12 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.svenruppert.urlshortener</groupId>
-        <artifactId>root</artifactId>
+        <artifactId>urlshortener-community-root</artifactId>
         <version>00.18.00-SNAPSHOT</version>
     </parent>
 
-    <artifactId>server</artifactId>
+    <artifactId>urlshortener-server</artifactId>
     <packaging>jar</packaging>
+
+    <name>URL-Shortener Community — Server</name>
 
     <properties>
         <!-- PIT mutation-coverage floor (baseline 2026-07-22: 29%). -->
@@ -20,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>com.svenruppert.urlshortener</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>urlshortener-core</artifactId>
         </dependency>
 
         <dependency>

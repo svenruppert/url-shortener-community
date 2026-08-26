@@ -5,10 +5,10 @@ Java client SDK, and the Vaadin admin UI.
 
 | Module | Artifact | Content |
 |---|---|---|
-| `urlshortener-core` | `core` | domain, DTOs, validation, JSON |
-| `urlshortener-server` | `server` | REST admin API + redirect server (JDK `HttpServer`, jSentinel security, EclipseStore persistence) |
-| `urlshortener-client` | `client` | Java SDK for the REST API |
-| `urlshortener-ui` | `ui` (war + `classes` jar) | Vaadin admin UI |
+| `urlshortener-core` | `urlshortener-core` | domain, DTOs, validation, JSON |
+| `urlshortener-server` | `urlshortener-server` | REST admin API + redirect server (JDK `HttpServer`, jSentinel security, EclipseStore persistence) |
+| `urlshortener-client` | `urlshortener-client` | Java SDK for the REST API |
+| `urlshortener-ui` | `urlshortener-ui` (war + `classes` jar) | Vaadin admin UI |
 
 ## Build & test
 
@@ -40,7 +40,7 @@ changed for a new commercial feature:
 - A **boundary test** in server and ui fails the build if community sources
   ever reference `urlshortener.enterprise`.
 
-The war additionally attaches a `ui-<version>-classes.jar` (classifier
+The war additionally attaches a `urlshortener-ui-<version>-classes.jar` (classifier
 `classes`) so plug-ins can compile against the UI SPI with scope `provided`.
 
 ## Release chain (concept §8)

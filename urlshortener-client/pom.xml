@@ -5,21 +5,23 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.svenruppert.urlshortener</groupId>
-        <artifactId>root</artifactId>
+        <artifactId>urlshortener-community-root</artifactId>
         <version>00.18.00-SNAPSHOT</version>
     </parent>
 
-    <artifactId>client</artifactId>
+    <artifactId>urlshortener-client</artifactId>
     <packaging>jar</packaging>
+
+    <name>URL-Shortener Community — Client</name>
 
     <dependencies>
         <dependency>
             <groupId>com.svenruppert.urlshortener</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>urlshortener-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.svenruppert.urlshortener</groupId>
-            <artifactId>server</artifactId>
+            <artifactId>urlshortener-server</artifactId>
             <scope>test</scope>
         </dependency>
 
