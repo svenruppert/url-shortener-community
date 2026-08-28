@@ -129,6 +129,17 @@ public final class EclipseStore
     return linkMetaStorage;
   }
 
+  /**
+   * Consistent online full backup of the running app store into the given
+   * (empty or absent) target directory — a bootable storage directory
+   * (V00.18.00 P090, backup seam).
+   */
+  public void issueFullBackup(java.nio.file.Path targetDirectory) {
+    storage.issueFullBackup(
+        org.eclipse.store.afs.nio.types.NioFileSystem.New()
+            .ensureDirectory(targetDirectory));
+  }
+
   public UrlMappingStore getUrlMappingStore() {
     return eclipseUrlMappingStore;
   }

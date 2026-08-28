@@ -19,5 +19,6 @@ import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingStore;
 public record ServerContext(UrlMappingStore urlMappingStore,
                             LinkMetaStorage linkMetaStorage,
                             StatisticsStore statisticsStore,
-                            PreferencesStore preferencesStore) {
+                            PreferencesStore preferencesStore,
+                            StorageAdmin storageAdmin) {
 }

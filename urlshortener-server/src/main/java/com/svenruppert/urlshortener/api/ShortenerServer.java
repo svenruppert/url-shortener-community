@@ -114,6 +114,22 @@ public class ShortenerServer
   public void init(String hostRedirect, int portRedirect, boolean persistent)
       throws IOException {
     logger().info("Starting server with urlMappingStore - persistent={}", persistent);
+    // Open-core seam (V00.18.00 P090): startup contributions run BEFORE the
+    // security bootstrap opens the jSentinel storages and before the app
+    // store opens — the only window in which a plug-in may touch the raw
+    // storage directories (restore-at-startup). First init per JVM only;
+    // a contribution failure is logged and never blocks startup.
+    if (!SECURITY_BOOTSTRAPPED.get()) {
+      for (var contribution : java.util.ServiceLoader.load(
+          com.svenruppert.urlshortener.api.extension.StartupContribution.class)) {
+        try {
+          contribution.beforeStoresOpen();
+        } catch (RuntimeException e) {
+          logger().error("startup contribution {} failed — continuing startup",
+              contribution.getClass().getName(), e);
+        }
+      }
+    }
     bootstrapSecurity();
     final long startedAt = System.currentTimeMillis();
     var shortCodeGenerator = new ShortCodeGenerator(1);
@@ -122,6 +138,7 @@ public class ShortenerServer
     PreferencesStore preferencesStore;
     StatisticsStore statisticsStore;
     com.svenruppert.urlshortener.api.extension.LinkMetaStorage linkMetaStorage;
+    com.svenruppert.urlshortener.api.extension.StorageAdmin storageAdmin;
     ImportStagingStore importStagingStore = new InMemoryImportStagingStore();
 
     if (persistent) {
@@ -134,6 +151,22 @@ public class ShortenerServer
       preferencesStore = eclipseStore.getPreferencesStore();
       statisticsStore = eclipseStore.getStatisticsStore();
       linkMetaStorage = eclipseStore.getLinkMetaStorage();
+      storageAdmin = new com.svenruppert.urlshortener.api.extension.StorageAdmin() {
+        @Override
+        public boolean persistent() {
+          return true;
+        }
+
+        @Override
+        public java.nio.file.Path appDataDir() {
+          return java.nio.file.Paths.get(STORAGE_DATA_PATH).toAbsolutePath();
+        }
+
+        @Override
+        public void issueAppStoreBackup(java.nio.file.Path targetDirectory) {
+          eclipseStore.issueFullBackup(targetDirectory);
+        }
+      };
 
       // Start background threads for statistics processing
       eclipseStore.start();
@@ -154,6 +187,22 @@ public class ShortenerServer
       preferencesStore = new InMemoryPreferencesStore();
       statisticsStore = new InMemoryStatisticsStore(Clock.systemUTC());
       linkMetaStorage = new com.svenruppert.urlshortener.api.store.provider.inmemory.InMemoryLinkMetaStorage();
+      storageAdmin = new com.svenruppert.urlshortener.api.extension.StorageAdmin() {
+        @Override
+        public boolean persistent() {
+          return false;
+        }
+
+        @Override
+        public java.nio.file.Path appDataDir() {
+          return null;
+        }
+
+        @Override
+        public void issueAppStoreBackup(java.nio.file.Path targetDirectory) {
+          throw new IllegalStateException("in-memory profile has no persistent app store");
+        }
+      };
     }
 
     // Open-core seam (V00.18.00 P085): the plug-in context and the link
@@ -161,7 +210,7 @@ public class ShortenerServer
     // community handlers only ever talk to the hook facade, never to a
     // feature store. A plug-in-free classpath yields empty hooks.
     var serverContext = new com.svenruppert.urlshortener.api.extension.ServerContext(
-        urlMappingStore, linkMetaStorage, statisticsStore, preferencesStore);
+        urlMappingStore, linkMetaStorage, statisticsStore, preferencesStore, storageAdmin);
     var lifecycleHooks = com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks.discover(serverContext);
 
     logger().info("Starting URL Shortener server (redirect) with parameters: host={}, port={}", hostRedirect, portRedirect);
@@ -318,6 +367,7 @@ public class ShortenerServer
     var filters = server.createContext(path, SecurityHttpHandler.secure(handler)).getFilters();
     filters.add(new SecurityHeadersFilter());
     filters.add(new CorsPreflightFilter());
+    filters.add(new com.svenruppert.urlshortener.api.filter.MaintenanceFilter());
   }
 
   /** Registers a public context (login/logout). */

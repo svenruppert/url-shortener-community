@@ -104,7 +104,7 @@
         <warName>ROOT</warName>
         <restServiceName>urlshortener</restServiceName>
         <eclipse-store.version>4.1.0</eclipse-store.version>
-        <jsentinel.version>00.80.00</jsentinel.version>
+        <jsentinel.version>00.81.00-SNAPSHOT</jsentinel.version>
         <icu4j.version>78.3</icu4j.version>
     </properties>
 

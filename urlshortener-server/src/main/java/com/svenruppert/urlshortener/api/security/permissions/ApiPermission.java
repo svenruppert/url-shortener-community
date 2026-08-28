@@ -51,6 +51,7 @@ public enum ApiPermission {
 
   // Admin
   STORE_INFO("storeInfo"),
+  BACKUP_MANAGE("backupManage"),
   LIST_AUDIT("listAudit"),
   LIST_USERS("listUsers"),
   BULK_CREATE_USERS("bulkCreateUsers"),
