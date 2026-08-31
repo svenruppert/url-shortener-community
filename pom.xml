@@ -250,11 +250,6 @@
             </dependency>
             <dependency>
                 <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-events-rest</artifactId>
-                <version>${jsentinel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
                 <artifactId>jSentinel-jwt</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>

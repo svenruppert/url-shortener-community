@@ -52,6 +52,14 @@ public enum ApiPermission {
   // Admin
   STORE_INFO("storeInfo"),
   BACKUP_MANAGE("backupManage"),
+  /**
+   * Subscribe to the signed security-event stream. The stream itself ships as
+   * an enterprise plug-in; the permission lives here because the role table is
+   * community-owned — same split as {@link #BACKUP_MANAGE}. Admin-only: the
+   * feed carries every subject's security events, so it must never reach the
+   * USER set.
+   */
+  EVENTS_SUBSCRIBE("events:subscribe"),
   LIST_AUDIT("listAudit"),
   LIST_USERS("listUsers"),
   BULK_CREATE_USERS("bulkCreateUsers"),

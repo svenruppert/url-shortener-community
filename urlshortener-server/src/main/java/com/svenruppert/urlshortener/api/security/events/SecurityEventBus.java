@@ -23,7 +23,6 @@ import com.svenruppert.jsentinel.events.producer.AllowListProducerPolicy;
 import com.svenruppert.jsentinel.events.producer.JSentinelEventProducerPolicy;
 import com.svenruppert.jsentinel.events.replay.InMemoryReplayStore;
 import com.svenruppert.jsentinel.events.wire.EnvelopeWireCodec;
-import com.svenruppert.jsentinel.events.rest.SseEventBroadcaster;
 import com.svenruppert.jsentinel.events.sequence.InMemorySequenceStore;
 import com.svenruppert.jsentinel.events.sequence.SequenceValidator;
 import com.svenruppert.jsentinel.events.sequence.SequenceViolationStrategy;
@@ -39,8 +38,10 @@ import com.svenruppert.jsentinel.logout.SubjectId;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * Signed security-event bus (P280). Assembles a tamper-evident
@@ -55,10 +56,15 @@ import java.util.concurrent.atomic.AtomicReference;
  *   <li>the framework {@link AuditEventBusListener} mirrors every bus event
  *       into the existing {@code JSentinelAuditService} (coupled lazily on the
  *       first publish, i.e. after security bootstrap);</li>
- *   <li>a bridge listener drains newly-stored envelopes to the
- *       {@link SseEventBroadcaster} that backs the {@code /api/events/stream}
- *       SSE endpoint for SIEM integration.</li>
+ *   <li>a bridge listener drains newly-stored envelopes to every registered
+ *       {@link #addEnvelopeListener(Consumer) envelope listener}.</li>
  * </ul>
+ *
+ * <p>The listener seam keeps outbound transports out of the community edition:
+ * shipping envelopes to an SSE stream, a webhook or a SIEM collector is a
+ * plug-in concern, registered at server start via
+ * {@link #addEnvelopeListener(Consumer)}. Without a plug-in the bus still signs,
+ * stores and audits every event — only nothing leaves the process.
  *
  * <p>Stores are in-memory; durable, tamper-evident persistence via
  * {@code jSentinel-events-persistence-eclipsestore} is a carry-over.
@@ -79,7 +85,7 @@ public final class SecurityEventBus
   private final InMemoryKeyManagement keys;
   private final JSentinelEventEnvelopeStore envelopeStore;
   private final JSentinelEventBus bus;
-  private final SseEventBroadcaster broadcaster;
+  private final List<Consumer<StoredEnvelope>> envelopeListeners = new CopyOnWriteArrayList<>();
   private final EnvelopeWireCodec wireCodec = new EnvelopeWireCodec();
   private final SignatureAlgorithms algorithms = SignatureAlgorithms.defaults();
   private final AtomicReference<JSentinelEventCursor> broadcastCursor =
@@ -104,9 +110,18 @@ public final class SecurityEventBus
     this.bus = new DefaultJSentinelEventBus(
         pipeline, envelopeStore, ListenerErrorStrategy.ISOLATE_AND_CONTINUE,
         Runnable::run, Instant::now);
-    this.broadcaster = new SseEventBroadcaster(wireCodec);
-    // Bridge: every published (and thus stored) envelope is streamed to SSE.
-    bus.subscribe(JSentinelEvent.class, event -> drainToBroadcaster());
+    // Bridge: every published (and thus stored) envelope reaches the listeners.
+    bus.subscribe(JSentinelEvent.class, event -> drainToListeners());
+  }
+
+  /**
+   * Registers an outbound consumer for newly stored envelopes — the seam a
+   * transport plug-in (SSE stream, webhook, SIEM collector) hooks into at
+   * server start. Listeners see envelopes stored from now on; a listener that
+   * throws is logged and skipped, it never breaks the bus or its peers.
+   */
+  public void addEnvelopeListener(Consumer<StoredEnvelope> listener) {
+    envelopeListeners.add(java.util.Objects.requireNonNull(listener, "listener must not be null"));
   }
 
   private static JSentinelEventProducerPolicy producerPolicy() {
@@ -150,10 +165,16 @@ public final class SecurityEventBus
     }
   }
 
-  private synchronized void drainToBroadcaster() {
+  private synchronized void drainToListeners() {
     List<StoredEnvelope> pending = envelopeStore.findAfter(broadcastCursor.get(), 128);
     for (StoredEnvelope stored : pending) {
-      broadcaster.broadcast(stored);
+      for (Consumer<StoredEnvelope> listener : envelopeListeners) {
+        try {
+          listener.accept(stored);
+        } catch (RuntimeException e) {
+          logger().warn("envelope listener failed - {}", e.toString());
+        }
+      }
       broadcastCursor.set(stored.cursor());
     }
   }
@@ -177,10 +198,6 @@ public final class SecurityEventBus
 
   public JSentinelEventEnvelopeStore envelopeStore() {
     return envelopeStore;
-  }
-
-  public SseEventBroadcaster broadcaster() {
-    return broadcaster;
   }
 
   public EnvelopeWireCodec wireCodec() {

@@ -396,15 +396,18 @@ public class UrlShortenerE2ETest
 
   @Test
   @Order(600)
-  void eventStream_registered_requiresAuth()
+  void eventStream_isNotServedByTheCommunityEdition()
       throws Exception {
-    // P280: the signed security-event SSE stream is wrapped by the standard
-    // pipeline, so an unauthenticated request is rejected before streaming.
-    var noAuth = HttpRequest.newBuilder(URI.create(baseUrlADMIN + "/api/events/stream"))
+    // The signed security-event stream became an enterprise feature in
+    // V00.20.00 — its SSE transport turned commercial with the jCustos
+    // open-core split, and a SIEM feed belongs next to the audit export.
+    // The community server keeps signing, storing and auditing every event;
+    // it just does not ship them out. Without the plug-in there is no route.
+    var request = HttpRequest.newBuilder(URI.create(baseUrlADMIN + "/api/events/stream"))
         .GET().build();
-    assertEquals(401,
-        http.send(noAuth, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)).statusCode(),
-        "event stream rejects unauthenticated access");
+    assertEquals(404,
+        http.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)).statusCode(),
+        "the community edition contributes no event-stream route");
   }
 
   @Test

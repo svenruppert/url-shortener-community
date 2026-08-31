@@ -73,10 +73,6 @@
         </dependency>
         <dependency>
             <groupId>com.svenruppert.jsentinel</groupId>
-            <artifactId>jSentinel-events-rest</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.svenruppert.jsentinel</groupId>
             <artifactId>jSentinel-jwt</artifactId>
         </dependency>
         <dependency>

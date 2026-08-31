@@ -8,8 +8,6 @@ import com.svenruppert.jsentinel.authorization.api.AuthorizationService;
 import com.svenruppert.jsentinel.dx.rest.bootstrap.RestSecurity;
 import com.svenruppert.jsentinel.dx.runtime.JSentinelBootstrapMode;
 import com.svenruppert.jsentinel.dx.runtime.JSentinelRuntime;
-import com.svenruppert.jsentinel.events.rest.EventsRestRoutes;
-import com.svenruppert.jsentinel.events.rest.SseStreamHttpHandler;
 import com.svenruppert.urlshortener.api.filter.CorsPreflightFilter;
 import com.svenruppert.urlshortener.api.filter.SecurityHeadersFilter;
 import com.svenruppert.urlshortener.api.handler.RedirectHandler;
@@ -273,16 +271,6 @@ public class ShortenerServer
     secured(serverAdmin, PATH_ADMIN_STATISTICS_EXPORT, new StatisticsExportHandler(statisticsStore));
     secured(serverAdmin, PATH_ADMIN_STATISTICS_IMPORT, new StatisticsImportHandler(statisticsStore));
     logger().info("Statistics API handlers registered");
-
-    // P280: signed security-event SSE stream for SIEM integration. The
-    // SseStreamHttpHandler self-resolves the subject; wrapping it in secure()
-    // additionally rejects unauthenticated requests via the standard pipeline.
-    var events = com.svenruppert.urlshortener.api.security.events.SecurityEventBus.instance();
-    secured(serverAdmin, EventsRestRoutes.STREAM,
-        new SseStreamHttpHandler(events.broadcaster(), events.envelopeStore(),
-            events.wireCodec(), new ApiRestSubjectResolver(),
-            EventsRestRoutes.EVENT_NAME, 15_000L, 128));
-    logger().info("Signed security-event stream registered at {}", EventsRestRoutes.STREAM);
 
     // Open-core seam (V00.18.00 P030): endpoints contributed by plug-in jars
     // via ServiceLoader. They run behind the SAME security pipeline
