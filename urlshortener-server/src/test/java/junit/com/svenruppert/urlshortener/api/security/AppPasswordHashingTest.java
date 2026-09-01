@@ -1,6 +1,6 @@
 package junit.com.svenruppert.urlshortener.api.security;
 
-import com.svenruppert.jsentinel.authentication.PasswordHasher;
+import eu.jsentinel.jcustos.authentication.PasswordHasher;
 import com.svenruppert.urlshortener.api.security.AppPasswordHashing;
 import org.junit.jupiter.api.Test;
 

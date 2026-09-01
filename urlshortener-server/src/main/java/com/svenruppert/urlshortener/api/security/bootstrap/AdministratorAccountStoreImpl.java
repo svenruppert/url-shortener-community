@@ -1,8 +1,8 @@
 package com.svenruppert.urlshortener.api.security.bootstrap;
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.bootstrap.AdministratorAccountStore;
-import com.svenruppert.jsentinel.bootstrap.NewAdministrator;
+import eu.jsentinel.jcustos.bootstrap.AdministratorAccountStore;
+import eu.jsentinel.jcustos.bootstrap.NewAdministrator;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
 import com.svenruppert.urlshortener.api.security.model.UserDirectory;
 import com.svenruppert.urlshortener.api.security.roles.AuthorizationRole;
@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * so this calls {@link UserDirectory#registerWithHashedPassword}.
  *
  * <p>Logs at {@code INFO}/{@code ERROR} around the write because
- * jSentinel-Core's {@code InitialAdminBootstrapService} converts any
+ * jCustos-Core's {@code InitialAdminBootstrapService} converts any
  * blanket {@code RuntimeException} into a cause-less
  * {@code InternalError}; without this local logging the operator
  * cannot diagnose persistence failures.

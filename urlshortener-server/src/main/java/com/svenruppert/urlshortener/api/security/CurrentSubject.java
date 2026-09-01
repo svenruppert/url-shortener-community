@@ -1,7 +1,7 @@
 package com.svenruppert.urlshortener.api.security;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.svenruppert.jsentinel.authorization.api.JSentinelSubject;
+import eu.jsentinel.jcustos.authorization.api.JCustosSubject;
 
 import java.util.Optional;
 
@@ -17,13 +17,13 @@ public final class CurrentSubject {
   private CurrentSubject() {
   }
 
-  static void set(HttpExchange exchange, JSentinelSubject subject) {
+  static void set(HttpExchange exchange, JCustosSubject subject) {
     exchange.setAttribute(ATTRIBUTE, subject);
   }
 
-  public static Optional<JSentinelSubject> of(HttpExchange exchange) {
+  public static Optional<JCustosSubject> of(HttpExchange exchange) {
     Object value = exchange.getAttribute(ATTRIBUTE);
-    return value instanceof JSentinelSubject subject
+    return value instanceof JCustosSubject subject
         ? Optional.of(subject)
         : Optional.empty();
   }

@@ -1,22 +1,22 @@
 package com.svenruppert.urlshortener.api.security.services;
 
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
-import com.svenruppert.jsentinel.authorization.api.tenant.TenantId;
-import com.svenruppert.jsentinel.logout.SubjectId;
-import com.svenruppert.jsentinel.session.JSentinelVersionKey;
-import com.svenruppert.jsentinel.session.JSentinelVersionStore;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
+import eu.jsentinel.jcustos.authorization.api.tenant.TenantId;
+import eu.jsentinel.jcustos.logout.SubjectId;
+import eu.jsentinel.jcustos.session.JCustosVersionKey;
+import eu.jsentinel.jcustos.session.JCustosVersionStore;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
 
 import java.util.Optional;
 
 /**
- * Increments the per-subject {@code JSentinelVersion} so any Bearer
+ * Increments the per-subject {@code JCustosVersion} so any Bearer
  * token captured before the bump drifts on its next request and the
  * affected user must re-authenticate. Call after every role-mutating
  * operation (assign / revoke role, delete user) — those endpoints
  * arrive with the user-management handlers in Stage G.
  *
- * <p>No-op when the {@link JSentinelVersionStore} SPI is absent, so
+ * <p>No-op when the {@link JCustosVersionStore} SPI is absent, so
  * call sites can stay unconditional.
  */
 public final class VersionBumper {
@@ -28,8 +28,8 @@ public final class VersionBumper {
     if (user == null) {
       return Optional.empty();
     }
-    Optional<JSentinelVersionStore> storeOpt =
-        JSentinelServiceResolver.findJSentinelVersionStore();
+    Optional<JCustosVersionStore> storeOpt =
+        JCustosServiceResolver.findJCustosVersionStore();
     if (storeOpt.isEmpty()) {
       return Optional.empty();
     }
@@ -45,12 +45,12 @@ public final class VersionBumper {
     if (user == null) {
       return 0L;
     }
-    return JSentinelServiceResolver.findJSentinelVersionStore()
+    return JCustosServiceResolver.findJCustosVersionStore()
         .map(store -> store.current(keyFor(user)).value())
         .orElse(0L);
   }
 
-  private static JSentinelVersionKey keyFor(ApiUser user) {
-    return new JSentinelVersionKey(TenantId.DEFAULT, SubjectId.of(user.id().toString()));
+  private static JCustosVersionKey keyFor(ApiUser user) {
+    return new JCustosVersionKey(TenantId.DEFAULT, SubjectId.of(user.id().toString()));
   }
 }

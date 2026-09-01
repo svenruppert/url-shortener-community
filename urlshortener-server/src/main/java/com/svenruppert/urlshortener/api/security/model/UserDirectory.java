@@ -1,6 +1,6 @@
 package com.svenruppert.urlshortener.api.security.model;
 
-import com.svenruppert.jsentinel.authentication.PasswordHasher;
+import eu.jsentinel.jcustos.authentication.PasswordHasher;
 import com.svenruppert.urlshortener.api.security.roles.AuthorizationRole;
 
 import java.util.Optional;

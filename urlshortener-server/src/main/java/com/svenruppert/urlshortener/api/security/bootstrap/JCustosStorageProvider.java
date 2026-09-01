@@ -1,35 +1,35 @@
 package com.svenruppert.urlshortener.api.security.bootstrap;
 
-import com.svenruppert.jsentinel.persistence.eclipsestore.EclipseStoreJSentinelStorage;
-import com.svenruppert.jsentinel.persistence.eclipsestore.JSentinelStorageFactory;
-import com.svenruppert.jsentinel.persistence.eclipsestore.JSentinelStoragePair;
+import eu.jsentinel.jcustos.persistence.eclipsestore.EclipseStoreJCustosStorage;
+import eu.jsentinel.jcustos.persistence.eclipsestore.JCustosStorageFactory;
+import eu.jsentinel.jcustos.persistence.eclipsestore.JCustosStoragePair;
 import com.svenruppert.urlshortener.api.security.storage.AppStoragePaths;
 import org.eclipse.store.storage.embedded.types.EmbeddedStorageManager;
 
 /**
- * Lazy singleton holder for the {@link JSentinelStoragePair} carrying
- * both the jSentinel framework storage (audit, sessions, bootstrap
+ * Lazy singleton holder for the {@link JCustosStoragePair} carrying
+ * both the jCustos framework storage (audit, sessions, bootstrap
  * state, …) and the application's own user-directory storage manager
  * under one parent directory ({@link AppStoragePaths#baseDir()}).
  *
  * <p>The first call to {@link #pair()} opens the pair and registers a
  * single JVM shutdown hook running the pair's two-phase close.
  */
-public final class JSentinelStorageProvider {
+public final class JCustosStorageProvider {
 
-  private static volatile JSentinelStoragePair current;
+  private static volatile JCustosStoragePair current;
 
-  private JSentinelStorageProvider() {
+  private JCustosStorageProvider() {
   }
 
-  public static JSentinelStoragePair pair() {
-    JSentinelStoragePair local = current;
+  public static JCustosStoragePair pair() {
+    JCustosStoragePair local = current;
     if (local != null) return local;
-    synchronized (JSentinelStorageProvider.class) {
+    synchronized (JCustosStorageProvider.class) {
       if (current == null) {
-        current = JSentinelStorageFactory.openAt(AppStoragePaths.baseDir());
+        current = JCustosStorageFactory.openAt(AppStoragePaths.baseDir());
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-          JSentinelStoragePair live = current;
+          JCustosStoragePair live = current;
           if (live != null) {
             live.close();
           }
@@ -40,7 +40,7 @@ public final class JSentinelStorageProvider {
   }
 
   /** Framework storage: audit / sessions / bootstrap state. */
-  public static EclipseStoreJSentinelStorage framework() {
+  public static EclipseStoreJCustosStorage framework() {
     return pair().framework();
   }
 
@@ -50,7 +50,7 @@ public final class JSentinelStorageProvider {
   }
 
   /** Test seam — install a custom pair before any production use. */
-  public static synchronized void setPair(JSentinelStoragePair replacement) {
+  public static synchronized void setPair(JCustosStoragePair replacement) {
     current = replacement;
   }
 }

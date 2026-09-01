@@ -2,14 +2,14 @@ package com.svenruppert.urlshortener.ui.vaadin.security;
 
 
 
-import com.svenruppert.jsentinel.authorization.api.AuthorizationService;
-import com.svenruppert.jsentinel.authorization.api.roles.HasRoles;
-import com.svenruppert.jsentinel.authorization.api.roles.RoleName;
-import com.svenruppert.jsentinel.autoservice.api.JSentinelAutoService;
+import eu.jsentinel.jcustos.authorization.api.AuthorizationService;
+import eu.jsentinel.jcustos.authorization.api.roles.HasRoles;
+import eu.jsentinel.jcustos.authorization.api.roles.RoleName;
+import eu.jsentinel.jcustos.autoservice.api.JCustosAutoService;
 
 import java.util.Objects;
 
-@JSentinelAutoService(AuthorizationService.class)
+@JCustosAutoService(AuthorizationService.class)
 public class AppAuthorizationService
     implements AuthorizationService<AppUser> {
 

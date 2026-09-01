@@ -1,6 +1,6 @@
 package junit.com.svenruppert.urlshortener.api.security;
 
-import com.svenruppert.jsentinel.credential.history.PasswordHistoryPolicy;
+import eu.jsentinel.jcustos.credential.history.PasswordHistoryPolicy;
 import com.svenruppert.urlshortener.api.security.PasswordHistoryGuard;
 import org.junit.jupiter.api.Test;
 

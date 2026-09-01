@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.functional.result.Result;
-import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
+import eu.jsentinel.jcustos.authorization.annotations.RequiresPermission;
 import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingStore;
 import com.svenruppert.urlshortener.api.utils.ErrorResponses;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;

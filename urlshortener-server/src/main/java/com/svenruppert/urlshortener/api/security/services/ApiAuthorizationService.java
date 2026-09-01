@@ -1,14 +1,14 @@
 package com.svenruppert.urlshortener.api.security.services;
 
-import com.svenruppert.jsentinel.authorization.api.AuthorizationService;
-import com.svenruppert.jsentinel.authorization.api.permissions.HasPermissions;
-import com.svenruppert.jsentinel.authorization.api.permissions.PermissionName;
-import com.svenruppert.jsentinel.authorization.api.permissions.RolePermissionMapping;
-import com.svenruppert.jsentinel.authorization.api.permissions.RolePermissionResolver;
-import com.svenruppert.jsentinel.authorization.api.permissions.StaticRolePermissionMapping;
-import com.svenruppert.jsentinel.authorization.api.roles.HasRoles;
-import com.svenruppert.jsentinel.authorization.api.roles.RoleName;
-import com.svenruppert.jsentinel.autoservice.api.JSentinelAutoService;
+import eu.jsentinel.jcustos.authorization.api.AuthorizationService;
+import eu.jsentinel.jcustos.authorization.api.permissions.HasPermissions;
+import eu.jsentinel.jcustos.authorization.api.permissions.PermissionName;
+import eu.jsentinel.jcustos.authorization.api.permissions.RolePermissionMapping;
+import eu.jsentinel.jcustos.authorization.api.permissions.RolePermissionResolver;
+import eu.jsentinel.jcustos.authorization.api.permissions.StaticRolePermissionMapping;
+import eu.jsentinel.jcustos.authorization.api.roles.HasRoles;
+import eu.jsentinel.jcustos.authorization.api.roles.RoleName;
+import eu.jsentinel.jcustos.autoservice.api.JCustosAutoService;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
 import com.svenruppert.urlshortener.api.security.permissions.ApiPermission;
 import com.svenruppert.urlshortener.api.security.roles.AuthorizationRole;
@@ -31,7 +31,7 @@ import static com.svenruppert.urlshortener.api.security.permissions.ApiPermissio
  *       column preferences</li>
  * </ul>
  */
-@JSentinelAutoService(AuthorizationService.class)
+@JCustosAutoService(AuthorizationService.class)
 public class ApiAuthorizationService
     implements AuthorizationService<ApiUser> {
 

@@ -23,7 +23,7 @@ final class TestAuth {
    * Installs the seeded in-memory directory BEFORE the first
    * {@code ShortenerServer.init()} so the bootstrap flow sees an
    * existing admin and never blocks with 503. Lazy supplier — built
-   * only after jSentinel bootstrap configured the hashing service.
+   * only after jCustos bootstrap configured the hashing service.
    */
   static void useSeededInMemoryDirectory() {
     UserDirectoryProvider.setDirectorySupplier(InMemoryUserDirectory::new);

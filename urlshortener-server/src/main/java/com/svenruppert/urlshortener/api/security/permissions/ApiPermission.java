@@ -1,6 +1,6 @@
 package com.svenruppert.urlshortener.api.security.permissions;
 
-import com.svenruppert.jsentinel.authorization.api.permissions.PermissionName;
+import eu.jsentinel.jcustos.authorization.api.permissions.PermissionName;
 
 /**
  * Permission catalog — the operation ids from PRE-REBUILD-SCOPE.md

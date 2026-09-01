@@ -1,10 +1,10 @@
 package junit.com.svenruppert.urlshortener.api.security.events;
 
-import com.svenruppert.jsentinel.events.api.JSentinelEventSeverity;
-import com.svenruppert.jsentinel.events.api.SignedJSentinelEventEnvelope;
-import com.svenruppert.jsentinel.events.store.JSentinelEventCursor;
-import com.svenruppert.jsentinel.events.store.StoredEnvelope;
-import com.svenruppert.jsentinel.events.wire.EnvelopeWireCodec;
+import eu.jsentinel.jcustos.events.api.JCustosEventSeverity;
+import eu.jsentinel.jcustos.events.api.SignedJCustosEventEnvelope;
+import eu.jsentinel.jcustos.events.store.JCustosEventCursor;
+import eu.jsentinel.jcustos.events.store.StoredEnvelope;
+import eu.jsentinel.jcustos.events.wire.EnvelopeWireCodec;
 import com.svenruppert.urlshortener.api.security.events.SecurityEventBus;
 import org.junit.jupiter.api.Test;
 
@@ -27,13 +27,13 @@ class EnvelopeWireCodecRoundTripTest {
   @Test
   void encodeDecodeIsLossless() {
     SecurityEventBus bus = SecurityEventBus.instance();
-    bus.publishSecurity("wire.roundtrip", "tester", "codec migration", JSentinelEventSeverity.INFO);
+    bus.publishSecurity("wire.roundtrip", "tester", "codec migration", JCustosEventSeverity.INFO);
     List<StoredEnvelope> all =
-        bus.envelopeStore().findAfter(JSentinelEventCursor.start(), 100_000);
-    SignedJSentinelEventEnvelope original = all.get(all.size() - 1).envelope();
+        bus.envelopeStore().findAfter(JCustosEventCursor.start(), 100_000);
+    SignedJCustosEventEnvelope original = all.get(all.size() - 1).envelope();
 
     EnvelopeWireCodec codec = new EnvelopeWireCodec();
-    SignedJSentinelEventEnvelope decoded = codec.decode(codec.encode(original)).getOrThrow();
+    SignedJCustosEventEnvelope decoded = codec.decode(codec.encode(original)).getOrThrow();
 
     assertEquals(original.envelopeId(), decoded.envelopeId(), "envelope id preserved");
     assertEquals(original.eventId(), decoded.eventId(), "event id preserved");

@@ -6,8 +6,8 @@ import java.nio.file.Path;
  * Storage-administration seam for plug-ins that need snapshot access to the
  * host's persistent app store (V00.18.00 P090): the profile flag, the real
  * app-store directory, and a consistent online full backup of the running
- * storage. Plug-ins reach the two jSentinel security stores separately via
- * {@code JSentinelStorageProvider}; this seam only covers what community
+ * storage. Plug-ins reach the two jCustos security stores separately via
+ * {@code JCustosStorageProvider}; this seam only covers what community
  * code keeps private.
  *
  * <p>Experimental open-core SPI — shape may still change.

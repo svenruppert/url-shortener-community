@@ -4,11 +4,11 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.dependencies.core.net.HttpStatus;
-import com.svenruppert.jsentinel.authorization.annotations.RequiresAllPermissions;
-import com.svenruppert.jsentinel.authorization.annotations.RequiresAnyPermission;
-import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
-import com.svenruppert.jsentinel.authorization.api.JSentinelSubject;
-import com.svenruppert.jsentinel.authorization.api.permissions.PermissionName;
+import eu.jsentinel.jcustos.authorization.annotations.RequiresAllPermissions;
+import eu.jsentinel.jcustos.authorization.annotations.RequiresAnyPermission;
+import eu.jsentinel.jcustos.authorization.annotations.RequiresPermission;
+import eu.jsentinel.jcustos.authorization.api.JCustosSubject;
+import eu.jsentinel.jcustos.authorization.api.permissions.PermissionName;
 import com.svenruppert.urlshortener.api.security.bootstrap.BootstrapWiring;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
 import com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider;
@@ -29,7 +29,7 @@ import static com.svenruppert.urlshortener.core.DefaultValues.BEARER_PREFIX;
  * declared on the delegate's class, and exposes the subject to the
  * delegate through {@link CurrentSubject}.
  *
- * <p>The required permissions are declared with the jSentinel framework
+ * <p>The required permissions are declared with the jCustos framework
  * annotations from {@code authorization.annotations} (P220):
  * {@link RequiresPermission @RequiresPermission} /
  * {@link RequiresAllPermissions @RequiresAllPermissions} (subject must hold
@@ -108,7 +108,7 @@ public final class SecurityHttpHandler
       ErrorResponses.serviceUnavailable(exchange, "initial admin not yet created; POST /api/setup");
       return;
     }
-    Optional<JSentinelSubject> subject = resolver.resolveSubject(RestRequests.from(exchange));
+    Optional<JCustosSubject> subject = resolver.resolveSubject(RestRequests.from(exchange));
     if (subject.isEmpty()) {
       subject = apiKeySubject(exchange); // P160: X-API-Key fallback
     }
@@ -142,7 +142,7 @@ public final class SecurityHttpHandler
    * permissions must be present; if {@link #requiredAny} is non-empty the
    * subject must additionally hold at least one of them.
    */
-  private PermissionName firstMissing(JSentinelSubject subject) {
+  private PermissionName firstMissing(JCustosSubject subject) {
     var held = subject.permissionNames();
     for (PermissionName p : requiredAll) {
       if (!held.contains(p)) return p;
@@ -161,7 +161,7 @@ public final class SecurityHttpHandler
    * switch via the version snapshot captured at issue time (legacy entries
    * without a snapshot are grandfathered).
    */
-  private Optional<JSentinelSubject> apiKeySubject(HttpExchange exchange) {
+  private Optional<JCustosSubject> apiKeySubject(HttpExchange exchange) {
     String apiKey = exchange.getRequestHeaders().getFirst("X-API-Key");
     if (apiKey == null || apiKey.isBlank()) {
       return Optional.empty();
@@ -201,7 +201,7 @@ public final class SecurityHttpHandler
    * the subject's current version. A mismatch means an admin bumped
    * the version (role change) after login — the token is stale.
    */
-  private boolean isStale(HttpExchange exchange, JSentinelSubject subject) {
+  private boolean isStale(HttpExchange exchange, JCustosSubject subject) {
     String auth = exchange.getRequestHeaders().getFirst(AUTHORIZATION_HEADER);
     if (auth == null || !auth.startsWith(BEARER_PREFIX)) {
       return false;

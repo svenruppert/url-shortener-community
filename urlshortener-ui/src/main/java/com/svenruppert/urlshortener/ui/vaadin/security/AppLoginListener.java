@@ -2,7 +2,7 @@ package com.svenruppert.urlshortener.ui.vaadin.security;
 
 
 
-import com.svenruppert.jsentinel.authorization.LoginListener;
+import eu.jsentinel.jcustos.authorization.LoginListener;
 import com.svenruppert.urlshortener.ui.vaadin.views.login.LoginView;
 import com.svenruppert.urlshortener.ui.vaadin.views.overview.OverviewView;
 import com.vaadin.flow.component.Component;
@@ -15,7 +15,7 @@ public class AppLoginListener extends LoginListener<AppUser> {
   }
 
   @Override
-  public Class<? extends com.svenruppert.jsentinel.authorization.LoginView> loginNavigationTarget() {
+  public Class<? extends eu.jsentinel.jcustos.authorization.LoginView> loginNavigationTarget() {
     return LoginView.class;
   }
 

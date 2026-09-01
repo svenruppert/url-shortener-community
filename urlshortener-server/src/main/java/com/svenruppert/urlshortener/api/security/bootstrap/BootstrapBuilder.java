@@ -1,6 +1,6 @@
 package com.svenruppert.urlshortener.api.security.bootstrap;
 
-import com.svenruppert.jsentinel.dx.rest.bootstrap.RestJSentinelBootstrap;
+import eu.jsentinel.jcustos.dx.rest.bootstrap.RestJCustosBootstrap;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,7 +21,7 @@ public final class BootstrapBuilder {
   private BootstrapBuilder() {
   }
 
-  public static RestJSentinelBootstrap apply(RestJSentinelBootstrap builder) {
+  public static RestJCustosBootstrap apply(RestJCustosBootstrap builder) {
     List<BootstrapExtension> extensions = new ArrayList<>();
     ServiceLoader.load(BootstrapExtension.class).forEach(extensions::add);
     extensions.sort(Comparator.comparingInt(BootstrapExtension::order));

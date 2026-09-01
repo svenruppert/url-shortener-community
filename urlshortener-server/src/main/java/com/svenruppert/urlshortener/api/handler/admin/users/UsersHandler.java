@@ -3,7 +3,7 @@ package com.svenruppert.urlshortener.api.handler.admin.users;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
+import eu.jsentinel.jcustos.authorization.annotations.RequiresPermission;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
 import com.svenruppert.urlshortener.api.security.model.UserDirectory;
 import com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider;
@@ -37,7 +37,7 @@ import static com.svenruppert.urlshortener.core.StringUtils.isNullOrBlank;
  *   <li>{@code DELETE /api/users/{id}/roles/{role}} — revoke role</li>
  * </ul>
  *
- * <p>Role mutations bump the subject's jSentinel version
+ * <p>Role mutations bump the subject's jCustos version
  * ({@link VersionBumper#bump}) so any open Bearer token of that user
  * drifts on its next request (drift detection).
  */

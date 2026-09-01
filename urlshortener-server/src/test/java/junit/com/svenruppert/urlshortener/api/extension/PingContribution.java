@@ -1,6 +1,6 @@
 package junit.com.svenruppert.urlshortener.api.extension;
 
-import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
+import eu.jsentinel.jcustos.authorization.annotations.RequiresPermission;
 import com.svenruppert.urlshortener.api.extension.HandlerContribution;
 import com.svenruppert.urlshortener.api.extension.ServerContext;
 import com.sun.net.httpserver.HttpHandler;

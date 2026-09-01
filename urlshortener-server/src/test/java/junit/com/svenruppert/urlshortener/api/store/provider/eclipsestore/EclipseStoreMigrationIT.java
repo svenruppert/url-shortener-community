@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * a restart.
  *
  * <p>Reads from the git-ignored repo-root {@code _backup/} tree; skips itself
- * when no old store is present (CI / clean checkouts stay green). The jSentinel
+ * when no old store is present (CI / clean checkouts stay green). The jCustos
  * security sub-stores are not copied (no user data touched).
  */
 class EclipseStoreMigrationIT {
@@ -105,7 +105,7 @@ class EclipseStoreMigrationIT {
     return sig;
   }
 
-  /** Newest old main app store under {@code _backup/} (has channel_0 + type dictionary, not a jSentinel sub-store). */
+  /** Newest old main app store under {@code _backup/} (has channel_0 + type dictionary, not a jCustos sub-store). */
   private static Path findOldMainStore() throws IOException {
     Path backup = findBackupDir();
     if (backup == null) return null;
@@ -116,7 +116,7 @@ class EclipseStoreMigrationIT {
           .filter(d -> Files.exists(d.resolve("PersistenceTypeDictionary.ptd")))
           .filter(d -> {
             String s = d.toString();
-            return !s.contains("jsentinel-rest") && !s.contains("jsentinel-store") && !s.contains("app-store");
+            return !s.contains("jsentinel-rest") && !s.contains("jcustos-store") && !s.contains("app-store");
           })
           .toList();
       // Prefer a versioned backup (path segment like /v00.15.00/) over historical archives.
@@ -138,7 +138,7 @@ class EclipseStoreMigrationIT {
     return null;
   }
 
-  /** Recursively copies the store, skipping the nested jSentinel security stores. */
+  /** Recursively copies the store, skipping the nested jCustos security stores. */
   private static void copyStoreExcludingSecurity(Path src, Path dst) throws IOException {
     try (Stream<Path> walk = Files.walk(src)) {
       for (Path p : (Iterable<Path>) walk::iterator) {

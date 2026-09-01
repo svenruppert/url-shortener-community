@@ -1,11 +1,11 @@
 package com.svenruppert.urlshortener.api.security.services;
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.audit.JSentinelAuditService;
-import com.svenruppert.jsentinel.audit.LoginSucceeded;
-import com.svenruppert.jsentinel.authentication.AuthenticationService;
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
-import com.svenruppert.jsentinel.autoservice.api.JSentinelAutoService;
+import eu.jsentinel.jcustos.audit.JCustosAuditService;
+import eu.jsentinel.jcustos.audit.LoginSucceeded;
+import eu.jsentinel.jcustos.authentication.AuthenticationService;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
+import eu.jsentinel.jcustos.autoservice.api.JCustosAutoService;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
 import com.svenruppert.urlshortener.api.security.model.Credentials;
 import com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider;
@@ -15,10 +15,10 @@ import java.time.Instant;
 
 /**
  * REST-side AuthenticationService. SPI-registered via
- * {@link JSentinelAutoService @JSentinelAutoService} — the annotation
+ * {@link JCustosAutoService @JCustosAutoService} — the annotation
  * processor produces the matching META-INF/services entry.
  */
-@JSentinelAutoService(AuthenticationService.class)
+@JCustosAutoService(AuthenticationService.class)
 public class ApiAuthenticationService
     implements AuthenticationService<Credentials, ApiUser>, HasLogger {
 
@@ -45,7 +45,7 @@ public class ApiAuthenticationService
   }
 
   private static void auditLoginSucceeded(String username) {
-    JSentinelAuditService sink = JSentinelServiceResolver.securityAuditService();
+    JCustosAuditService sink = JCustosServiceResolver.securityAuditService();
     try {
       sink.publish(new LoginSucceeded(
           Instant.now(Clock.systemUTC()), username, null, null));

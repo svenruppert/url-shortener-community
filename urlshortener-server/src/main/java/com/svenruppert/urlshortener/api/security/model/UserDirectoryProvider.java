@@ -1,7 +1,7 @@
 package com.svenruppert.urlshortener.api.security.model;
 
 import com.svenruppert.urlshortener.api.security.AppPasswordHashing;
-import com.svenruppert.urlshortener.api.security.bootstrap.JSentinelStorageProvider;
+import com.svenruppert.urlshortener.api.security.bootstrap.JCustosStorageProvider;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -76,7 +76,7 @@ public final class UserDirectoryProvider {
 
   private static UserDirectory buildDefault() {
     UserDirectoryPersistence persistence =
-        new EclipseStoreUserDirectoryPersistence(JSentinelStorageProvider.app());
+        new EclipseStoreUserDirectoryPersistence(JCustosStorageProvider.app());
     return new PersistentUserDirectory(persistence, AppPasswordHashing.hasher());
   }
 }

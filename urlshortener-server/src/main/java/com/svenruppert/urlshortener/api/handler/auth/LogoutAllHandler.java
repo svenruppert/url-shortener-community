@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.dependencies.core.net.HttpStatus;
-import com.svenruppert.jsentinel.authorization.api.JSentinelSubject;
+import eu.jsentinel.jcustos.authorization.api.JCustosSubject;
 import com.svenruppert.urlshortener.api.security.CurrentSubject;
 import com.svenruppert.urlshortener.api.security.TokenStore;
 import com.svenruppert.urlshortener.api.utils.ErrorResponses;
@@ -28,7 +28,7 @@ public final class LogoutAllHandler
       throws IOException {
     if (!RequestMethodUtils.requirePost(ex)) return;
 
-    Optional<JSentinelSubject> subject = CurrentSubject.of(ex);
+    Optional<JCustosSubject> subject = CurrentSubject.of(ex);
     if (subject.isEmpty()) {
       ErrorResponses.unauthorized(ex);
       return;

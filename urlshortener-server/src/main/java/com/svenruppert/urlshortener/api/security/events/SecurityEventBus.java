@@ -1,39 +1,39 @@
 package com.svenruppert.urlshortener.api.security.events;
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
-import com.svenruppert.jsentinel.authorization.api.tenant.TenantId;
-import com.svenruppert.jsentinel.events.api.EventMetadata;
-import com.svenruppert.jsentinel.events.api.EventProducerId;
-import com.svenruppert.jsentinel.events.api.JSentinelEvent;
-import com.svenruppert.jsentinel.events.api.JSentinelEventSeverity;
-import com.svenruppert.jsentinel.events.api.PayloadHashAlgorithm;
-import com.svenruppert.jsentinel.events.api.SignedJSentinelEventEnvelope;
-import com.svenruppert.jsentinel.events.api.KeyId;
-import com.svenruppert.jsentinel.events.bus.ConsumePipeline;
-import com.svenruppert.jsentinel.events.bus.DefaultJSentinelEventBus;
-import com.svenruppert.jsentinel.events.bus.JSentinelEventBus;
-import com.svenruppert.jsentinel.events.bus.ListenerErrorStrategy;
-import com.svenruppert.jsentinel.events.bus.PublishPipeline;
-import com.svenruppert.jsentinel.events.codec.CanonicalJsonPayloadCodec;
-import com.svenruppert.jsentinel.events.codec.RecordReflectionCanonicalizer;
-import com.svenruppert.jsentinel.events.integration.AuditEventBusListener;
-import com.svenruppert.jsentinel.events.keys.InMemoryKeyManagement;
-import com.svenruppert.jsentinel.events.producer.AllowListProducerPolicy;
-import com.svenruppert.jsentinel.events.producer.JSentinelEventProducerPolicy;
-import com.svenruppert.jsentinel.events.replay.InMemoryReplayStore;
-import com.svenruppert.jsentinel.events.wire.EnvelopeWireCodec;
-import com.svenruppert.jsentinel.events.sequence.InMemorySequenceStore;
-import com.svenruppert.jsentinel.events.sequence.SequenceValidator;
-import com.svenruppert.jsentinel.events.sequence.SequenceViolationStrategy;
-import com.svenruppert.jsentinel.events.signature.Ed25519SignatureAlgorithm;
-import com.svenruppert.jsentinel.events.signature.SignatureAlgorithm;
-import com.svenruppert.jsentinel.events.signature.SignatureAlgorithms;
-import com.svenruppert.jsentinel.events.store.InMemoryEnvelopeStore;
-import com.svenruppert.jsentinel.events.store.JSentinelEventCursor;
-import com.svenruppert.jsentinel.events.store.JSentinelEventEnvelopeStore;
-import com.svenruppert.jsentinel.events.store.StoredEnvelope;
-import com.svenruppert.jsentinel.logout.SubjectId;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
+import eu.jsentinel.jcustos.authorization.api.tenant.TenantId;
+import eu.jsentinel.jcustos.events.api.EventMetadata;
+import eu.jsentinel.jcustos.events.api.EventProducerId;
+import eu.jsentinel.jcustos.events.api.JCustosEvent;
+import eu.jsentinel.jcustos.events.api.JCustosEventSeverity;
+import eu.jsentinel.jcustos.events.api.PayloadHashAlgorithm;
+import eu.jsentinel.jcustos.events.api.SignedJCustosEventEnvelope;
+import eu.jsentinel.jcustos.events.api.KeyId;
+import eu.jsentinel.jcustos.events.bus.ConsumePipeline;
+import eu.jsentinel.jcustos.events.bus.DefaultJCustosEventBus;
+import eu.jsentinel.jcustos.events.bus.JCustosEventBus;
+import eu.jsentinel.jcustos.events.bus.ListenerErrorStrategy;
+import eu.jsentinel.jcustos.events.bus.PublishPipeline;
+import eu.jsentinel.jcustos.events.codec.CanonicalJsonPayloadCodec;
+import eu.jsentinel.jcustos.events.codec.RecordReflectionCanonicalizer;
+import eu.jsentinel.jcustos.events.integration.AuditEventBusListener;
+import eu.jsentinel.jcustos.events.keys.InMemoryKeyManagement;
+import eu.jsentinel.jcustos.events.producer.AllowListProducerPolicy;
+import eu.jsentinel.jcustos.events.producer.JCustosEventProducerPolicy;
+import eu.jsentinel.jcustos.events.replay.InMemoryReplayStore;
+import eu.jsentinel.jcustos.events.wire.EnvelopeWireCodec;
+import eu.jsentinel.jcustos.events.sequence.InMemorySequenceStore;
+import eu.jsentinel.jcustos.events.sequence.SequenceValidator;
+import eu.jsentinel.jcustos.events.sequence.SequenceViolationStrategy;
+import eu.jsentinel.jcustos.events.signature.Ed25519SignatureAlgorithm;
+import eu.jsentinel.jcustos.events.signature.SignatureAlgorithm;
+import eu.jsentinel.jcustos.events.signature.SignatureAlgorithms;
+import eu.jsentinel.jcustos.events.store.InMemoryEnvelopeStore;
+import eu.jsentinel.jcustos.events.store.JCustosEventCursor;
+import eu.jsentinel.jcustos.events.store.JCustosEventEnvelopeStore;
+import eu.jsentinel.jcustos.events.store.StoredEnvelope;
+import eu.jsentinel.jcustos.logout.SubjectId;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -45,16 +45,16 @@ import java.util.function.Consumer;
 
 /**
  * Signed security-event bus (P280). Assembles a tamper-evident
- * {@link JSentinelEventBus}: every published {@link JSentinelEvent} is
+ * {@link JCustosEventBus}: every published {@link JCustosEvent} is
  * canonicalised, hashed (SHA-256) and Ed25519-signed into a
- * {@link SignedJSentinelEventEnvelope} before it is appended to the envelope
+ * {@link SignedJCustosEventEnvelope} before it is appended to the envelope
  * store — so the audit trail cannot be altered without invalidating the
  * signature.
  *
  * <p>Two consumers are attached:
  * <ul>
  *   <li>the framework {@link AuditEventBusListener} mirrors every bus event
- *       into the existing {@code JSentinelAuditService} (coupled lazily on the
+ *       into the existing {@code JCustosAuditService} (coupled lazily on the
  *       first publish, i.e. after security bootstrap);</li>
  *   <li>a bridge listener drains newly-stored envelopes to every registered
  *       {@link #addEnvelopeListener(Consumer) envelope listener}.</li>
@@ -67,7 +67,7 @@ import java.util.function.Consumer;
  * stores and audits every event — only nothing leaves the process.
  *
  * <p>Stores are in-memory; durable, tamper-evident persistence via
- * {@code jSentinel-events-persistence-eclipsestore} is a carry-over.
+ * {@code jCustos-events-persistence-eclipsestore} is a carry-over.
  */
 public final class SecurityEventBus
     implements HasLogger {
@@ -83,13 +83,13 @@ public final class SecurityEventBus
   }
 
   private final InMemoryKeyManagement keys;
-  private final JSentinelEventEnvelopeStore envelopeStore;
-  private final JSentinelEventBus bus;
+  private final JCustosEventEnvelopeStore envelopeStore;
+  private final JCustosEventBus bus;
   private final List<Consumer<StoredEnvelope>> envelopeListeners = new CopyOnWriteArrayList<>();
   private final EnvelopeWireCodec wireCodec = new EnvelopeWireCodec();
   private final SignatureAlgorithms algorithms = SignatureAlgorithms.defaults();
-  private final AtomicReference<JSentinelEventCursor> broadcastCursor =
-      new AtomicReference<>(JSentinelEventCursor.start());
+  private final AtomicReference<JCustosEventCursor> broadcastCursor =
+      new AtomicReference<>(JCustosEventCursor.start());
   private final AtomicBoolean auditCoupled = new AtomicBoolean(false);
 
   private SecurityEventBus() {
@@ -107,11 +107,11 @@ public final class SecurityEventBus
         Duration.ofHours(1),
         Instant::now);
     this.envelopeStore = new InMemoryEnvelopeStore();
-    this.bus = new DefaultJSentinelEventBus(
+    this.bus = new DefaultJCustosEventBus(
         pipeline, envelopeStore, ListenerErrorStrategy.ISOLATE_AND_CONTINUE,
         Runnable::run, Instant::now);
     // Bridge: every published (and thus stored) envelope reaches the listeners.
-    bus.subscribe(JSentinelEvent.class, event -> drainToListeners());
+    bus.subscribe(JCustosEvent.class, event -> drainToListeners());
   }
 
   /**
@@ -124,7 +124,7 @@ public final class SecurityEventBus
     envelopeListeners.add(java.util.Objects.requireNonNull(listener, "listener must not be null"));
   }
 
-  private static JSentinelEventProducerPolicy producerPolicy() {
+  private static JCustosEventProducerPolicy producerPolicy() {
     return AllowListProducerPolicy.builder()
         .allow(PRODUCER, AppSecurityEvent.TYPE)
         .build();
@@ -135,7 +135,7 @@ public final class SecurityEventBus
    * it over SSE. The audit coupling is established on the first call so it runs
    * after security bootstrap (when {@code securityAuditService()} is ready).
    */
-  public void publish(JSentinelEvent event) {
+  public void publish(JCustosEvent event) {
     ensureAuditCoupled();
     bus.publish(event);
   }
@@ -146,7 +146,7 @@ public final class SecurityEventBus
    * subject id); {@code severity} distinguishes routine from suspicious events.
    */
   public void publishSecurity(String action, String subject, String detail,
-                              JSentinelEventSeverity severity) {
+                              JCustosEventSeverity severity) {
     EventMetadata metadata = EventMetadata.create(
         TenantId.DEFAULT, SubjectId.of(subject), Instant.now(), severity);
     publish(new AppSecurityEvent(metadata, action, detail));
@@ -155,7 +155,7 @@ public final class SecurityEventBus
   private void ensureAuditCoupled() {
     if (auditCoupled.compareAndSet(false, true)) {
       try {
-        new AuditEventBusListener(JSentinelServiceResolver.securityAuditService())
+        new AuditEventBusListener(JCustosServiceResolver.securityAuditService())
             .subscribeTo(bus);
         logger().info("security event bus coupled to audit service");
       } catch (RuntimeException e) {
@@ -185,18 +185,18 @@ public final class SecurityEventBus
    * collides with the publish-side sequence state — the result reflects only
    * signature/payload integrity. Returns {@code false} on any tampering.
    */
-  public boolean verify(SignedJSentinelEventEnvelope envelope) {
+  public boolean verify(SignedJCustosEventEnvelope envelope) {
     ConsumePipeline consume = new ConsumePipeline(
         keys, algorithms, new InMemoryReplayStore(), new InMemorySequenceStore(),
         new SequenceValidator(), SequenceViolationStrategy.ACCEPT_WITH_WARNING, producerPolicy());
     return consume.verify(envelope, Instant.now()).isValid();
   }
 
-  public JSentinelEventBus bus() {
+  public JCustosEventBus bus() {
     return bus;
   }
 
-  public JSentinelEventEnvelopeStore envelopeStore() {
+  public JCustosEventEnvelopeStore envelopeStore() {
     return envelopeStore;
   }
 

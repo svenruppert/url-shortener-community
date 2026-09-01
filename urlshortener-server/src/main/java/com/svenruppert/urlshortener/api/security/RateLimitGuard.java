@@ -1,19 +1,19 @@
 package com.svenruppert.urlshortener.api.security;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.svenruppert.jsentinel.audit.NoopJSentinelAuditService;
-import com.svenruppert.jsentinel.authorization.api.tenant.TenantId;
-import com.svenruppert.jsentinel.ratelimiting.InMemoryRateLimitPolicy;
-import com.svenruppert.jsentinel.ratelimiting.InMemoryRateLimitStore;
-import com.svenruppert.jsentinel.ratelimiting.RateLimitDecision;
-import com.svenruppert.jsentinel.ratelimiting.RateLimitKey;
-import com.svenruppert.jsentinel.ratelimiting.RateLimitPolicy;
+import eu.jsentinel.jcustos.audit.NoopJCustosAuditService;
+import eu.jsentinel.jcustos.authorization.api.tenant.TenantId;
+import eu.jsentinel.jcustos.ratelimiting.InMemoryRateLimitPolicy;
+import eu.jsentinel.jcustos.ratelimiting.InMemoryRateLimitStore;
+import eu.jsentinel.jcustos.ratelimiting.RateLimitDecision;
+import eu.jsentinel.jcustos.ratelimiting.RateLimitKey;
+import eu.jsentinel.jcustos.ratelimiting.RateLimitPolicy;
 import com.svenruppert.urlshortener.core.SecurityProfile;
 
 import java.time.Duration;
 
 /**
- * Per-IP request rate limiting (P120). Backed by jSentinel's in-memory
+ * Per-IP request rate limiting (P120). Backed by jCustos's in-memory
  * {@link RateLimitPolicy}. Profile-aware (see {@link SecurityProfile}):
  * <ul>
  *   <li>PRODUCTION — 300 requests / minute / scope</li>
@@ -32,7 +32,7 @@ public final class RateLimitGuard {
   /** Active guard with an explicit limit/window (also used by tests). */
   public RateLimitGuard(int limit, Duration window) {
     this.policy = new InMemoryRateLimitPolicy(
-        new InMemoryRateLimitStore(), NoopJSentinelAuditService.INSTANCE, limit, window);
+        new InMemoryRateLimitStore(), NoopJCustosAuditService.INSTANCE, limit, window);
   }
 
   private RateLimitGuard() {

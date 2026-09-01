@@ -1,13 +1,13 @@
 package com.svenruppert.urlshortener.api.security.model;
 
-import com.svenruppert.jsentinel.audit.AuditEvent;
-import com.svenruppert.jsentinel.audit.JSentinelAuditService;
-import com.svenruppert.jsentinel.audit.RoleAssigned;
-import com.svenruppert.jsentinel.audit.RoleRevoked;
-import com.svenruppert.jsentinel.audit.UserCreated;
-import com.svenruppert.jsentinel.audit.UserDeleted;
-import com.svenruppert.jsentinel.authentication.PasswordHasher;
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
+import eu.jsentinel.jcustos.audit.AuditEvent;
+import eu.jsentinel.jcustos.audit.JCustosAuditService;
+import eu.jsentinel.jcustos.audit.RoleAssigned;
+import eu.jsentinel.jcustos.audit.RoleRevoked;
+import eu.jsentinel.jcustos.audit.UserCreated;
+import eu.jsentinel.jcustos.audit.UserDeleted;
+import eu.jsentinel.jcustos.authentication.PasswordHasher;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
 import com.svenruppert.urlshortener.api.security.AppPasswordHashing;
 import com.svenruppert.urlshortener.api.security.roles.AuthorizationRole;
 
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * </ul>
  *
  * <p>Passwords are hashed at storage time through
- * {@code JSentinelServiceResolver.passwordHashingService()} — the
+ * {@code JCustosServiceResolver.passwordHashingService()} — the
  * plaintext literals are visible in this file but never make it to
  * the store. <strong>Demo-only seeding strategy; replaced by the
  * token-based first-admin bootstrap in Stage E.</strong>
@@ -203,7 +203,7 @@ public final class InMemoryUserDirectory implements UserDirectory {
 
   private static void audit(AuditEvent event) {
     try {
-      JSentinelAuditService sink = JSentinelServiceResolver.securityAuditService();
+      JCustosAuditService sink = JCustosServiceResolver.securityAuditService();
       sink.publish(event);
     } catch (RuntimeException ignored) {
       // audit must never block user-management calls

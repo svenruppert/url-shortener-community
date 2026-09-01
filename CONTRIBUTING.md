@@ -6,7 +6,7 @@ Thank you for considering a contribution!
 
 The Community Edition is licensed under the **European Union Public Licence
 v1.2 (EUPL-1.2)**. The project is developed under an **open-core /
-dual-licensing model**: jSentinel Ltd additionally offers the code base under
+dual-licensing model**: jCustos Ltd additionally offers the code base under
 commercial license terms (e.g. for the Enterprise Edition).
 
 ## Developer Certificate of Origin (DCO)
@@ -25,7 +25,7 @@ the contribution under the EUPL-1.2.
 ## Additional license grant (dual licensing)
 
 Because of the dual-licensing model, by submitting a contribution you
-additionally grant jSentinel Ltd a perpetual, worldwide, irrevocable,
+additionally grant jCustos Ltd a perpetual, worldwide, irrevocable,
 royalty-free right to relicense and distribute your contribution under other
 license terms, including commercial licenses. Your contribution always also
 remains available under the EUPL-1.2. If you cannot or do not want to grant

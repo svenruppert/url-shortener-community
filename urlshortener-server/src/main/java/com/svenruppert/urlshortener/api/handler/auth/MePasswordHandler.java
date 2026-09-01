@@ -3,7 +3,7 @@ package com.svenruppert.urlshortener.api.handler.auth;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.authorization.api.JSentinelSubject;
+import eu.jsentinel.jcustos.authorization.api.JCustosSubject;
 import com.svenruppert.urlshortener.api.security.CurrentSubject;
 import com.svenruppert.urlshortener.api.security.PasswordHistoryGuard;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
@@ -35,7 +35,7 @@ public class MePasswordHandler
   public void handle(HttpExchange ex)
       throws IOException {
     if (!RequestMethodUtils.requirePost(ex)) return;
-    Optional<JSentinelSubject> subject = CurrentSubject.of(ex);
+    Optional<JCustosSubject> subject = CurrentSubject.of(ex);
     if (subject.isEmpty()) {
       ErrorResponses.unauthorized(ex);
       return;

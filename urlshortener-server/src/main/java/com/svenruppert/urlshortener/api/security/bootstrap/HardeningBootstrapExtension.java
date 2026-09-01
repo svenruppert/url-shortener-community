@@ -1,9 +1,9 @@
 package com.svenruppert.urlshortener.api.security.bootstrap;
 
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
-import com.svenruppert.jsentinel.authorization.api.SubjectIdResolver;
-import com.svenruppert.jsentinel.dx.bootstrap.SessionBootstrap;
-import com.svenruppert.jsentinel.session.JSentinelVersionStore;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
+import eu.jsentinel.jcustos.authorization.api.SubjectIdResolver;
+import eu.jsentinel.jcustos.dx.bootstrap.SessionBootstrap;
+import eu.jsentinel.jcustos.session.JCustosVersionStore;
 
 import java.util.Optional;
 
@@ -22,10 +22,10 @@ public final class HardeningBootstrapExtension implements BootstrapExtension {
 
   @Override
   public void contributeSessions(SessionBootstrap s) {
-    Optional<JSentinelVersionStore> versionStore =
-        JSentinelServiceResolver.findJSentinelVersionStore();
+    Optional<JCustosVersionStore> versionStore =
+        JCustosServiceResolver.findJCustosVersionStore();
     Optional<SubjectIdResolver<Object>> resolver =
-        JSentinelServiceResolver.findSubjectIdResolver();
+        JCustosServiceResolver.findSubjectIdResolver();
     versionStore.ifPresent(s::securityVersion);
     resolver.ifPresent(s::subjectIdResolver);
   }

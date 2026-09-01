@@ -1,7 +1,7 @@
 package com.svenruppert.urlshortener.api.security.bootstrap;
 
-import com.svenruppert.jsentinel.dx.bootstrap.AuditBootstrap;
-import com.svenruppert.jsentinel.dx.bootstrap.SessionBootstrap;
+import eu.jsentinel.jcustos.dx.bootstrap.AuditBootstrap;
+import eu.jsentinel.jcustos.dx.bootstrap.SessionBootstrap;
 
 /**
  * Persistence-layer extension (order 10): contributes the
@@ -21,12 +21,12 @@ public final class PersistenceBootstrapExtension implements BootstrapExtension {
 
   @Override
   public void contributeAudit(AuditBootstrap a) {
-    a.storeBacked(JSentinelStorageProvider.framework().auditEventStore()).logging();
+    a.storeBacked(JCustosStorageProvider.framework().auditEventStore()).logging();
   }
 
   @Override
   public void contributeSessions(SessionBootstrap s) {
-    s.storeBacked(JSentinelStorageProvider.framework().sessionStore());
+    s.storeBacked(JCustosStorageProvider.framework().sessionStore());
   }
 
   @Override

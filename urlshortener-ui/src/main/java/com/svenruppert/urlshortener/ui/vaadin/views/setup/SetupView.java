@@ -23,7 +23,7 @@ import com.vaadin.flow.router.Route;
  * on a fresh instance where {@code GET /api/bootstrap/status} reports
  * {@code bootstrapRequired=true}: the operator pastes the one-time
  * bootstrap token (printed to the server console / stored in
- * {@code <app.storage.dir>/jsentinel-store/bootstrap.token}) and picks
+ * {@code <app.storage.dir>/jcustos-store/bootstrap.token}) and picks
  * the first admin's credentials, which are created via
  * {@code POST /api/setup}. After success it forwards to the
  * {@link LoginView}. Once an admin exists this route redirects to

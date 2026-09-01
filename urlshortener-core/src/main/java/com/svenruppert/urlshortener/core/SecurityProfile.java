@@ -3,7 +3,7 @@ package com.svenruppert.urlshortener.core;
 import java.util.Locale;
 
 /**
- * Selects the jSentinel bootstrap hardening profile (P100). Resolved from the
+ * Selects the jCustos bootstrap hardening profile (P100). Resolved from the
  * system property {@code app.security.profile} (or env {@code APP_SECURITY_PROFILE}),
  * defaulting to {@link #DEVELOPMENT} so tests and local runs are unaffected.
  * Production deployments set {@code -Dapp.security.profile=production} (or

@@ -1,21 +1,21 @@
 package com.svenruppert.urlshortener.api.security.oidc;
 
 import com.svenruppert.functional.result.Result;
-import com.svenruppert.jsentinel.authorization.api.JSentinelSubject;
-import com.svenruppert.jsentinel.identity.oidc.DefaultClaimsToSubjectMapper;
-import com.svenruppert.jsentinel.identity.oidc.DefaultIdTokenValidator;
-import com.svenruppert.jsentinel.identity.oidc.EmptyPermissionsMapper;
-import com.svenruppert.jsentinel.jwt.api.AlgorithmAllowList;
-import com.svenruppert.jsentinel.jwt.api.ClaimExpectations;
-import com.svenruppert.jsentinel.jwt.api.ClockSkewPolicy;
-import com.svenruppert.jsentinel.jwt.api.JwsAlgorithm;
-import com.svenruppert.jsentinel.jwt.api.JwtValidator;
-import com.svenruppert.jsentinel.jwt.api.JwtValidatorSpec;
-import com.svenruppert.jsentinel.jwt.impl.NimbusJwtValidatorFactory;
-import com.svenruppert.jsentinel.oidc.api.ClaimsToSubjectMapper;
-import com.svenruppert.jsentinel.oidc.api.IdTokenExpectations;
-import com.svenruppert.jsentinel.oidc.api.IdTokenValidationError;
-import com.svenruppert.jsentinel.oidc.api.IdTokenValidator;
+import eu.jsentinel.jcustos.authorization.api.JCustosSubject;
+import eu.jsentinel.jcustos.identity.oidc.DefaultClaimsToSubjectMapper;
+import eu.jsentinel.jcustos.identity.oidc.DefaultIdTokenValidator;
+import eu.jsentinel.jcustos.identity.oidc.EmptyPermissionsMapper;
+import eu.jsentinel.jcustos.jwt.api.AlgorithmAllowList;
+import eu.jsentinel.jcustos.jwt.api.ClaimExpectations;
+import eu.jsentinel.jcustos.jwt.api.ClockSkewPolicy;
+import eu.jsentinel.jcustos.jwt.api.JwsAlgorithm;
+import eu.jsentinel.jcustos.jwt.api.JwtValidator;
+import eu.jsentinel.jcustos.jwt.api.JwtValidatorSpec;
+import eu.jsentinel.jcustos.jwt.impl.NimbusJwtValidatorFactory;
+import eu.jsentinel.jcustos.oidc.api.ClaimsToSubjectMapper;
+import eu.jsentinel.jcustos.oidc.api.IdTokenExpectations;
+import eu.jsentinel.jcustos.oidc.api.IdTokenValidationError;
+import eu.jsentinel.jcustos.oidc.api.IdTokenValidator;
 
 import java.net.URI;
 import java.util.Optional;
@@ -28,23 +28,23 @@ import java.util.Set;
  * <ol>
  *   <li>validates the token signature against the provider JWKS (RS256) and the
  *       standard claim set via {@link DefaultIdTokenValidator};</li>
- *   <li>maps the resulting claims onto a {@link JSentinelSubject} — the same
+ *   <li>maps the resulting claims onto a {@link JCustosSubject} — the same
  *       subject type the rest of the security stack consumes — with roles taken
  *       from the {@code roles} claim ({@link OidcRolesMapper}).</li>
  * </ol>
  *
  * <p>This is the tested core of SSO. The browser-facing Authorization-Code +
  * PKCE redirect flow, Vaadin login buttons and vendor presets
- * ({@code jSentinel-oauth2}/{@code -identity-vendor-*}) are carry-over and
+ * ({@code jCustos-oauth2}/{@code -identity-vendor-*}) are carry-over and
  * require real IdP client credentials; this bridge is exercised end-to-end
- * against the {@code jSentinel-test-oidc} {@code StubIdentityProvider}.
+ * against the {@code jCustos-test-oidc} {@code StubIdentityProvider}.
  */
 public final class OidcSubjectBridge {
 
   private OidcSubjectBridge() {
   }
 
-  public static Result<JSentinelSubject, IdTokenValidationError> authenticate(
+  public static Result<JCustosSubject, IdTokenValidationError> authenticate(
       String idToken, URI jwksUri, String issuer, String audience) {
 
     JwtValidatorSpec spec = new JwtValidatorSpec(

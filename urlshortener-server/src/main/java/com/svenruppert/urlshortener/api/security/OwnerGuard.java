@@ -1,8 +1,8 @@
 package com.svenruppert.urlshortener.api.security;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.svenruppert.jsentinel.authorization.api.JSentinelSubject;
-import com.svenruppert.jsentinel.authorization.api.permissions.PermissionName;
+import eu.jsentinel.jcustos.authorization.api.JCustosSubject;
+import eu.jsentinel.jcustos.authorization.api.permissions.PermissionName;
 
 import java.util.Optional;
 
@@ -23,7 +23,7 @@ public final class OwnerGuard {
 
   /** @return true if the current subject may manage {@code shortCode}. */
   public static boolean canManage(HttpExchange exchange, String shortCode) {
-    Optional<JSentinelSubject> subject = CurrentSubject.of(exchange);
+    Optional<JCustosSubject> subject = CurrentSubject.of(exchange);
     if (subject.isEmpty()) {
       return false;
     }
@@ -61,7 +61,7 @@ public final class OwnerGuard {
   /** The numeric user id of the current subject, or {@code null}. */
   public static Long currentUserId(HttpExchange exchange) {
     return CurrentSubject.of(exchange)
-        .map(JSentinelSubject::subjectId)
+        .map(JCustosSubject::subjectId)
         .map(OwnerGuard::parseId)
         .orElse(null);
   }

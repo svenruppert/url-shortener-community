@@ -3,7 +3,7 @@ package com.svenruppert.urlshortener.ui.vaadin;
 
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.authorization.api.SubjectStores;
+import eu.jsentinel.jcustos.authorization.api.SubjectStores;
 import com.svenruppert.urlshortener.client.AuthClient;
 import com.svenruppert.urlshortener.ui.vaadin.components.StoreIndicator;
 import com.svenruppert.urlshortener.ui.vaadin.security.AppUser;

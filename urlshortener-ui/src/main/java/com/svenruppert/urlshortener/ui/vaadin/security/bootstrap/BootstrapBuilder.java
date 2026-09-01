@@ -1,6 +1,6 @@
 package com.svenruppert.urlshortener.ui.vaadin.security.bootstrap;
 
-import com.svenruppert.jsentinel.dx.vaadin.bootstrap.VaadinJSentinelBootstrap;
+import eu.jsentinel.jcustos.dx.vaadin.bootstrap.VaadinJCustosBootstrap;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,7 +34,7 @@ public final class BootstrapBuilder {
    *                loginRoute} etc.)
    * @return the same builder, for chaining {@code .install()}
    */
-  public static VaadinJSentinelBootstrap apply(VaadinJSentinelBootstrap builder) {
+  public static VaadinJCustosBootstrap apply(VaadinJCustosBootstrap builder) {
     List<BootstrapExtension> extensions = new ArrayList<>();
     ServiceLoader.load(BootstrapExtension.class).forEach(extensions::add);
     extensions.sort(Comparator.comparingInt(BootstrapExtension::order));

@@ -3,10 +3,10 @@ package com.svenruppert.urlshortener.api.handler.admin;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.audit.AuditEvent;
-import com.svenruppert.jsentinel.audit.AuditQuery;
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
-import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
+import eu.jsentinel.jcustos.audit.AuditEvent;
+import eu.jsentinel.jcustos.audit.AuditQuery;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
+import eu.jsentinel.jcustos.authorization.annotations.RequiresPermission;
 import com.svenruppert.urlshortener.api.utils.ErrorResponses;
 import com.svenruppert.urlshortener.api.utils.QueryUtils;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
@@ -44,7 +44,7 @@ public class AuditHandler
           ? AuditQuery.all()
           : AuditQuery.forSubject(subject);
 
-      List<AuditEntry> entries = JSentinelServiceResolver.securityAuditService().query(query)
+      List<AuditEntry> entries = JCustosServiceResolver.securityAuditService().query(query)
           .stream()
           .limit(limit)
           .map(AuditHandler::toEntry)

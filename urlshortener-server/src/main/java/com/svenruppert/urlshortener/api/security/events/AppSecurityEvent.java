@@ -1,9 +1,9 @@
 package com.svenruppert.urlshortener.api.security.events;
 
-import com.svenruppert.jsentinel.events.api.EventMetadata;
-import com.svenruppert.jsentinel.events.api.EventType;
-import com.svenruppert.jsentinel.events.api.JSentinelEvent;
-import com.svenruppert.jsentinel.events.api.JSentinelEventCategory;
+import eu.jsentinel.jcustos.events.api.EventMetadata;
+import eu.jsentinel.jcustos.events.api.EventType;
+import eu.jsentinel.jcustos.events.api.JCustosEvent;
+import eu.jsentinel.jcustos.events.api.JCustosEventCategory;
 
 /**
  * A security-relevant application event (P280) carried on the signed
@@ -17,7 +17,7 @@ import com.svenruppert.jsentinel.events.api.JSentinelEventCategory;
  * Ed25519 signature.
  */
 public record AppSecurityEvent(EventMetadata metadata, String action, String detail)
-    implements JSentinelEvent {
+    implements JCustosEvent {
 
   /** The single event type published by this application onto the bus. */
   public static final EventType TYPE = EventType.of("urlshortener.security");
@@ -28,7 +28,7 @@ public record AppSecurityEvent(EventMetadata metadata, String action, String det
   }
 
   @Override
-  public JSentinelEventCategory category() {
-    return JSentinelEventCategory.AUTHENTICATION;
+  public JCustosEventCategory category() {
+    return JCustosEventCategory.AUTHENTICATION;
   }
 }

@@ -3,10 +3,10 @@ package com.svenruppert.urlshortener.api.handler.admin;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.audit.JSentinelAuditService;
-import com.svenruppert.jsentinel.audit.PolicyEvaluated;
-import com.svenruppert.jsentinel.authorization.annotations.RequiresPermission;
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
+import eu.jsentinel.jcustos.audit.JCustosAuditService;
+import eu.jsentinel.jcustos.audit.PolicyEvaluated;
+import eu.jsentinel.jcustos.authorization.annotations.RequiresPermission;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
 import com.svenruppert.urlshortener.api.security.LinkOwnershipStore;
 import com.svenruppert.urlshortener.api.security.OwnerGuard;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
@@ -108,7 +108,7 @@ public class LinkOwnerHandler
 
   private static void audit(PolicyEvaluated event) {
     try {
-      JSentinelAuditService sink = JSentinelServiceResolver.securityAuditService();
+      JCustosAuditService sink = JCustosServiceResolver.securityAuditService();
       sink.publish(event);
     } catch (RuntimeException ignored) {
       // audit must never block the transfer itself

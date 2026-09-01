@@ -1,9 +1,9 @@
 package junit.com.svenruppert.urlshortener.api.security.oidc;
 
 import com.svenruppert.functional.result.Result;
-import com.svenruppert.jsentinel.authorization.api.JSentinelSubject;
-import com.svenruppert.jsentinel.oidc.api.IdTokenValidationError;
-import com.svenruppert.jsentinel.test.oidc.StubIdentityProvider;
+import eu.jsentinel.jcustos.authorization.api.JCustosSubject;
+import eu.jsentinel.jcustos.oidc.api.IdTokenValidationError;
+import eu.jsentinel.jcustos.test.oidc.StubIdentityProvider;
 import com.svenruppert.urlshortener.api.security.oidc.OidcSubjectBridge;
 import org.junit.jupiter.api.Test;
 
@@ -37,12 +37,12 @@ class OidcSubjectBridgeTest {
       claims.put("exp", now + 3600);
       String idToken = idp.signIdToken(claims);
 
-      Result<JSentinelSubject, IdTokenValidationError> result =
+      Result<JCustosSubject, IdTokenValidationError> result =
           OidcSubjectBridge.authenticate(idToken, idp.jwksUri(), idp.issuer(), idp.clientId());
 
       assertTrue(result.isSuccess(),
           () -> "expected a valid subject, got " + result);
-      JSentinelSubject subject = result.getOrThrow();
+      JCustosSubject subject = result.getOrThrow();
       // The mapper namespaces the subject per issuer (issuer#sub) — OIDC subs
       // are only unique within their issuer.
       assertTrue(subject.subjectId().endsWith("#oidc-user-1"),
@@ -61,7 +61,7 @@ class OidcSubjectBridgeTest {
           "sub", "oidc-user-2", "iss", idp.issuer(), "aud", idp.clientId(),
           "iat", now, "exp", now + 3600));
 
-      Result<JSentinelSubject, IdTokenValidationError> result = OidcSubjectBridge.authenticate(
+      Result<JCustosSubject, IdTokenValidationError> result = OidcSubjectBridge.authenticate(
           idToken, idp.jwksUri(), "https://attacker.example", idp.clientId());
 
       assertFalse(result.isSuccess(), "token with an unexpected issuer is rejected");

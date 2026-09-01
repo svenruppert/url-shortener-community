@@ -1,6 +1,6 @@
 package com.svenruppert.urlshortener.ui.vaadin.security;
 
-import com.svenruppert.jsentinel.authorization.api.SubjectStores;
+import eu.jsentinel.jcustos.authorization.api.SubjectStores;
 
 /**
  * Session-scoped subject shortcuts for view code. UI-side visibility only —

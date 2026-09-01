@@ -2,13 +2,13 @@ package com.svenruppert.urlshortener.ui.vaadin.security;
 
 
 
-import com.svenruppert.jsentinel.authorization.annotations.JSentinelAnnotation;
+import eu.jsentinel.jcustos.authorization.annotations.JCustosAnnotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-@JSentinelAnnotation(AppRoleAccessEvaluator.class)
+@JCustosAnnotation(AppRoleAccessEvaluator.class)
 public @interface VisibleFor {
   AppRole[] value();
 }

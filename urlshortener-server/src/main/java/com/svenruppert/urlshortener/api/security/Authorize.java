@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
  * {@link SecurityHttpHandler} — a handler without this annotation is
  * authenticated-only when wrapped, public when registered directly.
  *
- * @deprecated P220 — superseded by the jSentinel framework annotation
- *     {@code com.svenruppert.jsentinel.authorization.annotations.RequiresPermission}.
+ * @deprecated P220 — superseded by the jCustos framework annotation
+ *     {@code eu.jsentinel.jcustos.authorization.annotations.RequiresPermission}.
  *     Still honoured by {@link SecurityHttpHandler} as an evolutionary bridge;
  *     remove once no handler references it.
  */

@@ -1,9 +1,9 @@
 package junit.com.svenruppert.urlshortener.api.security.events;
 
-import com.svenruppert.jsentinel.events.api.JSentinelEventSeverity;
-import com.svenruppert.jsentinel.events.api.SignedJSentinelEventEnvelope;
-import com.svenruppert.jsentinel.events.store.JSentinelEventCursor;
-import com.svenruppert.jsentinel.events.store.StoredEnvelope;
+import eu.jsentinel.jcustos.events.api.JCustosEventSeverity;
+import eu.jsentinel.jcustos.events.api.SignedJCustosEventEnvelope;
+import eu.jsentinel.jcustos.events.store.JCustosEventCursor;
+import eu.jsentinel.jcustos.events.store.StoredEnvelope;
 import com.svenruppert.urlshortener.api.security.events.SecurityEventBus;
 import org.junit.jupiter.api.Test;
 
@@ -27,29 +27,29 @@ class SecurityEventBusTest {
     long before = bus.envelopeStore().count();
 
     bus.publishSecurity("login.success", "alice", "unit-test",
-        JSentinelEventSeverity.NOTICE);
+        JCustosEventSeverity.NOTICE);
 
     assertEquals(before + 1, bus.envelopeStore().count(),
         "publish appends exactly one signed envelope");
 
-    SignedJSentinelEventEnvelope genuine = latest(bus);
+    SignedJCustosEventEnvelope genuine = latest(bus);
     assertTrue(bus.verify(genuine), "genuine Ed25519-signed envelope verifies");
 
     // Flip one byte of the signature — verification must now fail.
-    SignedJSentinelEventEnvelope tampered = tamperSignature(genuine);
+    SignedJCustosEventEnvelope tampered = tamperSignature(genuine);
     assertFalse(bus.verify(tampered), "tampered envelope fails verification");
   }
 
-  private static SignedJSentinelEventEnvelope latest(SecurityEventBus bus) {
+  private static SignedJCustosEventEnvelope latest(SecurityEventBus bus) {
     List<StoredEnvelope> all =
-        bus.envelopeStore().findAfter(JSentinelEventCursor.start(), 100_000);
+        bus.envelopeStore().findAfter(JCustosEventCursor.start(), 100_000);
     return all.get(all.size() - 1).envelope();
   }
 
   /** Rebuilds the envelope record with a single mutated signature byte. */
-  private static SignedJSentinelEventEnvelope tamperSignature(SignedJSentinelEventEnvelope env)
+  private static SignedJCustosEventEnvelope tamperSignature(SignedJCustosEventEnvelope env)
       throws Exception {
-    RecordComponent[] comps = SignedJSentinelEventEnvelope.class.getRecordComponents();
+    RecordComponent[] comps = SignedJCustosEventEnvelope.class.getRecordComponents();
     Class<?>[] types = new Class<?>[comps.length];
     Object[] values = new Object[comps.length];
     for (int i = 0; i < comps.length; i++) {
@@ -62,7 +62,7 @@ class SecurityEventBusTest {
       }
       values[i] = value;
     }
-    return SignedJSentinelEventEnvelope.class
+    return SignedJCustosEventEnvelope.class
         .getDeclaredConstructor(types).newInstance(values);
   }
 }

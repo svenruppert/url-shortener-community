@@ -1,14 +1,14 @@
 package com.svenruppert.urlshortener.api.security;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.svenruppert.jsentinel.rest.RestRequest;
+import eu.jsentinel.jcustos.rest.RestRequest;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Bridges a JDK {@link HttpExchange} to jSentinel's {@link RestRequest}. */
+/** Bridges a JDK {@link HttpExchange} to jCustos's {@link RestRequest}. */
 public final class RestRequests {
 
   private RestRequests() {

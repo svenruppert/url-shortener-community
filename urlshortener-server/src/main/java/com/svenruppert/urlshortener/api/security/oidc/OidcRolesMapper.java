@@ -1,9 +1,9 @@
 package com.svenruppert.urlshortener.api.security.oidc;
 
-import com.svenruppert.jsentinel.authorization.api.roles.RoleName;
-import com.svenruppert.jsentinel.oidc.api.ClaimsToRolesMapper;
-import com.svenruppert.jsentinel.oidc.api.UserInfoResponse;
-import com.svenruppert.jsentinel.oidc.api.ValidatedIdToken;
+import eu.jsentinel.jcustos.authorization.api.roles.RoleName;
+import eu.jsentinel.jcustos.oidc.api.ClaimsToRolesMapper;
+import eu.jsentinel.jcustos.oidc.api.UserInfoResponse;
+import eu.jsentinel.jcustos.oidc.api.ValidatedIdToken;
 
 import java.util.Arrays;
 import java.util.Collection;

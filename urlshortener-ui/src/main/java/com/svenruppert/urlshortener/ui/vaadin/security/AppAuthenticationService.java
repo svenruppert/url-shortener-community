@@ -2,12 +2,12 @@ package com.svenruppert.urlshortener.ui.vaadin.security;
 
 
 
-import com.svenruppert.jsentinel.authentication.AuthenticationService;
-import com.svenruppert.jsentinel.autoservice.api.JSentinelAutoService;
+import eu.jsentinel.jcustos.authentication.AuthenticationService;
+import eu.jsentinel.jcustos.autoservice.api.JCustosAutoService;
 
 import java.util.Set;
 
-@JSentinelAutoService(AuthenticationService.class)
+@JCustosAutoService(AuthenticationService.class)
 public class AppAuthenticationService
     implements AuthenticationService<AppCredentials, AppUser> {
 

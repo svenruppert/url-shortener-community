@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Eclipse-Store-backed {@link UserDirectoryPersistence}. Shares the
  * app-side {@code EmbeddedStorageManager} of the
- * {@code JSentinelStoragePair}; the pair owns the lifecycle, this
+ * {@code JCustosStoragePair}; the pair owns the lifecycle, this
  * class only owns the root structure and the read/write methods.
  *
  * <p>Eclipse-Store's type-mapping handles record-header evolution:
@@ -62,7 +62,7 @@ public final class EclipseStoreUserDirectoryPersistence
 
   /**
    * Marks this persistence closed. The manager is NOT shut down here
-   * — the {@code JSentinelStoragePair} owns the storage lifecycle.
+   * — the {@code JCustosStoragePair} owns the storage lifecycle.
    */
   @Override
   public void close() {

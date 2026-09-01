@@ -69,28 +69,28 @@
         </dependency>
 
         <dependency>
-            <groupId>com.svenruppert.jsentinel</groupId>
-            <artifactId>jSentinel-core</artifactId>
+            <groupId>eu.jsentinel</groupId>
+            <artifactId>jCustos-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.svenruppert.jsentinel</groupId>
-            <artifactId>jSentinel-vaadin</artifactId>
+            <groupId>eu.jsentinel</groupId>
+            <artifactId>jCustos-vaadin</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.svenruppert.jsentinel</groupId>
-            <artifactId>jSentinel-dx</artifactId>
+            <groupId>eu.jsentinel</groupId>
+            <artifactId>jCustos-dx</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.svenruppert.jsentinel</groupId>
-            <artifactId>jSentinel-dx-vaadin</artifactId>
+            <groupId>eu.jsentinel</groupId>
+            <artifactId>jCustos-dx-vaadin</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.svenruppert.jsentinel</groupId>
-            <artifactId>jSentinel-vaadin-starter</artifactId>
+            <groupId>eu.jsentinel</groupId>
+            <artifactId>jCustos-vaadin-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.svenruppert.jsentinel</groupId>
-            <artifactId>jSentinel-autoservice-annotations</artifactId>
+            <groupId>eu.jsentinel</groupId>
+            <artifactId>jCustos-autoservice-annotations</artifactId>
         </dependency>
 
     </dependencies>
@@ -109,13 +109,13 @@
                         <!-- Order matters: processor BEFORE annotations,
                              otherwise the JDK silently emits nothing. -->
                         <path>
-                            <groupId>com.svenruppert.jsentinel</groupId>
-                            <artifactId>jSentinel-autoservice-processor</artifactId>
+                            <groupId>eu.jsentinel</groupId>
+                            <artifactId>jCustos-autoservice-processor</artifactId>
                             <version>${jsentinel.version}</version>
                         </path>
                         <path>
-                            <groupId>com.svenruppert.jsentinel</groupId>
-                            <artifactId>jSentinel-autoservice-annotations</artifactId>
+                            <groupId>eu.jsentinel</groupId>
+                            <artifactId>jCustos-autoservice-annotations</artifactId>
                             <version>${jsentinel.version}</version>
                         </path>
                     </annotationProcessorPaths>

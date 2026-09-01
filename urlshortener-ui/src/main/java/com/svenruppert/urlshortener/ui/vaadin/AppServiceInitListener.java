@@ -7,7 +7,7 @@ import com.svenruppert.urlshortener.core.AliasPolicy;
 import com.svenruppert.urlshortener.ui.vaadin.security.AppRole;
 import com.svenruppert.urlshortener.ui.vaadin.security.AppUser;
 import com.svenruppert.urlshortener.ui.vaadin.security.LoginConfig;
-import com.svenruppert.jsentinel.authorization.api.SubjectStores;
+import eu.jsentinel.jcustos.authorization.api.SubjectStores;
 import com.svenruppert.urlshortener.ui.vaadin.tools.LocaleSelection;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.RouteConfiguration;

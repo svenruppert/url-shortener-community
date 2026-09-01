@@ -1,8 +1,8 @@
 package com.svenruppert.urlshortener.api.security.bootstrap;
 
-import com.svenruppert.jsentinel.dx.bootstrap.AuditBootstrap;
-import com.svenruppert.jsentinel.dx.bootstrap.CredentialBootstrap;
-import com.svenruppert.jsentinel.dx.bootstrap.SessionBootstrap;
+import eu.jsentinel.jcustos.dx.bootstrap.AuditBootstrap;
+import eu.jsentinel.jcustos.dx.bootstrap.CredentialBootstrap;
+import eu.jsentinel.jcustos.dx.bootstrap.SessionBootstrap;
 
 /**
  * Project-local SPI for additive bootstrap configuration on the

@@ -1,11 +1,11 @@
 package com.svenruppert.urlshortener.ui.vaadin.security.bootstrap;
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.authentication.AuthenticationService;
-import com.svenruppert.jsentinel.authorization.api.AuthorizationService;
-import com.svenruppert.jsentinel.dx.runtime.JSentinelRuntime;
-import com.svenruppert.jsentinel.dx.vaadin.bootstrap.VaadinSecurity;
-import com.svenruppert.jsentinel.starter.profile.VaadinJSentinelStarter;
+import eu.jsentinel.jcustos.authentication.AuthenticationService;
+import eu.jsentinel.jcustos.authorization.api.AuthorizationService;
+import eu.jsentinel.jcustos.dx.runtime.JCustosRuntime;
+import eu.jsentinel.jcustos.dx.vaadin.bootstrap.VaadinSecurity;
+import eu.jsentinel.jcustos.starter.profile.VaadinJCustosStarter;
 import com.svenruppert.urlshortener.ui.vaadin.views.login.LoginView;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
@@ -20,12 +20,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <p>This listener is layer-1 — it stays untouched when persistence,
  * hardening or any other layer is applied later. Sub-aspect
  * configuration (audit, sessions, credentials) flows through
- * {@link BootstrapBuilder#apply(com.svenruppert.jsentinel.dx.vaadin.bootstrap.VaadinJSentinelBootstrap)},
+ * {@link BootstrapBuilder#apply(eu.jsentinel.jcustos.dx.vaadin.bootstrap.VaadinJCustosBootstrap)},
  * which loads every registered {@link BootstrapExtension} via
  * {@link ServiceLoader}. New layers add a new extension; the entry
  * point here never has to change.
  */
-public class JSentinelBootstrapInitListener
+public class JCustosBootstrapInitListener
     implements VaadinServiceInitListener, HasLogger {
 
   private static final AtomicBoolean DONE = new AtomicBoolean();
@@ -41,15 +41,15 @@ public class JSentinelBootstrapInitListener
         .findFirst().orElse(null);
     if (authn == null || authz == null) {
       // Fail fast — running an app with one of these missing means every
-      // request silently bypasses jSentinel, which is the worst possible
+      // request silently bypasses jCustos, which is the worst possible
       // failure mode for a security stack. Log the diagnosis and abort
       // Vaadin init so the deployment surfaces the broken state
       // immediately instead of silently rendering a wide-open app.
       String diagnosis = String.format(
-          "jSentinel bootstrap requires both AuthenticationService and "
+          "jCustos bootstrap requires both AuthenticationService and "
               + "AuthorizationService via SPI. Found: "
               + "AuthenticationService=%s, AuthorizationService=%s. "
-              + "Check the @JSentinelAutoService annotation processor is "
+              + "Check the @JCustosAutoService annotation processor is "
               + "wired in maven-compiler-plugin's annotationProcessorPaths, "
               + "and that target/classes/META-INF/services/com.svenruppert."
               + "jsentinel.{authentication.AuthenticationService,"
@@ -58,12 +58,12 @@ public class JSentinelBootstrapInitListener
           authz == null ? "<missing>" : authz.getClass().getName());
       throw new IllegalStateException(diagnosis);
     }
-    JSentinelRuntime runtime = BootstrapBuilder.apply(
+    JCustosRuntime runtime = BootstrapBuilder.apply(
         VaadinSecurity.bootstrap()
             .use(switch (com.svenruppert.urlshortener.core.SecurityProfile.current()) {
-              case PRODUCTION -> VaadinJSentinelStarter.productionDefaults();
-              case STRICT -> VaadinJSentinelStarter.strictDefaults();
-              case DEVELOPMENT -> VaadinJSentinelStarter.developmentDefaults();
+              case PRODUCTION -> VaadinJCustosStarter.productionDefaults();
+              case STRICT -> VaadinJCustosStarter.strictDefaults();
+              case DEVELOPMENT -> VaadinJCustosStarter.developmentDefaults();
             })
             .authentication(authn)
             .authorization(authz)

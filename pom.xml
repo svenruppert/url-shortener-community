@@ -104,7 +104,7 @@
         <warName>ROOT</warName>
         <restServiceName>urlshortener</restServiceName>
         <eclipse-store.version>4.1.0</eclipse-store.version>
-        <jsentinel.version>00.81.00-SNAPSHOT</jsentinel.version>
+        <jsentinel.version>00.82.00</jsentinel.version>
         <icu4j.version>78.3</icu4j.version>
     </properties>
 
@@ -113,6 +113,17 @@
         <repository>
             <id>central</id>
             <url>https://repo.maven.apache.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- jCustos resolves from the in-house registry: new versions land
+             there first, Central lags behind. Releases are readable
+             anonymously. The community edition needs NOTHING from the private
+             "sensitive" repo - that is the whole point of the edition split. -->
+        <repository>
+            <id>jsentinel-releases</id>
+            <url>https://repo.jsentinel.eu/releases</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -184,83 +195,83 @@
             </dependency>
 
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-core</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-core</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-vaadin</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-vaadin</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-dx</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-dx</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-dx-vaadin</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-dx-vaadin</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-vaadin-starter</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-vaadin-starter</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-autoservice-annotations</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-autoservice-annotations</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-rest</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-rest</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-dx-rest</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-dx-rest</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-persistence-eclipsestore</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-persistence-eclipsestore</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-crypto-bc</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-crypto-bc</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-credentials-hibp</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-credentials-hibp</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-test</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-test</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-events</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-events</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-jwt</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-jwt</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-identity-oidc</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-identity-oidc</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.svenruppert.jsentinel</groupId>
-                <artifactId>jSentinel-test-oidc</artifactId>
+                <groupId>eu.jsentinel</groupId>
+                <artifactId>jCustos-test-oidc</artifactId>
                 <version>${jsentinel.version}</version>
             </dependency>
 

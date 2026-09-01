@@ -3,11 +3,11 @@ package com.svenruppert.urlshortener.api;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.authentication.AuthenticationService;
-import com.svenruppert.jsentinel.authorization.api.AuthorizationService;
-import com.svenruppert.jsentinel.dx.rest.bootstrap.RestSecurity;
-import com.svenruppert.jsentinel.dx.runtime.JSentinelBootstrapMode;
-import com.svenruppert.jsentinel.dx.runtime.JSentinelRuntime;
+import eu.jsentinel.jcustos.authentication.AuthenticationService;
+import eu.jsentinel.jcustos.authorization.api.AuthorizationService;
+import eu.jsentinel.jcustos.dx.rest.bootstrap.RestSecurity;
+import eu.jsentinel.jcustos.dx.runtime.JCustosBootstrapMode;
+import eu.jsentinel.jcustos.dx.runtime.JCustosRuntime;
 import com.svenruppert.urlshortener.api.filter.CorsPreflightFilter;
 import com.svenruppert.urlshortener.api.filter.SecurityHeadersFilter;
 import com.svenruppert.urlshortener.api.handler.RedirectHandler;
@@ -67,7 +67,7 @@ import static com.svenruppert.urlshortener.core.DefaultValues.*;
 public class ShortenerServer
     implements HasLogger {
 
-  /** jSentinel installs once per JVM — tests start several servers. */
+  /** jCustos installs once per JVM — tests start several servers. */
   private static final AtomicBoolean SECURITY_BOOTSTRAPPED = new AtomicBoolean();
 
   private HttpServer serverRedirect;
@@ -113,7 +113,7 @@ public class ShortenerServer
       throws IOException {
     logger().info("Starting server with urlMappingStore - persistent={}", persistent);
     // Open-core seam (V00.18.00 P090): startup contributions run BEFORE the
-    // security bootstrap opens the jSentinel storages and before the app
+    // security bootstrap opens the jCustos storages and before the app
     // store opens — the only window in which a plug-in may touch the raw
     // storage directories (restore-at-startup). First init per JVM only;
     // a contribution failure is logged and never blocks startup.
@@ -304,7 +304,7 @@ public class ShortenerServer
   }
 
   /**
-   * Installs the jSentinel REST stack once per JVM: subject
+   * Installs the jCustos REST stack once per JVM: subject
    * resolution from Bearer tokens plus the additive
    * {@code BootstrapExtension} contributions (audit, sessions,
    * credentials) — later stages plug in via the SPI, this entry
@@ -314,7 +314,7 @@ public class ShortenerServer
     if (!SECURITY_BOOTSTRAPPED.compareAndSet(false, true)) {
       return;
     }
-    // Discover the @JSentinelAutoService-registered Authn/Authz via SPI
+    // Discover the @JCustosAutoService-registered Authn/Authz via SPI
     // and pass them explicitly — RestSecurity.bootstrap() does not
     // auto-discover them, and without this the resolver has no
     // AuthenticationService and every login is rejected.
@@ -324,18 +324,18 @@ public class ShortenerServer
         .findFirst().orElse(null);
     if (authn == null || authz == null) {
       throw new IllegalStateException(
-          "jSentinel bootstrap requires both AuthenticationService and "
-              + "AuthorizationService via @JSentinelAutoService SPI. Found: "
+          "jCustos bootstrap requires both AuthenticationService and "
+              + "AuthorizationService via @JCustosAutoService SPI. Found: "
               + "authn=" + authn + ", authz=" + authz
               + ". Check the annotation processor in maven-compiler-plugin.");
     }
 
-    JSentinelRuntime runtime = BootstrapBuilder.apply(
+    JCustosRuntime runtime = BootstrapBuilder.apply(
         RestSecurity.bootstrap()
             .mode(switch (com.svenruppert.urlshortener.core.SecurityProfile.current()) {
-              case PRODUCTION -> JSentinelBootstrapMode.PRODUCTION;
-              case STRICT -> JSentinelBootstrapMode.STRICT;
-              case DEVELOPMENT -> JSentinelBootstrapMode.DEVELOPMENT;
+              case PRODUCTION -> JCustosBootstrapMode.PRODUCTION;
+              case STRICT -> JCustosBootstrapMode.STRICT;
+              case DEVELOPMENT -> JCustosBootstrapMode.DEVELOPMENT;
             })
             .authentication(authn)
             .authorization(authz)

@@ -1,16 +1,16 @@
 package com.svenruppert.urlshortener.api.security;
 
-import com.svenruppert.jsentinel.credential.history.InMemoryPasswordHistoryStore;
-import com.svenruppert.jsentinel.credential.history.PasswordHistoryDecision;
-import com.svenruppert.jsentinel.credential.history.PasswordHistoryPolicy;
-import com.svenruppert.jsentinel.credential.history.PasswordHistoryService;
-import com.svenruppert.jsentinel.credential.secret.SecretValue;
+import eu.jsentinel.jcustos.credential.history.InMemoryPasswordHistoryStore;
+import eu.jsentinel.jcustos.credential.history.PasswordHistoryDecision;
+import eu.jsentinel.jcustos.credential.history.PasswordHistoryPolicy;
+import eu.jsentinel.jcustos.credential.history.PasswordHistoryService;
+import eu.jsentinel.jcustos.credential.secret.SecretValue;
 
 import java.time.Clock;
 import java.time.Instant;
 
 /**
- * Prevents reuse of recently used passwords (P190). Backed by jSentinel's
+ * Prevents reuse of recently used passwords (P190). Backed by jCustos's
  * {@link PasswordHistoryService}; the default policy retains the last 5.
  * Consulted by {@code MePasswordHandler} on a password change: a candidate
  * matching a stored (hashed) previous password is rejected, and each new

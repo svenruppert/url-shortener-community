@@ -1,11 +1,11 @@
 package com.svenruppert.urlshortener.api.security.storage;
 
-import com.svenruppert.jsentinel.persistence.eclipsestore.StorageLayout;
+import eu.jsentinel.jcustos.persistence.eclipsestore.StorageLayout;
 
 import java.nio.file.Path;
 
 /**
- * Single source of truth for the jSentinel storage base directory.
+ * Single source of truth for the jCustos storage base directory.
  *
  * <p>Production defaults to {@code ./data/jsentinel-rest}. Tests and
  * any deployment redirect it via {@code -Dapp.storage.dir=/some/path}
@@ -27,7 +27,7 @@ public final class AppStoragePaths {
   private AppStoragePaths() {
   }
 
-  /** Base directory the {@code JSentinelStoragePair} is opened under. */
+  /** Base directory the {@code JCustosStoragePair} is opened under. */
   public static Path baseDir() {
     return Path.of(System.getProperty(PROPERTY, DEFAULT));
   }

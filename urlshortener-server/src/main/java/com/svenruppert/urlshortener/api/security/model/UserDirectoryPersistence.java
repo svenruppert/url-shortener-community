@@ -10,7 +10,7 @@ import java.util.Map;
  * <ul>
  *   <li>{@link EclipseStoreUserDirectoryPersistence} — default,
  *       persistent, shares the app-side manager of the
- *       {@code JSentinelStoragePair}.</li>
+ *       {@code JCustosStoragePair}.</li>
  *   <li>{@link InMemoryUserDirectoryPersistence} — test seam, no disk
  *       side-effect.</li>
  * </ul>

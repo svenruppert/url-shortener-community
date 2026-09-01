@@ -2,7 +2,7 @@ package com.svenruppert.urlshortener.ui.vaadin.views.login;
 
 
 
-import com.svenruppert.jsentinel.authorization.api.SubjectStores;
+import eu.jsentinel.jcustos.authorization.api.SubjectStores;
 import com.svenruppert.urlshortener.client.AuthClient;
 import com.svenruppert.urlshortener.core.auth.MeResponse;
 import com.svenruppert.urlshortener.ui.vaadin.security.AppRole;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  */
 @Route(LoginView.PATH)
 public class LoginView
-    extends com.svenruppert.jsentinel.authorization.LoginView
+    extends eu.jsentinel.jcustos.authorization.LoginView
     implements I18nSupport, HasDynamicTitle, BeforeEnterObserver {
 
   public static final String PATH = "login";

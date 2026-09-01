@@ -2,13 +2,13 @@ package com.svenruppert.urlshortener.ui.vaadin.security;
 
 
 
-import com.svenruppert.jsentinel.authorization.api.AccessEvaluator;
-import com.svenruppert.jsentinel.authorization.api.AuthorizationService;
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
-import com.svenruppert.jsentinel.authorization.api.SubjectStores;
-import com.svenruppert.jsentinel.authorization.api.roles.RoleName;
-import com.svenruppert.jsentinel.authorization.navigation.AccessContext;
-import com.svenruppert.jsentinel.authorization.navigation.AccessDecision;
+import eu.jsentinel.jcustos.authorization.api.AccessEvaluator;
+import eu.jsentinel.jcustos.authorization.api.AuthorizationService;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
+import eu.jsentinel.jcustos.authorization.api.SubjectStores;
+import eu.jsentinel.jcustos.authorization.api.roles.RoleName;
+import eu.jsentinel.jcustos.authorization.navigation.AccessContext;
+import eu.jsentinel.jcustos.authorization.navigation.AccessDecision;
 import com.svenruppert.urlshortener.ui.vaadin.views.login.LoginView;
 import com.svenruppert.urlshortener.ui.vaadin.views.overview.OverviewView;
 
@@ -36,7 +36,7 @@ public class AppRoleAccessEvaluator implements AccessEvaluator<VisibleFor> {
     }
 
     AuthorizationService<AppUser> authorizationService =
-        JSentinelServiceResolver.authorizationService();
+        JCustosServiceResolver.authorizationService();
 
     boolean hasRole = authorizationService.rolesFor(currentSubject.get())
         .roleNames()

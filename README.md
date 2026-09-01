@@ -6,7 +6,7 @@ Java client SDK, and the Vaadin admin UI.
 | Module | Artifact | Content |
 |---|---|---|
 | `urlshortener-core` | `urlshortener-core` | domain, DTOs, validation, JSON |
-| `urlshortener-server` | `urlshortener-server` | REST admin API + redirect server (JDK `HttpServer`, jSentinel security, EclipseStore persistence) |
+| `urlshortener-server` | `urlshortener-server` | REST admin API + redirect server (JDK `HttpServer`, jCustos security, EclipseStore persistence) |
 | `urlshortener-client` | `urlshortener-client` | Java SDK for the REST API |
 | `urlshortener-ui` | `urlshortener-ui` (war + `classes` jar) | Vaadin admin UI |
 
@@ -60,9 +60,9 @@ The war additionally attaches a `urlshortener-ui-<version>-classes.jar` (classif
 The Community Edition is licensed under the **European Union Public Licence
 v1.2 (EUPL-1.2)**.
 
-**Dual licensing:** jSentinel Ltd additionally offers this code base and the
+**Dual licensing:** jCustos Ltd additionally offers this code base and the
 Enterprise Edition (plug-in modules such as the MCP server and the CLI) under
-**commercial license terms**. Contact: jSentinel Ltd — https://jsentinel.eu
+**commercial license terms**. Contact: jCustos Ltd — https://jsentinel.eu
 
 Contributions are accepted under the DCO plus an additional license grant —
 see [CONTRIBUTING.md](CONTRIBUTING.md).

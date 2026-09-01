@@ -1,14 +1,14 @@
 package com.svenruppert.urlshortener.api.security.model;
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.audit.AuditEvent;
-import com.svenruppert.jsentinel.audit.JSentinelAuditService;
-import com.svenruppert.jsentinel.audit.RoleAssigned;
-import com.svenruppert.jsentinel.audit.RoleRevoked;
-import com.svenruppert.jsentinel.audit.UserCreated;
-import com.svenruppert.jsentinel.audit.UserDeleted;
-import com.svenruppert.jsentinel.authentication.PasswordHasher;
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
+import eu.jsentinel.jcustos.audit.AuditEvent;
+import eu.jsentinel.jcustos.audit.JCustosAuditService;
+import eu.jsentinel.jcustos.audit.RoleAssigned;
+import eu.jsentinel.jcustos.audit.RoleRevoked;
+import eu.jsentinel.jcustos.audit.UserCreated;
+import eu.jsentinel.jcustos.audit.UserDeleted;
+import eu.jsentinel.jcustos.authentication.PasswordHasher;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
 import com.svenruppert.urlshortener.api.security.roles.AuthorizationRole;
 
 import java.time.Clock;
@@ -215,7 +215,7 @@ public final class PersistentUserDirectory implements UserDirectory, HasLogger {
 
   private static void audit(AuditEvent event) {
     try {
-      JSentinelAuditService sink = JSentinelServiceResolver.securityAuditService();
+      JCustosAuditService sink = JCustosServiceResolver.securityAuditService();
       sink.publish(event);
     } catch (RuntimeException ignored) {
       // audit must never block user-management calls

@@ -1,17 +1,17 @@
 package com.svenruppert.urlshortener.api.security;
 
-import com.svenruppert.jsentinel.authentication.PasswordHasher;
-import com.svenruppert.jsentinel.credential.password.CredentialVerificationResult;
-import com.svenruppert.jsentinel.credential.password.PasswordHashingService;
-import com.svenruppert.jsentinel.credential.password.RehashDecision;
-import com.svenruppert.jsentinel.credential.password.bouncycastle.BouncyCastleHashingServices;
+import eu.jsentinel.jcustos.authentication.PasswordHasher;
+import eu.jsentinel.jcustos.credential.password.CredentialVerificationResult;
+import eu.jsentinel.jcustos.credential.password.PasswordHashingService;
+import eu.jsentinel.jcustos.credential.password.RehashDecision;
+import eu.jsentinel.jcustos.credential.password.bouncycastle.BouncyCastleHashingServices;
 
 /**
  * Single application-wide password hashing service.
  *
  * <p>The first-admin bootstrap ({@code InitialAdminBootstrapService})
  * needs a {@link PasswordHashingService}; the user directories verify
- * logins through a {@link PasswordHasher}. jSentinel's resolver hands
+ * logins through a {@link PasswordHasher}. jCustos's resolver hands
  * out a <em>different</em> default {@code PasswordHasher}
  * ({@code Pbkdf2PasswordHasher}) than {@link PasswordHashingServices#defaults()},
  * and their hash strings do not cross-verify. This holder pins ONE
@@ -19,7 +19,7 @@ import com.svenruppert.jsentinel.credential.password.bouncycastle.BouncyCastleHa
  * adapter over it, so a password hashed at bootstrap verifies at login
  * with the identical algorithm and parameters.
  *
- * <p>Independent of the jSentinel bootstrap lifecycle — usable at any
+ * <p>Independent of the jCustos bootstrap lifecycle — usable at any
  * time (in particular by the seeded {@code InMemoryUserDirectory} the
  * tests install before the server starts).
  *

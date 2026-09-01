@@ -1,19 +1,19 @@
 package com.svenruppert.urlshortener.api.security.services;
 
-import com.svenruppert.jsentinel.authorization.api.SubjectIdResolver;
-import com.svenruppert.jsentinel.authorization.api.tenant.TenantId;
-import com.svenruppert.jsentinel.logout.SubjectId;
+import eu.jsentinel.jcustos.authorization.api.SubjectIdResolver;
+import eu.jsentinel.jcustos.authorization.api.tenant.TenantId;
+import eu.jsentinel.jcustos.logout.SubjectId;
 import com.svenruppert.urlshortener.api.security.model.ApiUser;
 
 /**
  * Maps the application's {@link ApiUser} to the framework's stable
  * {@link SubjectId}. Required for drift detection: login captures a
- * {@code JSentinelVersion} snapshot keyed by this id and the
+ * {@code JCustosVersion} snapshot keyed by this id and the
  * {@link com.svenruppert.urlshortener.api.security.services.VersionBumper}
  * increments the same key on role changes.
  *
  * <p>SPI-registered via
- * {@code META-INF/services/com.svenruppert.jsentinel.authorization.api.SubjectIdResolver}.
+ * {@code META-INF/services/eu.jsentinel.jcustos.authorization.api.SubjectIdResolver}.
  */
 public final class SubjectIdResolverImpl implements SubjectIdResolver<ApiUser> {
 

@@ -47,7 +47,7 @@ public final class TokenStore {
   }
 
   /**
-   * Issues a token capturing the subject's current jSentinel version
+   * Issues a token capturing the subject's current jCustos version
    * ({@code versionSnapshot}) so drift detection can reject the token
    * once an admin bumps that version (role change).
    */

@@ -1,7 +1,7 @@
 package com.svenruppert.urlshortener.api.security.bootstrap;
 
-import com.svenruppert.jsentinel.dx.bootstrap.AuditBootstrap;
-import com.svenruppert.jsentinel.dx.bootstrap.CredentialBootstrap;
+import eu.jsentinel.jcustos.dx.bootstrap.AuditBootstrap;
+import eu.jsentinel.jcustos.dx.bootstrap.CredentialBootstrap;
 import com.svenruppert.urlshortener.api.security.AppPasswordHashing;
 
 /**

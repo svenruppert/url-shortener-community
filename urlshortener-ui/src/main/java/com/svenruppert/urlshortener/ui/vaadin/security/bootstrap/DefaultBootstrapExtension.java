@@ -1,8 +1,8 @@
 package com.svenruppert.urlshortener.ui.vaadin.security.bootstrap;
 
-import com.svenruppert.jsentinel.credential.password.PasswordHashingServices;
-import com.svenruppert.jsentinel.dx.bootstrap.AuditBootstrap;
-import com.svenruppert.jsentinel.dx.bootstrap.CredentialBootstrap;
+import eu.jsentinel.jcustos.credential.password.PasswordHashingServices;
+import eu.jsentinel.jcustos.dx.bootstrap.AuditBootstrap;
+import eu.jsentinel.jcustos.dx.bootstrap.CredentialBootstrap;
 
 /**
  * Layer-1 defaults: in-memory ring buffer for audit, PBKDF2 for

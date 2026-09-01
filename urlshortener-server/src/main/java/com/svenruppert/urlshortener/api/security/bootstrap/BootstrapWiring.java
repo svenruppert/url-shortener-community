@@ -1,16 +1,16 @@
 package com.svenruppert.urlshortener.api.security.bootstrap;
 
-import com.svenruppert.jsentinel.bootstrap.BootstrapConfiguration;
-import com.svenruppert.jsentinel.bootstrap.BootstrapMode;
-import com.svenruppert.jsentinel.bootstrap.BootstrapStartup;
-import com.svenruppert.jsentinel.bootstrap.BootstrapStateService;
-import com.svenruppert.jsentinel.bootstrap.BootstrapTokenGenerator;
-import com.svenruppert.jsentinel.bootstrap.BootstrapTokenOutput;
-import com.svenruppert.jsentinel.bootstrap.BootstrapTokenStore;
-import com.svenruppert.jsentinel.bootstrap.FileBootstrapTokenOutput;
-import com.svenruppert.jsentinel.bootstrap.FileBootstrapTokenStore;
-import com.svenruppert.jsentinel.bootstrap.InitialAdminBootstrapService;
-import com.svenruppert.jsentinel.bootstrap.MinimumLengthPasswordPolicy;
+import eu.jsentinel.jcustos.bootstrap.BootstrapConfiguration;
+import eu.jsentinel.jcustos.bootstrap.BootstrapMode;
+import eu.jsentinel.jcustos.bootstrap.BootstrapStartup;
+import eu.jsentinel.jcustos.bootstrap.BootstrapStateService;
+import eu.jsentinel.jcustos.bootstrap.BootstrapTokenGenerator;
+import eu.jsentinel.jcustos.bootstrap.BootstrapTokenOutput;
+import eu.jsentinel.jcustos.bootstrap.BootstrapTokenStore;
+import eu.jsentinel.jcustos.bootstrap.FileBootstrapTokenOutput;
+import eu.jsentinel.jcustos.bootstrap.FileBootstrapTokenStore;
+import eu.jsentinel.jcustos.bootstrap.InitialAdminBootstrapService;
+import eu.jsentinel.jcustos.bootstrap.MinimumLengthPasswordPolicy;
 import com.svenruppert.urlshortener.api.security.AppPasswordHashing;
 import com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider;
 import com.svenruppert.urlshortener.api.security.storage.AppStoragePaths;
@@ -98,7 +98,7 @@ public final class BootstrapWiring {
   /**
    * SEC-L7 (V00.17.00 P080): the bootstrap token is a one-time admin
    * credential — the file must be readable by the service account only
-   * ({@code rw-------}). Enforced here because the jSentinel token store does
+   * ({@code rw-------}). Enforced here because the jCustos token store does
    * not guarantee it; skipped on file systems without POSIX permissions.
    */
   public static void enforceOwnerOnlyPermissions(java.nio.file.Path tokenFile) {

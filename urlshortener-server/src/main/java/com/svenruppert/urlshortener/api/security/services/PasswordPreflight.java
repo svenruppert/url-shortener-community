@@ -1,11 +1,11 @@
 package com.svenruppert.urlshortener.api.security.services;
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
-import com.svenruppert.jsentinel.credential.compromised.CompromisedPasswordChecker;
-import com.svenruppert.jsentinel.credential.compromised.CompromisedPasswordResult;
-import com.svenruppert.jsentinel.credential.compromised.LocalBlocklistCompromisedPasswordChecker;
-import com.svenruppert.jsentinel.credential.compromised.hibp.HaveIBeenPwnedCompromisedPasswordChecker;
-import com.svenruppert.jsentinel.credential.secret.SecretValue;
+import eu.jsentinel.jcustos.credential.compromised.CompromisedPasswordChecker;
+import eu.jsentinel.jcustos.credential.compromised.CompromisedPasswordResult;
+import eu.jsentinel.jcustos.credential.compromised.LocalBlocklistCompromisedPasswordChecker;
+import eu.jsentinel.jcustos.credential.compromised.hibp.HaveIBeenPwnedCompromisedPasswordChecker;
+import eu.jsentinel.jcustos.credential.secret.SecretValue;
 import com.svenruppert.urlshortener.core.SecurityProfile;
 
 import java.time.Duration;

@@ -4,11 +4,11 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.dependencies.core.net.HttpStatus;
-import com.svenruppert.jsentinel.authentication.AuthenticationService;
-import com.svenruppert.jsentinel.authorization.api.JSentinelServiceResolver;
-import com.svenruppert.jsentinel.bruteforce.LoginAttemptContext;
-import com.svenruppert.jsentinel.bruteforce.LoginAttemptDecision;
-import com.svenruppert.jsentinel.events.api.JSentinelEventSeverity;
+import eu.jsentinel.jcustos.authentication.AuthenticationService;
+import eu.jsentinel.jcustos.authorization.api.JCustosServiceResolver;
+import eu.jsentinel.jcustos.bruteforce.LoginAttemptContext;
+import eu.jsentinel.jcustos.bruteforce.LoginAttemptDecision;
+import eu.jsentinel.jcustos.events.api.JCustosEventSeverity;
 import com.svenruppert.urlshortener.api.security.AppPasswordHashing;
 import com.svenruppert.urlshortener.api.security.events.SecurityEventBus;
 import com.svenruppert.urlshortener.api.security.LoginAttemptGuard;
@@ -70,7 +70,7 @@ public class LoginHandler
 
       Credentials credentials = new Credentials(username, password);
       AuthenticationService<Credentials, ApiUser> authn =
-          JSentinelServiceResolver.authenticationService();
+          JCustosServiceResolver.authenticationService();
       if (!authn.checkCredentials(credentials)) {
         logger().info("login rejected for username '{}'", username);
         // Timing-safe: equalise cost so unknown users can't be enumerated
@@ -78,7 +78,7 @@ public class LoginHandler
         AppPasswordHashing.dummyVerify(password.toCharArray());
         LoginAttemptGuard.INSTANCE.recordFailure(attempt);
         SecurityEventBus.instance().publishSecurity(
-            "login.failure", username, "invalid credentials", JSentinelEventSeverity.WARNING);
+            "login.failure", username, "invalid credentials", JCustosEventSeverity.WARNING);
         ErrorResponses.unauthorized(ex);
         return;
       }
@@ -96,7 +96,7 @@ public class LoginHandler
       String token = TokenStore.INSTANCE.issue(user.get(), VersionBumper.current(user.get()));
       logger().info("login succeeded for username '{}'", username);
       SecurityEventBus.instance().publishSecurity(
-          "login.success", username, "bearer token issued", JSentinelEventSeverity.NOTICE);
+          "login.success", username, "bearer token issued", JCustosEventSeverity.NOTICE);
       Map<String, String> response = new LinkedHashMap<>();
       response.put("token", token);
       response.put("user", user.get().name());
