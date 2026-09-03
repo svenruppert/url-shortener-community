@@ -9,6 +9,7 @@ import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -222,7 +223,7 @@ class URLShortenerClient_BulkValidateTest {
   @Test
   @Order(32)
   void largeBatch_processedCorrectly() throws IOException {
-    final var urls = java.util.stream.IntStream.range(0, 20)
+    final var urls = IntStream.range(0, 20)
         .mapToObj(i -> "https://bulk-validate-batch.example.com/page-" + i)
         .toList();
     final var response = client.bulkValidate(urls, List.of());
@@ -303,7 +304,7 @@ class URLShortenerClient_BulkValidateTest {
   @Test
   @Order(61)
   void createdShortCodes_areBase62Alphanumeric() throws IOException {
-    final var urls = java.util.stream.IntStream.range(0, 5)
+    final var urls = IntStream.range(0, 5)
         .mapToObj(i -> "https://shortcode-alphanum.example.com/item-" + i)
         .toList();
     final var response = client.bulkShorten(urls);

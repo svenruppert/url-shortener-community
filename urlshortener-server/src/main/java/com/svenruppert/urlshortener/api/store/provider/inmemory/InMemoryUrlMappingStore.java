@@ -12,6 +12,7 @@ import com.svenruppert.urlshortener.core.urlmapping.ToggleActive.ToggleActiveRes
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.time.Clock;
 
 import static com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingFilterHelper.filterSortAndPage;
 import static com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingFilterHelper.matches;
@@ -30,7 +31,7 @@ public class InMemoryUrlMappingStore
         generator,
         this::existsByCode,
         this::storeMapping,
-        java.time.Clock.systemUTC(),
+        Clock.systemUTC(),
         err -> toJson(err.httpStatus(), err.message(), err.reasonCode()),
         code -> findByShortCode(code).map(ShortUrlMapping::originalUrl)
     );

@@ -37,6 +37,8 @@ import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.SHORTCODE_BASE_URL;
 
@@ -245,7 +247,7 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
   }
 
   private void configureExpiryFields() {
-    expiresDateTime.setStep(java.time.Duration.ofMinutes(30));
+    expiresDateTime.setStep(Duration.ofMinutes(30));
     expiresDateTime.setWeekNumbersVisible(true);
     noExpiry.addValueChangeListener(ev -> {
       boolean disabled = ev.getValue();
@@ -260,7 +262,7 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
     if (Boolean.TRUE.equals(noExpiry.getValue())) {
       return Optional.empty();
     }
-    final java.time.LocalDateTime ldt = expiresDateTime.getValue();
+    final LocalDateTime ldt = expiresDateTime.getValue();
     if (ldt == null) {
       return Optional.empty();
     }

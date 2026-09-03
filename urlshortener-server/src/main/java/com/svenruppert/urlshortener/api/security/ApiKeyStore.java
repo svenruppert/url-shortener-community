@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider;
+import com.svenruppert.urlshortener.api.security.services.VersionBumper;
 
 /**
  * API-key store facade. A key enables programmatic, non-interactive access: it
@@ -51,9 +53,9 @@ public final class ApiKeyStore {
   public String issue(Long userId, String label) {
     // SEC-L2: snapshot the subject's security version at issue time so the
     // role-drift kill switch covers API keys like it covers tokens.
-    Long versionAtIssue = com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider
+    Long versionAtIssue = UserDirectoryProvider
         .directory().findById(userId)
-        .map(com.svenruppert.urlshortener.api.security.services.VersionBumper::current)
+        .map(VersionBumper::current)
         .orElse(null);
     return backend.issue(userId, label, versionAtIssue);
   }

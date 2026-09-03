@@ -12,6 +12,7 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
+import com.svenruppert.urlshortener.core.SecurityProfile;
 
 /**
  * Runs the fluent {@link VaadinSecurity#bootstrap()} chain once per
@@ -60,7 +61,7 @@ public class JCustosBootstrapInitListener
     }
     JCustosRuntime runtime = BootstrapBuilder.apply(
         VaadinSecurity.bootstrap()
-            .use(switch (com.svenruppert.urlshortener.core.SecurityProfile.current()) {
+            .use(switch (SecurityProfile.current()) {
               case PRODUCTION -> VaadinJCustosStarter.productionDefaults();
               case STRICT -> VaadinJCustosStarter.strictDefaults();
               case DEVELOPMENT -> VaadinJCustosStarter.developmentDefaults();

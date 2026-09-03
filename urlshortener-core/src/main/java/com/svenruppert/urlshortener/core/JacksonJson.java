@@ -14,6 +14,8 @@ import tools.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.StreamWriteConstraints;
 
 /**
  * Central Jackson configuration for the whole application.
@@ -129,11 +131,11 @@ public final class JacksonJson {
    */
   private static JsonFactory createFactoryWithOptionalConstraints() {
     return JsonFactory.builder()
-        .streamReadConstraints(tools.jackson.core.StreamReadConstraints.builder()
+        .streamReadConstraints(StreamReadConstraints.builder()
             .maxStringLength(10_000_000)
             .maxNumberLength(1_000)
             .build())
-        .streamWriteConstraints(tools.jackson.core.StreamWriteConstraints.builder()
+        .streamWriteConstraints(StreamWriteConstraints.builder()
             .maxNestingDepth(1_000)
             .build())
         .build();

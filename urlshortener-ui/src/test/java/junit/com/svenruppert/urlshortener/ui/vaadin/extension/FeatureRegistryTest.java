@@ -2,6 +2,7 @@ package junit.com.svenruppert.urlshortener.ui.vaadin.extension;
 
 import com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry;
 import org.junit.jupiter.api.Test;
+import com.vaadin.flow.component.html.Span;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,7 +23,7 @@ class FeatureRegistryTest {
 
     var route = FeatureRegistry.routes().stream()
         .filter(r -> "test-feature".equals(r.path())).findFirst().orElseThrow();
-    assertEquals(com.vaadin.flow.component.html.Span.class, route.view());
+    assertEquals(Span.class, route.view());
 
     var menu = FeatureRegistry.menuItems().stream()
         .filter(m -> "test-feature".equals(m.path())).findFirst().orElseThrow();

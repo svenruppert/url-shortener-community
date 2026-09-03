@@ -6,6 +6,7 @@ import com.svenruppert.urlshortener.core.statistics.RedirectEventBuilder;
 
 import java.time.Clock;
 import java.util.List;
+import com.sun.net.httpserver.Headers;
 
 /**
  * Extracts redirect event data from an HTTP request.
@@ -72,7 +73,7 @@ public final class RequestDataExtractor {
     return null;
   }
 
-  private String getFirstHeader(com.sun.net.httpserver.Headers headers, String name) {
+  private String getFirstHeader(Headers headers, String name) {
     List<String> values = headers.get(name);
     if (values != null && !values.isEmpty()) {
       return values.getFirst();

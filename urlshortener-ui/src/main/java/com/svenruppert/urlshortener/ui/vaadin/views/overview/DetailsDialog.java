@@ -46,6 +46,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import com.svenruppert.urlshortener.ui.vaadin.security.CurrentUser;
+import com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.SHORTCODE_BASE_URL;
 import static com.svenruppert.urlshortener.ui.vaadin.components.ExpiryBadgeFactory.computeStatusText;
@@ -240,7 +242,7 @@ public class DetailsDialog
   }
 
   private static boolean isCurrentUserAdmin() {
-    return com.svenruppert.urlshortener.ui.vaadin.security.CurrentUser.isAdmin();
+    return CurrentUser.isAdmin();
   }
 
   private HorizontalLayout buildOwnerTransferRow() {
@@ -344,7 +346,7 @@ public class DetailsDialog
   private void wireActions() {
     openBtn.addClickListener(_ -> {
       fireEvent(new OpenEvent(this, shortCode, originalUrl));
-      com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks.openInNewTab(this, originalUrl);
+      UiLinks.openInNewTab(this, originalUrl);
     });
 
     copyShortBtn.addClickListener(_ -> {

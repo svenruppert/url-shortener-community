@@ -4,6 +4,10 @@ package com.svenruppert.urlshortener.ui.vaadin.tools;
 
 import com.svenruppert.urlshortener.core.IcuText;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.Map;
 
 public interface I18nSupport {
 
@@ -23,7 +27,7 @@ public interface I18nSupport {
     final String translated = ((Component) this).getTranslation(key, params);
     if (translated == null || translated.isBlank() || translated.equals(key)) {
       // fallback uses the same placeholder style as Vaadin (MessageFormat)
-      return java.text.MessageFormat.format(fallback, params);
+      return MessageFormat.format(fallback, params);
     }
     return translated;
   }
@@ -36,12 +40,12 @@ public interface I18nSupport {
    * {@link IcuText} for the component's current locale. Falls back to
    * {@code fallbackPattern} when the key is missing.
    */
-  default String trPlural(String key, String fallbackPattern, java.util.Map<String, Object> args) {
+  default String trPlural(String key, String fallbackPattern, Map<String, Object> args) {
     final Component self = (Component) this;
     final String pattern = self.getTranslation(key);
-    final java.util.Locale locale = self.getUI()
-        .map(com.vaadin.flow.component.UI::getLocale)
-        .orElse(java.util.Locale.getDefault());
+    final Locale locale = self.getUI()
+        .map(UI::getLocale)
+        .orElse(Locale.getDefault());
     final boolean missing = pattern == null || pattern.isBlank() || pattern.equals(key);
     return IcuText.format(missing ? fallbackPattern : pattern, locale, args);
   }

@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.svenruppert.urlshortener.core.JsonUtils;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.ADMIN_SERVER_HOST;
 import static com.svenruppert.urlshortener.core.DefaultValues.DEFAULT_SERVER_HOST;
@@ -338,8 +339,8 @@ class URLShortenerClient_BulkShortenTest implements HasLogger {
     final String jsonBody;
     try {
       // Build raw request bypassing the client guard
-      final var req = new com.svenruppert.urlshortener.core.urlmapping.BulkShortenRequest(tooMany);
-      jsonBody = com.svenruppert.urlshortener.core.JsonUtils.toJson(req);
+      final var req = new BulkShortenRequest(tooMany);
+      jsonBody = JsonUtils.toJson(req);
     } catch (Exception e) {
       fail("Setup failed: " + e.getMessage());
       return;

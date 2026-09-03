@@ -42,6 +42,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.Objects;
 
 /**
  * Signed security-event bus (P280). Assembles a tamper-evident
@@ -121,7 +122,7 @@ public final class SecurityEventBus
    * throws is logged and skipped, it never breaks the bus or its peers.
    */
   public void addEnvelopeListener(Consumer<StoredEnvelope> listener) {
-    envelopeListeners.add(java.util.Objects.requireNonNull(listener, "listener must not be null"));
+    envelopeListeners.add(Objects.requireNonNull(listener, "listener must not be null"));
   }
 
   private static JCustosEventProducerPolicy producerPolicy() {

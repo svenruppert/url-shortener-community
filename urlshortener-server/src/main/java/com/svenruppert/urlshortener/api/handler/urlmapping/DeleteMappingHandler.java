@@ -10,6 +10,8 @@ import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
 import com.svenruppert.urlshortener.core.AliasPolicy;
 
 import java.io.IOException;
+import com.svenruppert.urlshortener.api.security.LinkOwnershipStore;
+import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
 import static com.svenruppert.dependencies.core.net.HttpStatus.BAD_REQUEST;
 import static com.svenruppert.dependencies.core.net.HttpStatus.FORBIDDEN;
@@ -62,7 +64,7 @@ public final class DeleteMappingHandler
     }
 
     // Owner model (P210): only the owner or a link:read:all holder may delete.
-    if (!com.svenruppert.urlshortener.api.security.OwnerGuard.canManage(exchange, shortCode)) {
+    if (!OwnerGuard.canManage(exchange, shortCode)) {
       logger().info("delete denied — not owner of '{}'", shortCode);
       writeJson(exchange, FORBIDDEN, NOT_OWNER);
       return;
@@ -71,7 +73,7 @@ public final class DeleteMappingHandler
     try {
       boolean removed = updater.delete(shortCode);
       if (removed) {
-        com.svenruppert.urlshortener.api.security.LinkOwnershipStore.INSTANCE.remove(shortCode);
+        LinkOwnershipStore.INSTANCE.remove(shortCode);
         hooks.linkDeleted(shortCode); // plug-in cascade (V00.18.00 P085)
         exchange.sendResponseHeaders(NO_CONTENT.code(), -1);
       } else {

@@ -13,6 +13,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import com.svenruppert.urlshortener.api.security.model.InMemoryUserDirectory;
+import com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider;
+import java.util.Map;
 
 import static com.svenruppert.dependencies.core.net.HttpStatus.*;
 import static com.svenruppert.urlshortener.core.DefaultValues.*;
@@ -35,9 +38,9 @@ public class UrlShortenerE2ETest
     // Keep the seeded admin/admin convention: install the in-memory
     // directory so the Stage-E bootstrap sees an existing admin and
     // never blocks with 503.
-    com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider
+    UserDirectoryProvider
         .setDirectorySupplier(
-            com.svenruppert.urlshortener.api.security.model.InMemoryUserDirectory::new);
+            InMemoryUserDirectory::new);
     // Server auf Port 0 starten -> Ephemeral-Port, kollisionsfrei
     server = new ShortenerServer();
     server.init(DEFAULT_SERVER_HOST, 0);
@@ -55,7 +58,7 @@ public class UrlShortenerE2ETest
   /** Logs in against the admin server and returns the Bearer token. */
   private static String login(String username, String password)
       throws Exception {
-    var body = JsonUtils.toJson(java.util.Map.of("username", username, "password", password));
+    var body = JsonUtils.toJson(Map.of("username", username, "password", password));
     var req = HttpRequest.newBuilder(URI.create(baseUrlADMIN + PATH_AUTH_LOGIN))
         .header(CONTENT_TYPE, MediaType.APPLICATION_JSON.withCharsetUtf8())
         .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
@@ -114,7 +117,7 @@ public class UrlShortenerE2ETest
 
   private HttpResponse<String> rawLogin(String username, String password)
       throws Exception {
-    var body = JsonUtils.toJson(java.util.Map.of("username", username, "password", password));
+    var body = JsonUtils.toJson(Map.of("username", username, "password", password));
     var req = HttpRequest.newBuilder(URI.create(baseUrlADMIN + PATH_AUTH_LOGIN))
         .header(CONTENT_TYPE, MediaType.APPLICATION_JSON.withCharsetUtf8())
         .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))

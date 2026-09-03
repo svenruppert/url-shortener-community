@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import com.svenruppert.urlshortener.api.security.OwnerGuard;
+import java.util.LinkedHashSet;
 
 import static com.svenruppert.urlshortener.api.utils.QueryUtils.*;
 
@@ -33,10 +35,10 @@ public final class ListCountHandler
   /** SEC-M2 (V00.17.00 P050): plug-in restriction intersected with the caller's read-scope. */
   private Set<String> combinedRestriction(Map<String, List<String>> query, HttpExchange ex) {
     Set<String> contributed = hooks.listRestriction(query);
-    Set<String> owned = com.svenruppert.urlshortener.api.security.OwnerGuard.readRestriction(ex);
+    Set<String> owned = OwnerGuard.readRestriction(ex);
     if (owned == null) return contributed;
     if (contributed == null) return owned;
-    Set<String> both = new java.util.LinkedHashSet<>(contributed);
+    Set<String> both = new LinkedHashSet<>(contributed);
     both.retainAll(owned);
     return both;
   }

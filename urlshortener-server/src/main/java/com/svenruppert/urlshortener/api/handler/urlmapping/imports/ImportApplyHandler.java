@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import com.svenruppert.urlshortener.api.security.LinkOwnershipStore;
+import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
 @RequiresPermission("importApply")
 public final class ImportApplyHandler
@@ -67,13 +69,13 @@ public final class ImportApplyHandler
     int created = 0;
     int skippedConflicts = staging.conflicts().size();
 
-    Long importingUser = com.svenruppert.urlshortener.api.security.OwnerGuard.currentUserId(ex);
+    Long importingUser = OwnerGuard.currentUserId(ex);
     for (var m : staging.newItems()) {
       Instant expires = m.expiresAt().orElse(null);
       var res = store.createMapping(m.createdAt(), m.shortCode(), m.originalUrl(), expires, m.active());
       if (res.isSuccess()) {
         created++;
-        com.svenruppert.urlshortener.api.security.LinkOwnershipStore.INSTANCE.record(
+        LinkOwnershipStore.INSTANCE.record(
             m.shortCode(), importingUser);
       }
     }

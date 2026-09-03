@@ -11,6 +11,12 @@ import org.junit.jupiter.api.Test;
 
 import java.time.*;
 import java.util.Map;
+import com.svenruppert.urlshortener.core.statistics.DailyAggregate;
+import com.svenruppert.urlshortener.core.statistics.HourlyAggregate;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -321,51 +327,51 @@ class StatisticsDebugTest {
     public void flush() {}
 
     @Override
-    public long getCountForDate(String shortCode, java.time.LocalDate date) { return 0; }
+    public long getCountForDate(String shortCode, LocalDate date) { return 0; }
 
     @Override
-    public long getCountForDateRange(String shortCode, java.time.LocalDate from, java.time.LocalDate to) { return 0; }
+    public long getCountForDateRange(String shortCode, LocalDate from, LocalDate to) { return 0; }
 
     @Override
     public long getTotalCount(String shortCode) { return 0; }
 
     @Override
-    public java.util.Optional<com.svenruppert.urlshortener.core.statistics.HourlyAggregate> getHourlyAggregate(String shortCode, java.time.LocalDate date) {
-      return java.util.Optional.empty();
+    public Optional<HourlyAggregate> getHourlyAggregate(String shortCode, LocalDate date) {
+      return Optional.empty();
     }
 
     @Override
-    public java.util.Optional<com.svenruppert.urlshortener.core.statistics.DailyAggregate> getDailyAggregate(String shortCode, java.time.LocalDate date) {
-      return java.util.Optional.empty();
+    public Optional<DailyAggregate> getDailyAggregate(String shortCode, LocalDate date) {
+      return Optional.empty();
     }
 
     @Override
-    public java.util.List<com.svenruppert.urlshortener.core.statistics.DailyAggregate> getDailyAggregates(String shortCode, java.time.LocalDate from, java.time.LocalDate to) {
-      return java.util.Collections.emptyList();
+    public List<DailyAggregate> getDailyAggregates(String shortCode, LocalDate from, LocalDate to) {
+      return Collections.emptyList();
     }
 
     @Override
-    public java.util.List<com.svenruppert.urlshortener.core.statistics.HourlyAggregate> getHourlyAggregates(String shortCode, java.time.LocalDate from, java.time.LocalDate to) {
-      return java.util.Collections.emptyList();
+    public List<HourlyAggregate> getHourlyAggregates(String shortCode, LocalDate from, LocalDate to) {
+      return Collections.emptyList();
     }
 
     @Override
-    public java.util.List<RedirectEvent> getEventsForDate(String shortCode, java.time.LocalDate date) {
-      return java.util.Collections.emptyList();
+    public List<RedirectEvent> getEventsForDate(String shortCode, LocalDate date) {
+      return Collections.emptyList();
     }
 
     @Override
-    public java.util.List<RedirectEvent> getEventsForDateRange(String shortCode, java.time.LocalDate from, java.time.LocalDate to) {
-      return java.util.Collections.emptyList();
+    public List<RedirectEvent> getEventsForDateRange(String shortCode, LocalDate from, LocalDate to) {
+      return Collections.emptyList();
     }
 
     @Override
-    public java.util.List<java.time.LocalDate> getAvailableDates(String shortCode) {
-      return java.util.Collections.emptyList();
+    public List<LocalDate> getAvailableDates(String shortCode) {
+      return Collections.emptyList();
     }
 
     @Override
-    public boolean isInHotWindow(java.time.LocalDate date) { return false; }
+    public boolean isInHotWindow(LocalDate date) { return false; }
 
     @Override
     public StatisticsConfig getConfig() { return config; }

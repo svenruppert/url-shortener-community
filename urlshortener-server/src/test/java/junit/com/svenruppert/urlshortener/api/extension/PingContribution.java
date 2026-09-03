@@ -5,6 +5,8 @@ import com.svenruppert.urlshortener.api.extension.HandlerContribution;
 import com.svenruppert.urlshortener.api.extension.ServerContext;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.urlshortener.api.utils.SuccessResponses;
+import com.sun.net.httpserver.HttpExchange;
+import java.io.IOException;
 
 /**
  * Test plug-in registered via META-INF/services (test scope) — proves the
@@ -38,8 +40,8 @@ public class PingContribution
     }
 
     @Override
-    public void handle(com.sun.net.httpserver.HttpExchange exchange)
-        throws java.io.IOException {
+    public void handle(HttpExchange exchange)
+        throws IOException {
       SuccessResponses.okJson(exchange,
           "{\"feature\":\"extension-ping\",\"links\":" + context.urlMappingStore().countAll() + "}");
     }

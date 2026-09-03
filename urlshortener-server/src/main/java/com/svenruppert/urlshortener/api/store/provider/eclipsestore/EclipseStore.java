@@ -28,6 +28,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.nio.file.Path;
+import org.eclipse.store.afs.nio.types.NioFileSystem;
 
 public final class EclipseStore
     implements HasLogger, Closeable {
@@ -134,9 +136,9 @@ public final class EclipseStore
    * (empty or absent) target directory — a bootable storage directory
    * (V00.18.00 P090, backup seam).
    */
-  public void issueFullBackup(java.nio.file.Path targetDirectory) {
+  public void issueFullBackup(Path targetDirectory) {
     storage.issueFullBackup(
-        org.eclipse.store.afs.nio.types.NioFileSystem.New()
+        NioFileSystem.New()
             .ensureDirectory(targetDirectory));
   }
 

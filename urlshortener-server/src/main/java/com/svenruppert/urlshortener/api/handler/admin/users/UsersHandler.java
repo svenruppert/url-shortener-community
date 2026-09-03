@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.EnumSet;
 
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ADMIN_USERS;
@@ -192,8 +193,8 @@ public class UsersHandler
         user.roles().stream().map(Enum::name).sorted().toList());
   }
 
-  private static java.util.EnumSet<AuthorizationRole> parseRoles(List<String> names) {
-    var roles = java.util.EnumSet.noneOf(AuthorizationRole.class);
+  private static EnumSet<AuthorizationRole> parseRoles(List<String> names) {
+    var roles = EnumSet.noneOf(AuthorizationRole.class);
     if (names == null || names.isEmpty()) {
       roles.add(AuthorizationRole.USER);
       return roles;

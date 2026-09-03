@@ -50,7 +50,7 @@ public class AdminClient
   }
 
   public StoreInfo getStoreInfo()
-      throws java.io.IOException {
+      throws IOException {
     URL url = serverBaseAdmin.resolve(PATH_ADMIN_STORE_INFO).toURL();
     var con = (HttpURLConnection) url.openConnection();
     con.setRequestMethod("GET");

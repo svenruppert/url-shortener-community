@@ -35,6 +35,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Optional;
 
 import static com.svenruppert.dependencies.core.net.HttpStatus.OK;
 import static com.svenruppert.urlshortener.core.DefaultValues.*;
@@ -207,7 +210,7 @@ public class URLShortenerClient implements HasLogger {
     int code = con.getResponseCode();
     if (code != expected) {
       byte[] body = readResponseBytes(con, code);
-      String snippet = new String(body, java.nio.charset.StandardCharsets.UTF_8);
+      String snippet = new String(body, StandardCharsets.UTF_8);
       if (snippet.length() > 2_000) snippet = snippet.substring(0, 2_000) + "...";
       throw new IOException("HTTP " + code + " expected " + expected + " for " + con.getURL()
                                 + " response: " + snippet);
@@ -347,7 +350,7 @@ public class URLShortenerClient implements HasLogger {
    * @throws IOException if the request fails
    * @throws IllegalArgumentException if shortCode is null or blank
    */
-  public java.util.Optional<ShortUrlMapping> getMapping(String shortCode) throws IOException {
+  public Optional<ShortUrlMapping> getMapping(String shortCode) throws IOException {
     if (shortCode == null || shortCode.isBlank()) {
       throw new IllegalArgumentException("shortCode must not be null/blank");
     }
@@ -603,7 +606,7 @@ public class URLShortenerClient implements HasLogger {
    * @param defaultActive    optional active flag for every link; {@code null} defaults to {@code true}
    */
   public BulkShortenResponse bulkShorten(List<String> urls,
-                                         java.time.Instant defaultExpiresAt,
+                                         Instant defaultExpiresAt,
                                          Boolean defaultActive) throws IOException {
     if (urls == null || urls.isEmpty()) {
       throw new IllegalArgumentException("urls must not be null or empty");
@@ -878,9 +881,9 @@ public class URLShortenerClient implements HasLogger {
     for (int a : allowed) if (code == a) return;
 
     byte[] body = readResponseBytes(con, code);
-    String snippet = new String(body, java.nio.charset.StandardCharsets.UTF_8);
+    String snippet = new String(body, StandardCharsets.UTF_8);
     if (snippet.length() > 2_000) snippet = snippet.substring(0, 2_000) + "...";
-    throw new IOException("HTTP " + code + " expected one of " + java.util.Arrays.toString(allowed)
+    throw new IOException("HTTP " + code + " expected one of " + Arrays.toString(allowed)
                               + " for " + con.getURL() + " response: " + snippet);
   }
 

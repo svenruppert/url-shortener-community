@@ -17,6 +17,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * EclipseStore implementation of the StatisticsStore.
@@ -609,8 +611,8 @@ public class EclipseStatisticsStore
   }
 
   @Override
-  public java.util.Map<String, Object> getDebugInfo() {
-    var info = new java.util.LinkedHashMap<String, Object>();
+  public Map<String, Object> getDebugInfo() {
+    var info = new LinkedHashMap<String, Object>();
 
     // Config info
     var config = getConfig();
@@ -627,12 +629,12 @@ public class EclipseStatisticsStore
     var redirectEvents = dataRoot().redirectEvents();
     info.put("redirectEvents_shortCodeCount", redirectEvents != null ? redirectEvents.size() : "NULL");
     if (redirectEvents != null && !redirectEvents.isEmpty()) {
-      var eventsDetail = new java.util.LinkedHashMap<String, Object>();
+      var eventsDetail = new LinkedHashMap<String, Object>();
       for (var entry : redirectEvents.entrySet()) {
         String shortCode = entry.getKey();
         var dateMap = entry.getValue();
         if (dateMap != null) {
-          var dateDetail = new java.util.LinkedHashMap<String, Integer>();
+          var dateDetail = new LinkedHashMap<String, Integer>();
           for (var dateEntry : dateMap.entrySet()) {
             dateDetail.put(dateEntry.getKey(),
                            dateEntry.getValue() != null ? dateEntry.getValue().size() : 0);
@@ -647,12 +649,12 @@ public class EclipseStatisticsStore
     var hourlyAggregates = dataRoot().hourlyAggregates();
     info.put("hourlyAggregates_shortCodeCount", hourlyAggregates != null ? hourlyAggregates.size() : "NULL");
     if (hourlyAggregates != null && !hourlyAggregates.isEmpty()) {
-      var hourlyDetail = new java.util.LinkedHashMap<String, Object>();
+      var hourlyDetail = new LinkedHashMap<String, Object>();
       for (var entry : hourlyAggregates.entrySet()) {
         String shortCode = entry.getKey();
         var dateMap = entry.getValue();
         if (dateMap != null) {
-          var dateDetail = new java.util.LinkedHashMap<String, Long>();
+          var dateDetail = new LinkedHashMap<String, Long>();
           for (var dateEntry : dateMap.entrySet()) {
             dateDetail.put(dateEntry.getKey(),
                            dateEntry.getValue() != null ? dateEntry.getValue().totalCount() : 0L);
@@ -667,12 +669,12 @@ public class EclipseStatisticsStore
     var dailyAggregates = dataRoot().dailyAggregates();
     info.put("dailyAggregates_shortCodeCount", dailyAggregates != null ? dailyAggregates.size() : "NULL");
     if (dailyAggregates != null && !dailyAggregates.isEmpty()) {
-      var dailyDetail = new java.util.LinkedHashMap<String, Object>();
+      var dailyDetail = new LinkedHashMap<String, Object>();
       for (var entry : dailyAggregates.entrySet()) {
         String shortCode = entry.getKey();
         var dateMap = entry.getValue();
         if (dateMap != null) {
-          var dateDetail = new java.util.LinkedHashMap<String, Long>();
+          var dateDetail = new LinkedHashMap<String, Long>();
           for (var dateEntry : dateMap.entrySet()) {
             dateDetail.put(dateEntry.getKey(),
                            dateEntry.getValue() != null ? dateEntry.getValue().totalCount() : 0L);

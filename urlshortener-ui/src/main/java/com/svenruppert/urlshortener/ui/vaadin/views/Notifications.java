@@ -57,22 +57,22 @@ public final class Notifications {
   // =========================
 
   public static void infoKey(String key, String fallback, Object... params) {
-    show(com.svenruppert.urlshortener.ui.vaadin.tools.I18n.tr(key, fallback, params),
+    show(I18n.tr(key, fallback, params),
          null, DEFAULT_DURATION, DEFAULT_POSITION);
   }
 
   public static void successKey(String key, String fallback, Object... params) {
-    show(com.svenruppert.urlshortener.ui.vaadin.tools.I18n.tr(key, fallback, params),
+    show(I18n.tr(key, fallback, params),
          NotificationVariant.LUMO_SUCCESS, DEFAULT_DURATION, DEFAULT_POSITION);
   }
 
   public static void warningKey(String key, String fallback, Object... params) {
-    show(com.svenruppert.urlshortener.ui.vaadin.tools.I18n.tr(key, fallback, params),
+    show(I18n.tr(key, fallback, params),
          NotificationVariant.LUMO_WARNING, DEFAULT_DURATION, DEFAULT_POSITION);
   }
 
   public static void errorKey(String key, String fallback, Object... params) {
-    show(com.svenruppert.urlshortener.ui.vaadin.tools.I18n.tr(key, fallback, params),
+    show(I18n.tr(key, fallback, params),
          NotificationVariant.LUMO_ERROR, DEFAULT_DURATION, DEFAULT_POSITION);
   }
 

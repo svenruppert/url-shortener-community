@@ -21,6 +21,7 @@ import com.vaadin.flow.router.Route;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * Login form that delegates authentication to the REST backend
@@ -84,7 +85,7 @@ public class LoginView
   private static AppUser toAppUser(String username, MeResponse me) {
     Set<AppRole> roles = me.roles().stream()
         .map(LoginView::toAppRole)
-        .filter(java.util.Objects::nonNull)
+        .filter(Objects::nonNull)
         .collect(Collectors.toCollection(() -> EnumSet.noneOf(AppRole.class)));
     if (roles.isEmpty()) {
       roles = EnumSet.of(AppRole.USER);

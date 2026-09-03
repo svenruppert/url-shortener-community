@@ -61,6 +61,18 @@ import java.util.Arrays;
 import java.util.ServiceLoader;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import com.svenruppert.urlshortener.api.extension.HandlerRegistry;
+import com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks;
+import com.svenruppert.urlshortener.api.extension.LinkMetaStorage;
+import com.svenruppert.urlshortener.api.extension.ServerContext;
+import com.svenruppert.urlshortener.api.extension.StartupContribution;
+import com.svenruppert.urlshortener.api.extension.StorageAdmin;
+import com.svenruppert.urlshortener.api.filter.MaintenanceFilter;
+import com.svenruppert.urlshortener.api.security.SecurityDiagnostics;
+import com.svenruppert.urlshortener.api.store.provider.inmemory.InMemoryLinkMetaStorage;
+import com.svenruppert.urlshortener.core.SecurityProfile;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.*;
 
@@ -72,7 +84,7 @@ public class ShortenerServer
 
   private HttpServer serverRedirect;
   private HttpServer serverAdmin;
-  private com.svenruppert.urlshortener.api.extension.ServerContext serverContext;
+  private ServerContext serverContext;
 
   public static void main(String[] args)
       throws IOException {
@@ -119,8 +131,8 @@ public class ShortenerServer
     // storage directories (restore-at-startup). First init per JVM only;
     // a contribution failure is logged and never blocks startup.
     if (!SECURITY_BOOTSTRAPPED.get()) {
-      for (var contribution : java.util.ServiceLoader.load(
-          com.svenruppert.urlshortener.api.extension.StartupContribution.class)) {
+      for (var contribution : ServiceLoader.load(
+          StartupContribution.class)) {
         try {
           contribution.beforeStoresOpen();
         } catch (RuntimeException e) {
@@ -136,8 +148,8 @@ public class ShortenerServer
     UrlMappingStore urlMappingStore;
     PreferencesStore preferencesStore;
     StatisticsStore statisticsStore;
-    com.svenruppert.urlshortener.api.extension.LinkMetaStorage linkMetaStorage;
-    com.svenruppert.urlshortener.api.extension.StorageAdmin storageAdmin;
+    LinkMetaStorage linkMetaStorage;
+    StorageAdmin storageAdmin;
     ImportStagingStore importStagingStore = new InMemoryImportStagingStore();
 
     if (persistent) {
@@ -150,19 +162,19 @@ public class ShortenerServer
       preferencesStore = eclipseStore.getPreferencesStore();
       statisticsStore = eclipseStore.getStatisticsStore();
       linkMetaStorage = eclipseStore.getLinkMetaStorage();
-      storageAdmin = new com.svenruppert.urlshortener.api.extension.StorageAdmin() {
+      storageAdmin = new StorageAdmin() {
         @Override
         public boolean persistent() {
           return true;
         }
 
         @Override
-        public java.nio.file.Path appDataDir() {
-          return java.nio.file.Paths.get(STORAGE_DATA_PATH).toAbsolutePath();
+        public Path appDataDir() {
+          return Paths.get(STORAGE_DATA_PATH).toAbsolutePath();
         }
 
         @Override
-        public void issueAppStoreBackup(java.nio.file.Path targetDirectory) {
+        public void issueAppStoreBackup(Path targetDirectory) {
           eclipseStore.issueFullBackup(targetDirectory);
         }
       };
@@ -185,20 +197,20 @@ public class ShortenerServer
       urlMappingStore = new InMemoryUrlMappingStore(shortCodeGenerator);
       preferencesStore = new InMemoryPreferencesStore();
       statisticsStore = new InMemoryStatisticsStore(Clock.systemUTC());
-      linkMetaStorage = new com.svenruppert.urlshortener.api.store.provider.inmemory.InMemoryLinkMetaStorage();
-      storageAdmin = new com.svenruppert.urlshortener.api.extension.StorageAdmin() {
+      linkMetaStorage = new InMemoryLinkMetaStorage();
+      storageAdmin = new StorageAdmin() {
         @Override
         public boolean persistent() {
           return false;
         }
 
         @Override
-        public java.nio.file.Path appDataDir() {
+        public Path appDataDir() {
           return null;
         }
 
         @Override
-        public void issueAppStoreBackup(java.nio.file.Path targetDirectory) {
+        public void issueAppStoreBackup(Path targetDirectory) {
           throw new IllegalStateException("in-memory profile has no persistent app store");
         }
       };
@@ -208,10 +220,10 @@ public class ShortenerServer
     // lifecycle hooks are discovered BEFORE handler registration — the
     // community handlers only ever talk to the hook facade, never to a
     // feature store. A plug-in-free classpath yields empty hooks.
-    var serverContext = new com.svenruppert.urlshortener.api.extension.ServerContext(
+    var serverContext = new ServerContext(
         urlMappingStore, linkMetaStorage, statisticsStore, preferencesStore, storageAdmin);
     this.serverContext = serverContext;
-    var lifecycleHooks = com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks.discover(serverContext);
+    var lifecycleHooks = LinkLifecycleHooks.discover(serverContext);
 
     logger().info("Starting URL Shortener server (redirect) with parameters: host={}, port={}", hostRedirect, portRedirect);
     this.serverRedirect = HttpServer.create(new InetSocketAddress(hostRedirect, portRedirect), 0);
@@ -280,7 +292,7 @@ public class ShortenerServer
     // the same stores; duplicate plug-in paths abort in the registry, a
     // collision with a community route aborts in createContext — fail fast
     // either way. A plug-in-free classpath makes this a no-op.
-    for (var contribution : com.svenruppert.urlshortener.api.extension.HandlerRegistry.discover()) {
+    for (var contribution : HandlerRegistry.discover()) {
       secured(serverAdmin, contribution.path(), contribution.create(serverContext));
       logger().info("Contributed endpoint registered at {}", contribution.path());
     }
@@ -334,7 +346,7 @@ public class ShortenerServer
 
     JCustosRuntime runtime = BootstrapBuilder.apply(
         RestSecurity.bootstrap()
-            .mode(switch (com.svenruppert.urlshortener.core.SecurityProfile.current()) {
+            .mode(switch (SecurityProfile.current()) {
               case PRODUCTION -> JCustosBootstrapMode.PRODUCTION;
               case STRICT -> JCustosBootstrapMode.STRICT;
               case DEVELOPMENT -> JCustosBootstrapMode.DEVELOPMENT;
@@ -343,7 +355,7 @@ public class ShortenerServer
             .authorization(authz)
             .subjectResolver(new ApiRestSubjectResolver())
     ).install();
-    com.svenruppert.urlshortener.api.security.SecurityDiagnostics.set(runtime);
+    SecurityDiagnostics.set(runtime);
     logger().info("{}", runtime.log());
 
     // Generate/print the one-time bootstrap token if no admin exists yet.
@@ -357,7 +369,7 @@ public class ShortenerServer
     var filters = server.createContext(path, SecurityHttpHandler.secure(handler)).getFilters();
     filters.add(new SecurityHeadersFilter());
     filters.add(new CorsPreflightFilter());
-    filters.add(new com.svenruppert.urlshortener.api.filter.MaintenanceFilter());
+    filters.add(new MaintenanceFilter());
   }
 
   /** Registers a public context (login/logout). */
@@ -384,7 +396,7 @@ public class ShortenerServer
    * tooling that need to reach the open-core seams of a live server;
    * {@code null} before {@code init(...)} ran.
    */
-  public com.svenruppert.urlshortener.api.extension.ServerContext serverContext() {
+  public ServerContext serverContext() {
     return serverContext;
   }
 

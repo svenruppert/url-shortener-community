@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.time.Duration;
+import java.time.Instant;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.AUTHORIZATION_HEADER;
 import static com.svenruppert.urlshortener.core.DefaultValues.BEARER_PREFIX;
@@ -192,8 +194,8 @@ public final class SecurityHttpHandler
     if (maxAgeDays <= 0 || entry.createdAt() == null) {
       return false;
     }
-    return entry.createdAt().plus(java.time.Duration.ofDays(maxAgeDays))
-        .isBefore(java.time.Instant.now());
+    return entry.createdAt().plus(Duration.ofDays(maxAgeDays))
+        .isBefore(Instant.now());
   }
 
   /**

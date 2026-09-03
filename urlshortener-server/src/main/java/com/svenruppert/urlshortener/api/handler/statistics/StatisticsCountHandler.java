@@ -12,6 +12,7 @@ import com.svenruppert.urlshortener.core.statistics.StatisticsCountResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
 import static com.svenruppert.dependencies.core.net.HttpStatus.*;
 import static com.svenruppert.urlshortener.api.utils.JsonWriter.writeJson;
@@ -55,7 +56,7 @@ public class StatisticsCountHandler
       return;
     }
     // SEC-M1 (V00.17.00 P050): per-link statistics are owner-scoped.
-    if (!com.svenruppert.urlshortener.api.security.OwnerGuard.canManage(exchange, shortCode)) {
+    if (!OwnerGuard.canManage(exchange, shortCode)) {
       writeJson(exchange, FORBIDDEN, ERROR_NOT_OWNER);
       return;
     }

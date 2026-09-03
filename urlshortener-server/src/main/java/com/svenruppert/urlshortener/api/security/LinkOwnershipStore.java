@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Records which user owns which short code (P210). Kept separate from the core
@@ -81,8 +83,8 @@ public final class LinkOwnershipStore {
    * All normalized codes owned by {@code userId} — the read-scoping set for
    * listing/export/statistics (V00.17.00 P050). Never {@code null}.
    */
-  public java.util.Set<String> codesOwnedBy(Long userId) {
-    return userId == null ? java.util.Set.of() : backend.codesOwnedBy(userId);
+  public Set<String> codesOwnedBy(Long userId) {
+    return userId == null ? Set.of() : backend.codesOwnedBy(userId);
   }
 
   /** Pluggable storage for link ownership (in-memory default, EclipseStore in prod). */
@@ -97,7 +99,7 @@ public final class LinkOwnershipStore {
 
     boolean isEmpty();
 
-    java.util.Set<String> codesOwnedBy(Long userId);
+    Set<String> codesOwnedBy(Long userId);
   }
 
   /** Default, non-persistent backend — ownership is lost on restart (fine for tests). */
@@ -132,11 +134,11 @@ public final class LinkOwnershipStore {
     }
 
     @Override
-    public java.util.Set<String> codesOwnedBy(Long userId) {
+    public Set<String> codesOwnedBy(Long userId) {
       return owners.entrySet().stream()
           .filter(e -> userId.equals(e.getValue()))
           .map(Map.Entry::getKey)
-          .collect(java.util.stream.Collectors.toUnmodifiableSet());
+          .collect(Collectors.toUnmodifiableSet());
     }
   }
 }

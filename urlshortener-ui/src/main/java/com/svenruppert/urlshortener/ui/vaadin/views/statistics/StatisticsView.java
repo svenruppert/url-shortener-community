@@ -44,6 +44,8 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks;
+import java.util.Set;
 
 
 /**
@@ -129,7 +131,7 @@ public class StatisticsView
       LocalDate from = statisticsToolbar.getFromDate();
       LocalDate to = statisticsToolbar.getToDate();
       StatisticsClient.ExportZipDownload download =
-          statisticsClient.exportAsZipDownload(from, to, java.util.Set.of());
+          statisticsClient.exportAsZipDownload(from, to, Set.of());
       return new DownloadResponse(download.inputStreamFactory().get(),
                                   download.filename(),
                                   MediaType.APPLICATION_ZIP.mime(),
@@ -247,8 +249,8 @@ public class StatisticsView
       String url = item.mapping().originalUrl();
       // SEC-L8/L9 (V00.17.00 P090): noopener rel + scheme allowlist — an
       // unsafe scheme renders as inert text instead of a clickable href.
-      Anchor a = com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks.isSafeHref(url)
-          ? com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks.externalAnchor(url, url)
+      Anchor a = UiLinks.isSafeHref(url)
+          ? UiLinks.externalAnchor(url, url)
           : new Anchor("", url);
       a.addClassName(C_URL_ANCHOR);
       a.getElement().setProperty("title", url);

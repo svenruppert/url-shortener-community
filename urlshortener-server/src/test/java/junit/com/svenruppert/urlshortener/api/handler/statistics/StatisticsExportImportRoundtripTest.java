@@ -19,6 +19,7 @@ import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.time.LocalTime;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.STATISTICS_EXPORT_NDJSON_ENTRY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -155,7 +156,7 @@ class StatisticsExportImportRoundtripTest {
   }
 
   private void record(InMemoryStatisticsStore store, String code, LocalDate date, int hour) {
-    Instant ts = LocalDateTime.of(date, java.time.LocalTime.of(hour, 0, 0)).toInstant(ZoneOffset.UTC);
+    Instant ts = LocalDateTime.of(date, LocalTime.of(hour, 0, 0)).toInstant(ZoneOffset.UTC);
     store.recordEvent(RedirectEvent.minimal(code, ts));
   }
 

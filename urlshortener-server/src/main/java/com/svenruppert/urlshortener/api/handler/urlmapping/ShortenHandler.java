@@ -17,6 +17,9 @@ import com.svenruppert.urlshortener.core.urlmapping.ShortenRequest;
 import com.svenruppert.urlshortener.core.validation.UrlValidator;
 
 import java.io.IOException;
+import com.svenruppert.dependencies.core.net.HttpStatus;
+import com.svenruppert.urlshortener.api.security.LinkOwnershipStore;
+import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
 import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
@@ -76,9 +79,9 @@ public class ShortenHandler
       urlMappingResult
           .peek(success -> {
             logger().info("mapping created success {}", success.toString());
-            com.svenruppert.urlshortener.api.security.LinkOwnershipStore.INSTANCE.record(
+            LinkOwnershipStore.INSTANCE.record(
                 success.shortCode(),
-                com.svenruppert.urlshortener.api.security.OwnerGuard.currentUserId(ex));
+                OwnerGuard.currentUserId(ex));
             // plug-in hook (V00.18.00 P085): create-time metadata rides along
             // in the raw JSON; without a plug-in this is a no-op
             hooks.linkCreated(success.shortCode(), body, false);
@@ -105,7 +108,7 @@ public class ShortenHandler
             final Headers h = ex.getResponseHeaders();
             h.add("Location", "/r/" + mapping.shortCode());
             try {
-              SuccessResponses.withStatus(ex, com.svenruppert.dependencies.core.net.HttpStatus.CREATED.code(), mapping);
+              SuccessResponses.withStatus(ex, HttpStatus.CREATED.code(), mapping);
             } catch (IOException e) {
               throw new RuntimeException(e);
             }

@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.*;
 import static com.svenruppert.urlshortener.core.JsonUtils.parseJson;
@@ -38,7 +39,7 @@ public final class ColumnVisibilityClient
 
   private final String baseUrl;      // e.g. "http://localhost:8080"
   private final HttpClient http;
-  private java.util.function.Supplier<String> bearerToken = AuthContext::getGlobalToken;
+  private Supplier<String> bearerToken = AuthContext::getGlobalToken;
 
   public ColumnVisibilityClient() {
     this(ADMIN_SERVER_URL);
@@ -60,7 +61,7 @@ public final class ColumnVisibilityClient
   }
 
   /** Session-scoped token source (e.g. Vaadin session) instead of the global default. */
-  public ColumnVisibilityClient withBearerToken(java.util.function.Supplier<String> tokenSupplier) {
+  public ColumnVisibilityClient withBearerToken(Supplier<String> tokenSupplier) {
     this.bearerToken = tokenSupplier;
     return this;
   }

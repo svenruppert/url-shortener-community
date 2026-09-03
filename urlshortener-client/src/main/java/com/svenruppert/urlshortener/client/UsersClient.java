@@ -16,6 +16,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.function.Function;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.ADMIN_SERVER_URL;
 import static com.svenruppert.urlshortener.core.DefaultValues.AUTHORIZATION_HEADER;
@@ -96,7 +97,7 @@ public class UsersClient
   }
 
   private <T> Result<T, String> send(HttpRequest request, HttpStatus expected,
-                                     java.util.function.Function<String, T> parser) {
+                                     Function<String, T> parser) {
     try {
       HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() != expected.code()) {

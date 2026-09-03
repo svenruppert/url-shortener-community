@@ -41,6 +41,8 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.util.Locale;
+import com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry;
+import com.svenruppert.urlshortener.ui.vaadin.security.CurrentUser;
 
 import static com.vaadin.flow.component.icon.VaadinIcon.*;
 
@@ -128,7 +130,7 @@ public class MainLayout
     addToNavbar(viewHeader);
     // Open-core seam (V00.18.00 P030): navbar components contributed by
     // plug-in jars — a no-op without plug-ins on the classpath.
-    com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry.navbarComponents()
+    FeatureRegistry.navbarComponents()
         .forEach(contribution -> addToNavbar(contribution.create()));
 
     setPrimarySection(Section.DRAWER);
@@ -156,9 +158,9 @@ public class MainLayout
     // Open-core seam (V00.18.00 P030): drawer entries contributed by plug-in
     // jars, appended after the community entries. Visibility is a UI nicety —
     // access control stays server-side.
-    for (var item : com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry.menuItems()) {
+    for (var item : FeatureRegistry.menuItems()) {
       if (item.adminOnly() && !isCurrentUserAdmin()
-          && !com.svenruppert.urlshortener.ui.vaadin.security.CurrentUser
+          && !CurrentUser
               .hasAnyRole(item.alsoVisibleFor())) {
         continue;
       }
@@ -170,7 +172,7 @@ public class MainLayout
   }
 
   private static boolean isCurrentUserAdmin() {
-    return com.svenruppert.urlshortener.ui.vaadin.security.CurrentUser.isAdmin();
+    return CurrentUser.isAdmin();
   }
 
   private Component createLanguageSwitch() {

@@ -13,6 +13,8 @@ import com.svenruppert.urlshortener.core.urlmapping.ToggleActive.ToggleActiveReq
 import com.svenruppert.urlshortener.core.urlmapping.ToggleActive.ToggleActiveResponse;
 
 import java.io.IOException;
+import com.svenruppert.dependencies.core.net.HttpStatus;
+import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
 import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
@@ -58,9 +60,9 @@ public class ToggleActiveHandler
       }
       // SEC-H2 (V00.17.00 P030): only the owner or link:read:all may toggle —
       // without this check any USER could deactivate foreign links.
-      if (!com.svenruppert.urlshortener.api.security.OwnerGuard.canManage(ex, shortCode)) {
+      if (!OwnerGuard.canManage(ex, shortCode)) {
         logger().info("toggle denied — not owner of '{}'", shortCode);
-        ErrorResponses.withStatus(ex, com.svenruppert.dependencies.core.net.HttpStatus.FORBIDDEN,
+        ErrorResponses.withStatus(ex, HttpStatus.FORBIDDEN,
             "not the owner of this alias");
         return;
       }

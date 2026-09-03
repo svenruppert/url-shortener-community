@@ -37,6 +37,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.*;
+import com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks;
 
 /**
  * Detail view showing statistics for a specific shortcode.
@@ -192,7 +193,7 @@ public class StatisticsDetailView
         shortCodeLabel.setText(shortCode);
         urlAnchor.setText(mapping.get().originalUrl());
         // SEC-L9: unsafe schemes stay text-only.
-        if (com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks.isSafeHref(mapping.get().originalUrl())) {
+        if (UiLinks.isSafeHref(mapping.get().originalUrl())) {
           urlAnchor.setHref(mapping.get().originalUrl());
         }
       } else {

@@ -7,6 +7,8 @@ import org.eclipse.store.storage.types.StorageManager;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * EclipseStore-backed link-ownership backend: entries live in
@@ -59,10 +61,10 @@ public final class EclipseLinkOwnershipStore
   }
 
   @Override
-  public java.util.Set<String> codesOwnedBy(Long userId) {
+  public Set<String> codesOwnedBy(Long userId) {
     return owners().entrySet().stream()
         .filter(e -> userId.equals(e.getValue()))
         .map(Map.Entry::getKey)
-        .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        .collect(Collectors.toUnmodifiableSet());
   }
 }

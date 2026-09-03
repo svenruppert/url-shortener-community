@@ -5,6 +5,7 @@ import eu.jsentinel.jcustos.authorization.api.JCustosSubject;
 import eu.jsentinel.jcustos.authorization.api.permissions.PermissionName;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Link-owner enforcement (P210, hardened in V00.17.00 P030). A short code may
@@ -51,7 +52,7 @@ public final class OwnerGuard {
    * otherwise the normalized codes the caller owns — possibly empty, which
    * matches nothing.
    */
-  public static java.util.Set<String> readRestriction(HttpExchange exchange) {
+  public static Set<String> readRestriction(HttpExchange exchange) {
     if (canReadAll(exchange)) {
       return null;
     }

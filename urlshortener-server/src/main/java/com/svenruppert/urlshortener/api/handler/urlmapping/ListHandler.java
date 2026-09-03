@@ -23,6 +23,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import com.svenruppert.dependencies.core.net.HttpStatus;
+import com.svenruppert.urlshortener.api.security.OwnerGuard;
+import com.svenruppert.urlshortener.core.AliasPolicy;
+import java.util.LinkedHashSet;
 
 import static com.svenruppert.dependencies.core.net.HttpStatus.OK;
 import static com.svenruppert.urlshortener.api.handler.urlmapping.exports.ZipWriter.writeZipStream;
@@ -55,10 +59,10 @@ public class ListHandler
    */
   private Set<String> combinedRestriction(Map<String, List<String>> query, HttpExchange ex) {
     Set<String> contributed = hooks.listRestriction(query);
-    Set<String> owned = com.svenruppert.urlshortener.api.security.OwnerGuard.readRestriction(ex);
+    Set<String> owned = OwnerGuard.readRestriction(ex);
     if (owned == null) return contributed;
     if (contributed == null) return owned;
-    Set<String> both = new java.util.LinkedHashSet<>(contributed);
+    Set<String> both = new LinkedHashSet<>(contributed);
     both.retainAll(owned);
     return both;
   }
@@ -105,7 +109,7 @@ public class ListHandler
     } else {
       if (!RequestMethodUtils.requireGet(ex)) return;
       // SEC-M2: the fixed list modes are owner-scoped too (null = admin).
-      Set<String> owned = com.svenruppert.urlshortener.api.security.OwnerGuard.readRestriction(ex);
+      Set<String> owned = OwnerGuard.readRestriction(ex);
       String responseJson;
       if (path.endsWith(PATH_ADMIN_LIST_ALL)) {
         responseJson = listAll(owned);
@@ -119,7 +123,7 @@ public class ListHandler
         responseJson = listFiltered(ex);
       } else {
         logger().info("undefined path {}", path);
-        ex.sendResponseHeaders(com.svenruppert.dependencies.core.net.HttpStatus.NOT_FOUND.code(), -1);
+        ex.sendResponseHeaders(HttpStatus.NOT_FOUND.code(), -1);
         return;
       }
       SuccessResponses.okJson(ex, responseJson);
@@ -197,7 +201,7 @@ public class ListHandler
     return owned == null
         ? _ -> true
         : m -> owned.contains(
-            com.svenruppert.urlshortener.core.AliasPolicy.normalize(m.shortCode()));
+            AliasPolicy.normalize(m.shortCode()));
   }
 
   private String listAll(Set<String> owned) {

@@ -45,6 +45,11 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import com.svenruppert.urlshortener.core.DefaultValues;
+import com.svenruppert.urlshortener.ui.vaadin.components.ExpiryBadgeFactory;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Two-phase Bulk-Create workflow:
@@ -218,7 +223,7 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
       if (url != null && url.startsWith("http://")) {
         return UiLinks.httpAwareLink(url, url);
       }
-      return new com.vaadin.flow.component.html.Span(url != null ? url : "");
+      return new Span(url != null ? url : "");
     })
         .setHeader(tr(K_COL_URL, "Original URL"))
         .setFlexGrow(3)
@@ -227,7 +232,7 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
     // Short URL column — shown after creation
     resultsGrid.addComponentColumn(item -> {
       if (item.getCreatedShortUrl() != null) {
-        final var link = com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks
+        final var link = UiLinks
             .externalAnchor(item.getCreatedShortUrl(), item.getCreatedShortUrl());
         return link;
       }
@@ -469,7 +474,7 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
 
     // Items not being re-validated represent the full established work set for
     // DUPLICATE_IN_GRID detection — includes VALID, HAS_EXISTING, CREATED, CREATE_FAILED
-    final java.util.Set<WorkItem> toRevalidateSet = new java.util.HashSet<>(blockingItems);
+    final Set<WorkItem> toRevalidateSet = new HashSet<>(blockingItems);
     final List<String> existingUrls = workItems.stream()
         .filter(w -> !toRevalidateSet.contains(w) && !w.getUrl().isBlank())
         .map(WorkItem::getUrl)
@@ -615,7 +620,7 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
       // Enriched display: show active/expiry status + protocol variant warning
       for (final ExistingShortlinkInfo info : infos) {
         final String fullUrl =
-            com.svenruppert.urlshortener.core.DefaultValues.SHORTCODE_BASE_URL + info.getShortCode();
+            DefaultValues.SHORTCODE_BASE_URL + info.getShortCode();
 
         final var linkRow = new HorizontalLayout();
         linkRow.setSpacing(false);
@@ -633,8 +638,8 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
         linkRow.add(activeBadge);
 
         // Expiry badge
-        final var expiryStatus = com.svenruppert.urlshortener.ui.vaadin.components.ExpiryBadgeFactory
-            .computeStatusText(java.util.Optional.ofNullable(info.getExpiresAt()));
+        final var expiryStatus = ExpiryBadgeFactory
+            .computeStatusText(Optional.ofNullable(info.getExpiresAt()));
         final var expiryBadge = new Span(expiryStatus.text());
         expiryBadge.getElement().getThemeList().add("badge pill small");
         expiryBadge.getElement().getThemeList().add(expiryStatus.theme());
@@ -655,8 +660,8 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
       // Fallback: just show links (no enriched info available)
       for (final String code : shortCodes) {
         final String fullUrl =
-            com.svenruppert.urlshortener.core.DefaultValues.SHORTCODE_BASE_URL + code;
-        final var link = com.svenruppert.urlshortener.ui.vaadin.tools.UiLinks
+            DefaultValues.SHORTCODE_BASE_URL + code;
+        final var link = UiLinks
             .externalAnchor(fullUrl, fullUrl);
         content.add(link);
       }

@@ -17,6 +17,12 @@ import com.svenruppert.urlshortener.api.security.storage.AppStoragePaths;
 
 import java.nio.file.Path;
 import java.time.Clock;
+import com.svenruppert.dependencies.core.logger.HasLogger;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.EnumSet;
 
 /**
  * Wires the first-admin bootstrap flow (PRE-REBUILD-SCOPE Kap. 2.8).
@@ -101,21 +107,21 @@ public final class BootstrapWiring {
    * ({@code rw-------}). Enforced here because the jCustos token store does
    * not guarantee it; skipped on file systems without POSIX permissions.
    */
-  public static void enforceOwnerOnlyPermissions(java.nio.file.Path tokenFile) {
+  public static void enforceOwnerOnlyPermissions(Path tokenFile) {
     try {
-      if (tokenFile == null || !java.nio.file.Files.exists(tokenFile)) {
+      if (tokenFile == null || !Files.exists(tokenFile)) {
         return;
       }
-      var view = java.nio.file.Files.getFileAttributeView(
-          tokenFile, java.nio.file.attribute.PosixFileAttributeView.class);
+      var view = Files.getFileAttributeView(
+          tokenFile, PosixFileAttributeView.class);
       if (view == null) {
         return; // non-POSIX file system (e.g. Windows ACLs)
       }
-      view.setPermissions(java.util.EnumSet.of(
-          java.nio.file.attribute.PosixFilePermission.OWNER_READ,
-          java.nio.file.attribute.PosixFilePermission.OWNER_WRITE));
-    } catch (java.io.IOException e) {
-      com.svenruppert.dependencies.core.logger.HasLogger.staticLogger()
+      view.setPermissions(EnumSet.of(
+          PosixFilePermission.OWNER_READ,
+          PosixFilePermission.OWNER_WRITE));
+    } catch (IOException e) {
+      HasLogger.staticLogger()
           .warn("could not restrict bootstrap-token file permissions: {}", e.getMessage());
     }
   }

@@ -18,6 +18,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Optional;
+import com.svenruppert.dependencies.core.net.HttpStatus;
+import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
 import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
 
@@ -57,9 +59,9 @@ public class EditMappingHandler
 
       // SEC-H1 (V00.17.00 P030): only the owner or link:read:all may edit —
       // without this check any USER could hijack a foreign link's target URL.
-      if (!com.svenruppert.urlshortener.api.security.OwnerGuard.canManage(ex, shortCode)) {
+      if (!OwnerGuard.canManage(ex, shortCode)) {
         logger().info("edit denied — not owner of '{}'", shortCode);
-        ErrorResponses.withStatus(ex, com.svenruppert.dependencies.core.net.HttpStatus.FORBIDDEN,
+        ErrorResponses.withStatus(ex, HttpStatus.FORBIDDEN,
             "not the owner of this alias");
         return;
       }

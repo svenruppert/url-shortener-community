@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import com.svenruppert.urlshortener.api.utils.JsonWriter;
 
 import static com.svenruppert.urlshortener.api.handler.urlmapping.imports.ZipImportReader.extractExportJson;
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBodyBytes;
@@ -63,7 +64,7 @@ public final class ImportValidateHandler
    * raw newline produced structurally broken preview JSON.
    */
   private static String escape(String v) {
-    return v == null ? "" : com.svenruppert.urlshortener.api.utils.JsonWriter.escapeJsonString(v);
+    return v == null ? "" : JsonWriter.escapeJsonString(v);
   }
 
   private static String buildPreviewFullJson(String stagingId, ImportStaging s) {

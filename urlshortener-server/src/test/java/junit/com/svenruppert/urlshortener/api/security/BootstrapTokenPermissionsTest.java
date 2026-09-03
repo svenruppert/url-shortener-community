@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.EnumSet;
+import java.nio.file.attribute.PosixFileAttributeView;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,7 +31,7 @@ class BootstrapTokenPermissionsTest {
         PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE,
         PosixFilePermission.GROUP_READ, PosixFilePermission.OTHERS_READ));
     assumeTrue(Files.getFileAttributeView(token,
-        java.nio.file.attribute.PosixFileAttributeView.class) != null,
+        PosixFileAttributeView.class) != null,
         "POSIX permissions unsupported on this file system");
 
     BootstrapWiring.enforceOwnerOnlyPermissions(token);

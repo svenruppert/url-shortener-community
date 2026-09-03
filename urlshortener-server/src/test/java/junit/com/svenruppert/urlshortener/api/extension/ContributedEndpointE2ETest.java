@@ -15,6 +15,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
+import com.svenruppert.urlshortener.api.security.model.InMemoryUserDirectory;
+import com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider;
 
 import static com.svenruppert.dependencies.core.net.HttpStatus.OK;
 import static com.svenruppert.dependencies.core.net.HttpStatus.UNAUTHORIZED;
@@ -41,9 +43,9 @@ class ContributedEndpointE2ETest
   @BeforeAll
   static void startServer()
       throws Exception {
-    com.svenruppert.urlshortener.api.security.model.UserDirectoryProvider
+    UserDirectoryProvider
         .setDirectorySupplier(
-            com.svenruppert.urlshortener.api.security.model.InMemoryUserDirectory::new);
+            InMemoryUserDirectory::new);
     server = new ShortenerServer();
     server.init(DEFAULT_SERVER_HOST, 0);
     baseUrlAdmin = ADMIN_SERVER_PROTOCOL + "://" + ADMIN_SERVER_HOST + ":" + server.getPortAdmin();

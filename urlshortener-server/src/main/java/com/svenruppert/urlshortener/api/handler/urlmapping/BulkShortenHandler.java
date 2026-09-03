@@ -21,6 +21,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import com.svenruppert.urlshortener.api.security.LinkOwnershipStore;
+import com.svenruppert.urlshortener.api.security.OwnerGuard;
+import com.svenruppert.urlshortener.core.DefaultValues;
 
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
 import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
@@ -118,9 +121,9 @@ public class BulkShortenHandler implements HttpHandler, HasLogger {
         if (mappingResult.isSuccess()) {
           final var mapping   = mappingResult.getOrThrow();
           final String shortUrl = resolveShortUrl(mapping.shortCode());
-          com.svenruppert.urlshortener.api.security.LinkOwnershipStore.INSTANCE.record(
+          LinkOwnershipStore.INSTANCE.record(
               mapping.shortCode(),
-              com.svenruppert.urlshortener.api.security.OwnerGuard.currentUserId(ex));
+              OwnerGuard.currentUserId(ex));
           // plug-in hook (V00.18.00 P085): batch-wide metadata rides along in
           // the raw JSON; without a plug-in this is a no-op
           hooks.linkCreated(mapping.shortCode(), body, true);
@@ -161,6 +164,6 @@ public class BulkShortenHandler implements HttpHandler, HasLogger {
    * Uses the configured base URL from {@link com.svenruppert.urlshortener.core.DefaultValues}.
    */
   private static String resolveShortUrl(String shortCode) {
-    return com.svenruppert.urlshortener.core.DefaultValues.SHORTCODE_BASE_URL + shortCode;
+    return DefaultValues.SHORTCODE_BASE_URL + shortCode;
   }
 }

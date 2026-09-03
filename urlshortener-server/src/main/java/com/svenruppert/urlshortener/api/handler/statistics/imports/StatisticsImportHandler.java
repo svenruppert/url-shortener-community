@@ -14,6 +14,7 @@ import com.svenruppert.urlshortener.core.statistics.StatisticsImportResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import com.svenruppert.dependencies.core.net.HttpStatus;
 
 import static com.svenruppert.urlshortener.api.utils.QueryUtils.first;
 import static com.svenruppert.urlshortener.api.utils.QueryUtils.parseQueryParams;
@@ -95,7 +96,7 @@ public class StatisticsImportHandler
     } catch (StatisticsImportReader.SizeLimitExceededException tooLarge) {
       logger().warn("Statistics import rejected — {}", tooLarge.getMessage());
       ErrorResponses.withStatus(ex,
-          com.svenruppert.dependencies.core.net.HttpStatus.CONTENT_TOO_LARGE,
+          HttpStatus.CONTENT_TOO_LARGE,
           tooLarge.getMessage());
     } catch (IOException e) {
       logger().warn("Statistics import failed", e);
