@@ -72,6 +72,7 @@ public class ShortenerServer
 
   private HttpServer serverRedirect;
   private HttpServer serverAdmin;
+  private com.svenruppert.urlshortener.api.extension.ServerContext serverContext;
 
   public static void main(String[] args)
       throws IOException {
@@ -209,6 +210,7 @@ public class ShortenerServer
     // feature store. A plug-in-free classpath yields empty hooks.
     var serverContext = new com.svenruppert.urlshortener.api.extension.ServerContext(
         urlMappingStore, linkMetaStorage, statisticsStore, preferencesStore, storageAdmin);
+    this.serverContext = serverContext;
     var lifecycleHooks = com.svenruppert.urlshortener.api.extension.LinkLifecycleHooks.discover(serverContext);
 
     logger().info("Starting URL Shortener server (redirect) with parameters: host={}, port={}", hostRedirect, portRedirect);
@@ -374,6 +376,16 @@ public class ShortenerServer
       serverAdmin.stop(0);
       logger().info("URL Shortener server stopped (admin)");
     }
+  }
+
+  /**
+   * The plug-in context of the running server — the same object every
+   * {@code HandlerContribution} receives. Exposed for integration tests and
+   * tooling that need to reach the open-core seams of a live server;
+   * {@code null} before {@code init(...)} ran.
+   */
+  public com.svenruppert.urlshortener.api.extension.ServerContext serverContext() {
+    return serverContext;
   }
 
   public int getPortRedirect() {

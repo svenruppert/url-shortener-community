@@ -9,5 +9,12 @@ package com.svenruppert.urlshortener.api.security.roles;
  */
 public enum AuthorizationRole {
   ADMIN,
-  USER
+  USER,
+  /**
+   * Read-only analyst on assigned campaigns (V00.19.00 P050): may open the
+   * aggregated reports, but only over the links of the campaigns assigned to
+   * them. Holds no manage permission and no {@code link:read:all}, which is
+   * exactly what makes the row-level scoping bite.
+   */
+  CAMPAIGN_ANALYST
 }

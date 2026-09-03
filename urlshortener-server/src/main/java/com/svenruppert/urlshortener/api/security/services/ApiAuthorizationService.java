@@ -54,6 +54,17 @@ public class ApiAuthorizationService
       PREFERENCES_COLUMNS_SINGLE.permissionName(),
       CAMPAIGN_MANAGE.permissionName());
 
+  /**
+   * The campaign analyst (V00.19.00 P050) reads reports and nothing else.
+   * Deliberately NOT in this set: {@code link:read:all} — its absence is what
+   * makes the row-level scoping bite, because the analytics endpoint narrows
+   * the window to the caller's assigned campaigns whenever the caller may not
+   * read everything. Also absent: every manage permission and
+   * {@code analystScopeManage}, so an analyst can never widen their own scope.
+   */
+  private static final Set<PermissionName> ANALYST_PERMISSIONS = Set.of(
+      ANALYTICS_READ.permissionName());
+
   private static final Set<PermissionName> ADMIN_PERMISSIONS =
       EnumSet.allOf(ApiPermission.class).stream()
           .map(ApiPermission::permissionName)
@@ -62,6 +73,7 @@ public class ApiAuthorizationService
   private static final RolePermissionMapping ROLE_PERMISSIONS = StaticRolePermissionMapping.builder()
       .put(roleName(AuthorizationRole.ADMIN), ADMIN_PERMISSIONS)
       .put(roleName(AuthorizationRole.USER), USER_PERMISSIONS)
+      .put(roleName(AuthorizationRole.CAMPAIGN_ANALYST), ANALYST_PERMISSIONS)
       .build();
 
   @Override

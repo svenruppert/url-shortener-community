@@ -33,6 +33,13 @@ public interface LinkMetaStorage {
   /** Tag registry (keys are the defined tags, including empty ones). */
   Map<String, Boolean> knownTags();
 
+  /**
+   * Campaign-scoped analyst access (V00.19.00 P050): user id -&gt; the campaign
+   * ids that user may see. A user without an entry sees nothing, never
+   * everything — an empty scope must not silently widen to "all".
+   */
+  Map<String, Set<String>> analystCampaigns();
+
   /** Persists the maps after a mutation; no-op for the in-memory profile. */
   void persist();
 }

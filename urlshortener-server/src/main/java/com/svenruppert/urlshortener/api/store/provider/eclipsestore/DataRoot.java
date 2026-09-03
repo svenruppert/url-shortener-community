@@ -62,6 +62,10 @@ public class DataRoot
   private Map<String, String> linkLabels = new ConcurrentHashMap<>();          // shortCode -> placement label
   private Map<String, Boolean> knownTags = new ConcurrentHashMap<>();          // tag registry (incl. empty tags)
 
+  // Campaign-scoped analyst access (V00.19.00 P050): userId -> assigned campaign ids.
+  // Community code never reads this; the analytics plug-in does, through the seam.
+  private Map<String, Set<String>> analystCampaigns = new ConcurrentHashMap<>();
+
   // Link ownership (V00.17.00 P020): normalized shortCode -> owning user id.
   // Not final for backward-compat init on load (see ensureStatisticsInitialized).
   private Map<String, Long> linkOwners = new ConcurrentHashMap<>();
@@ -126,6 +130,10 @@ public class DataRoot
       knownTags = new ConcurrentHashMap<>();
       modified = true;
     }
+    if (analystCampaigns == null) {
+      analystCampaigns = new ConcurrentHashMap<>();
+      modified = true;
+    }
     if (linkOwners == null) {
       linkOwners = new ConcurrentHashMap<>();
       modified = true;
@@ -155,6 +163,10 @@ public class DataRoot
 
   public Map<String, Boolean> knownTags() {
     return knownTags;
+  }
+
+  public Map<String, Set<String>> analystCampaigns() {
+    return analystCampaigns;
   }
 
   public Map<String, Long> linkOwners() {

@@ -16,6 +16,7 @@ public final class InMemoryLinkMetaStorage
   private final Map<String, Set<String>> linkTags = new ConcurrentHashMap<>();
   private final Map<String, String> linkLabels = new ConcurrentHashMap<>();
   private final Map<String, Boolean> knownTags = new ConcurrentHashMap<>();
+  private final Map<String, Set<String>> analystCampaigns = new ConcurrentHashMap<>();
 
   @Override
   public Map<String, Campaign> campaigns() {
@@ -40,6 +41,11 @@ public final class InMemoryLinkMetaStorage
   @Override
   public Map<String, Boolean> knownTags() {
     return knownTags;
+  }
+
+  @Override
+  public Map<String, Set<String>> analystCampaigns() {
+    return analystCampaigns;
   }
 
   @Override

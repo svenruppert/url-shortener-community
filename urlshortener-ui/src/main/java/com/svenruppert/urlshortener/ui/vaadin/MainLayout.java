@@ -157,7 +157,9 @@ public class MainLayout
     // jars, appended after the community entries. Visibility is a UI nicety —
     // access control stays server-side.
     for (var item : com.svenruppert.urlshortener.ui.vaadin.extension.FeatureRegistry.menuItems()) {
-      if (item.adminOnly() && !isCurrentUserAdmin()) {
+      if (item.adminOnly() && !isCurrentUserAdmin()
+          && !com.svenruppert.urlshortener.ui.vaadin.security.CurrentUser
+              .hasAnyRole(item.alsoVisibleFor())) {
         continue;
       }
       sideNav.addItem(item.icon() == null

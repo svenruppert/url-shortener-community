@@ -54,11 +54,17 @@ public final class EclipseLinkMetaStorage
   }
 
   @Override
+  public Map<String, Set<String>> analystCampaigns() {
+    return dataRoot().analystCampaigns();
+  }
+
+  @Override
   public void persist() {
     storage.store(dataRoot().campaigns());
     storage.store(dataRoot().campaignOfLink());
     storage.store(dataRoot().linkTags());
     storage.store(dataRoot().linkLabels());
     storage.store(dataRoot().knownTags());
+    storage.store(dataRoot().analystCampaigns());
   }
 }

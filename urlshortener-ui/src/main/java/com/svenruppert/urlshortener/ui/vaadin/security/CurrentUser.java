@@ -13,8 +13,20 @@ public final class CurrentUser {
 
   /** @return true if the signed-in user carries the ADMIN role. */
   public static boolean isAdmin() {
+    return hasAnyRole(AppRole.ADMIN);
+  }
+
+  /** @return true if the signed-in user carries at least one of {@code roles}. */
+  public static boolean hasAnyRole(AppRole... roles) {
+    if (roles == null || roles.length == 0) return false;
     return SubjectStores.subjectStore().currentSubject(AppUser.class)
-        .map(user -> user.roles().contains(AppRole.ADMIN))
+        .map(user -> java.util.Arrays.stream(roles).anyMatch(user.roles()::contains))
         .orElse(false);
+  }
+
+  /** @return true if the signed-in user carries at least one of {@code roles}. */
+  public static boolean hasAnyRole(java.util.Collection<AppRole> roles) {
+    if (roles == null || roles.isEmpty()) return false;
+    return hasAnyRole(roles.toArray(new AppRole[0]));
   }
 }

@@ -68,6 +68,12 @@ public enum ApiPermission {
    * analyst role gets this permission plus a scope of its own.
    */
   ANALYTICS_READ("analyticsRead"),
+  /**
+   * Assign campaigns to an analyst. Separate from {@link #ANALYTICS_READ} on
+   * purpose: an analyst reads reports but must never be able to widen their
+   * own scope.
+   */
+  ANALYST_SCOPE_MANAGE("analystScopeManage"),
   LIST_AUDIT("listAudit"),
   LIST_USERS("listUsers"),
   BULK_CREATE_USERS("bulkCreateUsers"),
