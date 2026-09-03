@@ -60,6 +60,14 @@ public enum ApiPermission {
    * USER set.
    */
   EVENTS_SUBSCRIBE("events:subscribe"),
+  /**
+   * Read the aggregated analytics reports. The reports ship as an enterprise
+   * plug-in; the permission lives here because the role table is
+   * community-owned — same split as {@link #BACKUP_MANAGE}. Admin-only for
+   * now: the reports aggregate across every owner's links. A campaign-scoped
+   * analyst role gets this permission plus a scope of its own.
+   */
+  ANALYTICS_READ("analyticsRead"),
   LIST_AUDIT("listAudit"),
   LIST_USERS("listUsers"),
   BULK_CREATE_USERS("bulkCreateUsers"),
