@@ -13,7 +13,6 @@ import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.svenruppert.dependencies.core.net.HttpStatus.INTERNAL_SERVER_ERROR;
 import static com.svenruppert.urlshortener.core.DefaultValues.*;
 
 public class ZipWriter
@@ -51,11 +50,17 @@ public class ZipWriter
     h.add(CONTENT_DISPOSITION, "attachment; filename=\"" + downloadFileName + "\"");
     h.add("X-Content-Type-Options", "nosniff");
 
+    // From here on the status line is gone: 200 and chunked encoding are on the
+    // wire before the first byte of content, and HTTP offers no way to take that
+    // back. The previous version tried a second sendResponseHeaders(500, …) in
+    // the catch — that call cannot succeed and its failure was swallowed, so a
+    // failed export reached the client as "200 OK" plus a truncated archive.
     ex.sendResponseHeaders(httpStatus.code(), 0);
 
-    try (OutputStream os = ex.getResponseBody();
-         ZipOutputStream zip = new ZipOutputStream(os, StandardCharsets.UTF_8)) {
-
+    OutputStream os = ex.getResponseBody();
+    ZipOutputStream zip = new ZipOutputStream(os, StandardCharsets.UTF_8);
+    boolean complete = false;
+    try {
       ZipEntry entry = new ZipEntry(zipEntryName);
       entry.setTime(System.currentTimeMillis());
       zip.putNextEntry(entry);
@@ -64,40 +69,36 @@ public class ZipWriter
       writer.writeTo(zip);
 
       zip.closeEntry();
+      // finish() writes the central directory — the part that makes the bytes a
+      // readable archive. It happens ONLY here, on the success path.
       zip.finish();
+      complete = true;
 
     } catch (Exception e) {
-      HasLogger.staticLogger().info("writeZipStream (catch) {}", e.getMessage());
-
-      try {
-        byte[] body = ("{\"error\":\"" + escapeJson(e.getMessage()) + "\"}")
-            .getBytes(StandardCharsets.UTF_8);
-        ex.getResponseHeaders().set(CONTENT_TYPE, MediaType.APPLICATION_JSON.withCharsetUtf8());
-        ex.sendResponseHeaders(INTERNAL_SERVER_ERROR.code(), body.length);
-        ex.getResponseBody().write(body);
-      } catch (Exception ignoredI) {
-        HasLogger.staticLogger().info("writeZipStream (catch - ignored I) {} ", ignoredI.getMessage());
-      }
+      // Deliberately leave the archive unfinished: without a central directory
+      // no zip reader accepts the file, so a failed export fails loudly at the
+      // consumer instead of being filed away as a valid backup. Closing the
+      // ZipOutputStream would call finish() and hand out exactly the
+      // valid-looking, incomplete archive this is meant to prevent.
+      HasLogger.staticLogger().error(
+          "export aborted after the response had started — leaving the archive "
+          + "unfinished on purpose (entry={}, file={})", zipEntryName, downloadFileName, e);
 
     } finally {
-      try {
-        ex.close();
-      } catch (Exception ignoredII) {
-        HasLogger.staticLogger().info("writeZipStream (finally - ignored II) {} ", ignoredII.getMessage());
-      }
+      // Only the raw stream is closed; `zip` is never closed, precisely so that
+      // finish() cannot run on the failure path.
+      closeQuietly(os, "response stream");
+      closeQuietly(ex::close, "exchange");
+      HasLogger.staticLogger().debug("writeZipStream done, complete={}", complete);
     }
   }
 
-  /**
-   * Minimal JSON string escaping to avoid breaking the fallback error payload.
-   */
-  private static String escapeJson(String s) {
-    if (s == null) return "";
-    return s.replace("\\", "\\\\")
-        .replace("\"", "\\\"")
-        .replace("\n", "\\n")
-        .replace("\r", "\\r")
-        .replace("\t", "\\t");
+  private static void closeQuietly(AutoCloseable closeable, String what) {
+    try {
+      closeable.close();
+    } catch (Exception e) {
+      HasLogger.staticLogger().debug("closing {} failed: {}", what, e.toString());
+    }
   }
 
   @FunctionalInterface
