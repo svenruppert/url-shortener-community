@@ -39,7 +39,12 @@ public class RedirectHandler
   @Override
   public void handle(HttpExchange exchange)
       throws IOException {
-    if (!RequestMethodUtils.requireGet(exchange)) return;
+    // HEAD must answer exactly like GET, only without a body: link checkers
+    // (Microsoft SafeLinks, Teams previews, WordPress) probe short links this
+    // way and treat anything but a redirect as a broken link. Every response
+    // below already sends -1 as its length, so no branch writes a body.
+    if (!RequestMethodUtils.requireGetOrHead(exchange)) return;
+    final boolean headRequest = "HEAD".equalsIgnoreCase(exchange.getRequestMethod());
 
     // Per-IP rate limiting (P120); no-op unless a production/strict profile is active.
     if (!RateLimitGuard.INSTANCE.allow("redirect:" + RateLimitGuard.clientIp(exchange))) {
@@ -53,9 +58,14 @@ public class RedirectHandler
       exchange.sendResponseHeaders(HttpStatus.BAD_REQUEST.code(), -1);
       return;
     }
+    // The bare origin carries no short code. That is a well-formed request for
+    // something that does not exist, so it is a 404 — not a 400. Browsers,
+    // Googlebot and GPTBot all reach this path; a malformed-request answer to a
+    // perfectly formed request misreports the problem. Serving a landing page
+    // here would need a configured UI address the server does not have.
     final String code = path.substring((PATH_REDIRECT).length());
     if (code.isBlank()) {
-      exchange.sendResponseHeaders(HttpStatus.BAD_REQUEST.code(), -1);
+      exchange.sendResponseHeaders(HttpStatus.NOT_FOUND.code(), -1);
       return;
     }
     // A shortcode is a single path segment. Multi-segment paths like
@@ -89,8 +99,12 @@ public class RedirectHandler
       return;
     }
 
-    // Record the redirect event (non-blocking)
-    recordRedirectEvent(exchange, code);
+    // Record the redirect event (non-blocking). A HEAD request is a link check,
+    // not a visit — counting it would let every SafeLinks or Teams probe inflate
+    // the click figures the statistics and analytics views are built on.
+    if (!headRequest) {
+      recordRedirectEvent(exchange, code);
+    }
 
     exchange.getResponseHeaders().add("Location", mapping.originalUrl());
     exchange.sendResponseHeaders(HttpStatus.FOUND.code(), -1);

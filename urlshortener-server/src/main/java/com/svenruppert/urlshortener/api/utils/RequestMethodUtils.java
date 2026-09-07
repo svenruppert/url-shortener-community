@@ -32,6 +32,10 @@ public final class RequestMethodUtils
     HasLogger.staticLogger().debug("handle ... {} ", exchange.getRequestMethod());
     Objects.requireNonNull(exchange, "exchange");
     if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+      // RFC 9110 §15.5.6: a 405 response MUST carry an Allow header naming the
+      // methods the resource does support. Without it the caller cannot tell
+      // what to do instead.
+      exchange.getResponseHeaders().set("Allow", "GET");
       ErrorResponses.withStatus(exchange, METHOD_NOT_ALLOWED,
                                 "Only GET is allowed for this endpoint.");
 
@@ -97,6 +101,8 @@ public final class RequestMethodUtils
 
     String method = exchange.getRequestMethod();
     if (!"GET".equalsIgnoreCase(method) && !"HEAD".equalsIgnoreCase(method)) {
+      // RFC 9110 §15.5.6: a 405 MUST name the supported methods in Allow.
+      exchange.getResponseHeaders().set("Allow", "GET, HEAD");
       // keep behaviour consistent with requireGet: return a JSON error
       ErrorResponses.withStatus(exchange, METHOD_NOT_ALLOWED,
                                 "Only GET or HEAD is allowed for this endpoint.");
