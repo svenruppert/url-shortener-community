@@ -101,14 +101,18 @@ public class EclipseUrlMappingStore
   public Result<ToggleActive.ToggleActiveResponse, String> toggleActive(String shortCode, boolean newActiveValue) {
     if (shortCode == null || shortCode.isBlank())
       return Result.failure("shortCode '" + shortCode + "' is  valid");
+    // Normalise like every other lookup in this store (delete, existsByCode,
+    // findByShortCode all do). Without it an alias in a non-canonical spelling
+    // reported "not found" here while find and delete resolved it fine.
+    String normalized = normalize(shortCode);
     var urlMappings = dataRoot().shortUrlMappings();
-    if (urlMappings.containsKey(shortCode)) {
-      var urlMapping = urlMappings.get(shortCode);
+    if (urlMappings.containsKey(normalized)) {
+      var urlMapping = urlMappings.get(normalized);
       var updatedUrlMapping = urlMapping.withActive(newActiveValue);
-      urlMappings.put(shortCode, updatedUrlMapping);
+      urlMappings.put(normalized, updatedUrlMapping);
       storage.store(dataRoot().shortUrlMappings());
       logger().info("toggleActive - changes persisted in store");
-      return Result.success(new ToggleActive.ToggleActiveResponse(shortCode, updatedUrlMapping.active()));
+      return Result.success(new ToggleActive.ToggleActiveResponse(normalized, updatedUrlMapping.active()));
     } else {
       return Result.failure("shortCode " + shortCode + " not found");
     }

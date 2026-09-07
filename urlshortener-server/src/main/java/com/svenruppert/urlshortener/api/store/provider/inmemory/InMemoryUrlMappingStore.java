@@ -83,11 +83,15 @@ public class InMemoryUrlMappingStore
   public Result<ToggleActiveResponse, String> toggleActive(String shortCode, boolean newActiveValue) {
     if (shortCode == null || shortCode.isBlank())
       return Result.failure("shortCode '" + shortCode + "' is  valid");
-    if (store.containsKey(shortCode)) {
-      var urlMapping = store.get(shortCode);
+    // Normalise like every other lookup in this store (delete, existsByCode,
+    // findByShortCode all do). Without it an alias in a non-canonical spelling
+    // reported "not found" here while find and delete resolved it fine.
+    String normalized = normalize(shortCode);
+    if (store.containsKey(normalized)) {
+      var urlMapping = store.get(normalized);
       var updatedUrlMapping = urlMapping.withActive(newActiveValue);
-      store.put(shortCode, updatedUrlMapping);
-      return Result.success(new ToggleActiveResponse(shortCode, updatedUrlMapping.active()));
+      store.put(normalized, updatedUrlMapping);
+      return Result.success(new ToggleActiveResponse(normalized, updatedUrlMapping.active()));
     } else {
       return Result.failure("shortCode " + shortCode + " not found");
     }

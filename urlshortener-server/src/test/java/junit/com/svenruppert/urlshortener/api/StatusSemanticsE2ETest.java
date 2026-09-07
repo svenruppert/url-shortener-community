@@ -29,6 +29,7 @@ import static com.svenruppert.urlshortener.core.DefaultValues.CONTENT_TYPE;
 import static com.svenruppert.urlshortener.core.DefaultValues.DEFAULT_SERVER_HOST;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ADMIN_AUDIT;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ADMIN_PREFERENCES_COLUMNS_SINGLE;
+import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ADMIN_SHORTEN;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ADMIN_TOGGLE_ACTIVE;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_AUTH_LOGIN;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ME_API_KEYS;
@@ -154,6 +155,28 @@ class StatusSemanticsE2ETest {
             StandardCharsets.UTF_8)).build());
     assertEquals(NOT_FOUND.code(), res.statusCode(),
         "a well-formed request for something that does not exist is a 404: " + res.body());
+  }
+
+  @Test
+  void anAliasCanBeToggledWhateverItsSpelling()
+      throws Exception {
+    // Aliases are stored lower-cased (AliasPolicy.normalize). delete,
+    // findByShortCode and existsByCode all normalise before looking up —
+    // toggleActive was the one that did not, so a mixed-case spelling reported
+    // "not found" for a link that resolved fine everywhere else.
+    String alias = "ToggleCaseAlias";
+    var created = send(request(PATH_ADMIN_SHORTEN, adminToken)
+        .POST(HttpRequest.BodyPublishers.ofString(
+            JsonUtils.toJson(Map.of("url", "https://example.org/case", "shortURL", alias)),
+            StandardCharsets.UTF_8)).build());
+    assertEquals(201, created.statusCode(), created.body());
+
+    var res = send(request(PATH_ADMIN_TOGGLE_ACTIVE, adminToken)
+        .PUT(HttpRequest.BodyPublishers.ofString(
+            JsonUtils.toJson(Map.of("shortCode", alias, "active", "false")),
+            StandardCharsets.UTF_8)).build());
+    assertEquals(OK.code(), res.statusCode(),
+        "the alias exists — spelling must not decide whether it can be toggled: " + res.body());
   }
 
   // --- helpers ----------------------------------------------------------------
