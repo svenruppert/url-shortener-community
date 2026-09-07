@@ -14,9 +14,10 @@ import java.util.Map;
 import static com.svenruppert.dependencies.core.net.HttpStatus.*;
 import static com.svenruppert.urlshortener.api.utils.JsonWriter.writeJson;
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.parseOrBadRequest;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonBodyOrBadRequest;
 import static com.svenruppert.urlshortener.api.utils.RequestMethodUtils.allow;
 import static com.svenruppert.urlshortener.api.utils.RequestMethodUtils.methodNotAllowed;
-import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
 import static com.svenruppert.urlshortener.core.StringUtils.isBlank;
 
 @RequiresPermission("preferencesColumnsSingle")
@@ -46,7 +47,8 @@ public class ColumnVisibilitySingleHandler
     final var body = readBody(ex.getRequestBody());
     final ColumnDeleteRequest req;
     try {
-      req = fromJson(body, ColumnDeleteRequest.class);
+      req = parseOrBadRequest(ex, body, ColumnDeleteRequest.class);
+      if (req == null) return;
     } catch (Exception e) {
       writeJson(ex, BAD_REQUEST, Map.of("error", "Invalid JSON: " + e.getMessage()));
       return;
@@ -63,7 +65,8 @@ public class ColumnVisibilitySingleHandler
   private void handleSingleEdit(HttpExchange ex)
       throws IOException {
     logger().info("handleSingleEdit..");
-    var req = fromJson(readBody(ex.getRequestBody()), ColumnSingleEditRequest.class);
+    var req = jsonBodyOrBadRequest(ex, ColumnSingleEditRequest.class);
+    if (req == null) return;
     if (isBlank(req.userId()) || isBlank(req.viewId()) || isBlank(req.columnKey())) {
       writeJson(ex, BAD_REQUEST, Map.of("error", "userId, viewId and columnKey required"));
       return;

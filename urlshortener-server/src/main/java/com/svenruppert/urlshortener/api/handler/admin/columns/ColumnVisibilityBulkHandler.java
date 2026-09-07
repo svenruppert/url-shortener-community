@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.parseOrBadRequest;
 import static com.svenruppert.urlshortener.api.utils.RequestMethodUtils.allow;
 import static com.svenruppert.urlshortener.api.utils.RequestMethodUtils.methodNotAllowed;
-import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
 import static com.svenruppert.urlshortener.core.StringUtils.isBlank;
 
 @RequiresPermission("preferencesColumnsBulk")
@@ -49,7 +49,8 @@ public class ColumnVisibilityBulkHandler
       throws IOException {
     var bodyAsString = readBody(ex.getRequestBody());
     logger().info("handleBulkEdit - bodyAsString: {}", bodyAsString);
-    var req = fromJson(bodyAsString, ColumnEditRequest.class);
+    var req = parseOrBadRequest(ex, bodyAsString, ColumnEditRequest.class);
+    if (req == null) return;
     logger().info("handleBulkEdit - ColumnEditRequest - {}", req);
     var blankUserID = isBlank(req.userId());
     var blankViewId = isBlank(req.viewId());

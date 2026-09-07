@@ -1,7 +1,12 @@
 package com.svenruppert.urlshortener.api.utils;
 
+import com.sun.net.httpserver.HttpExchange;
+import com.svenruppert.dependencies.core.logger.HasLogger;
+import com.svenruppert.urlshortener.core.JsonUtils;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * Utility methods for safely reading HTTP request bodies.
@@ -54,6 +59,88 @@ public final class RequestBodyUtils {
 
       return sb.toString();
     }
+  }
+
+  /**
+   * Reads the body as a flat JSON object, or answers 400 and returns {@code null}.
+   *
+   * <p>Jackson 3 reports parse failures as unchecked {@code JacksonException}
+   * ({@code extends RuntimeException}). A handler that catches only
+   * {@code IOException} therefore lets a malformed body escape {@code handle()},
+   * and the JDK {@code HttpServer} closes the connection without a status line —
+   * the client gets no answer at all. A body the caller sent is the caller's
+   * responsibility, so the correct answer is 400, not 500 and not silence.
+   *
+   * <p>Follows the {@code RequestMethodUtils.requireGet} convention: a
+   * {@code null} return means the response has already been written, so the
+   * caller returns immediately. A blank body yields an empty map, letting the
+   * handler's own required-field checks produce the more specific message.
+   *
+   * @return the parsed body, or {@code null} when 400 has already been sent
+   */
+  public static Map<String, String> jsonMapOrBadRequest(HttpExchange exchange)
+      throws IOException {
+    try {
+      Map<String, String> body = JsonUtils.parseJson(readBody(exchange.getRequestBody()));
+      return body == null ? Map.of() : body;
+    } catch (IOException | RuntimeException malformed) {
+      HasLogger.staticLogger().debug("malformed JSON body: {}", malformed.toString());
+      ErrorResponses.badRequest(exchange, "invalid_json", "Request body is not valid JSON");
+      return null;
+    }
+  }
+
+  /**
+   * Reads the body into {@code type}, or answers 400 and returns {@code null}.
+   *
+   * <p>Same contract as {@link #jsonMapOrBadRequest(HttpExchange)}. A body that
+   * parses to {@code null} is treated as malformed — a typed endpoint needs an
+   * object to work with.
+   *
+   * @return the parsed body, or {@code null} when 400 has already been sent
+   */
+  public static <T> T jsonBodyOrBadRequest(HttpExchange exchange, Class<T> type)
+      throws IOException {
+    return parseOrBadRequest(exchange, readBody(exchange.getRequestBody()), type);
+  }
+
+  /**
+   * Parses an already-read body into {@code type}, or answers 400 and returns
+   * {@code null}.
+   *
+   * <p>For the handlers that need the raw text as well (logging, size checks)
+   * and therefore cannot let the helper read the stream a second time — a body
+   * can only be consumed once.
+   *
+   * @return the parsed body, or {@code null} when 400 has already been sent
+   */
+  public static <T> T parseOrBadRequest(HttpExchange exchange, String rawBody, Class<T> type)
+      throws IOException {
+    try {
+      // JsonUtils.fromJson, not the raw mapper: it adds the per-type field
+      // validation (e.g. a ShortenRequest without a url) and reports it as an
+      // IllegalArgumentException whose message names the offending field.
+      T body = JsonUtils.fromJson(rawBody, type);
+      if (body == null) {
+        ErrorResponses.badRequest(exchange, "invalid_json", "Request body is not valid JSON");
+      }
+      return body;
+    } catch (RuntimeException malformed) {
+      HasLogger.staticLogger().debug("malformed JSON body: {}", malformed.toString());
+      ErrorResponses.badRequest(exchange, "invalid_json",
+                                messageOf(malformed, "Request body is not valid JSON"));
+      return null;
+    }
+  }
+
+  /**
+   * Keeps a validation message that names the offending field, but never leaks a
+   * parser's internal text (position, class names) to the caller.
+   */
+  private static String messageOf(Exception e, String fallback) {
+    return e instanceof IllegalArgumentException && e.getMessage() != null
+           ? e.getMessage()
+           : fallback;
   }
 
   public static byte[] readBodyBytes(InputStream in, int maxBytes) throws IOException {

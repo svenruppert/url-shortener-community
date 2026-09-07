@@ -13,7 +13,6 @@ import com.svenruppert.urlshortener.api.utils.ErrorResponses;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
 import com.svenruppert.urlshortener.api.utils.SuccessResponses;
 import com.svenruppert.urlshortener.core.JacksonJson;
-import com.svenruppert.urlshortener.core.JsonUtils;
 import com.svenruppert.urlshortener.core.SecurityProfile;
 
 import java.io.IOException;
@@ -21,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonMapOrBadRequest;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_PASSWORD_RESET;
 import static com.svenruppert.urlshortener.core.StringUtils.isNullOrBlank;
 
@@ -63,7 +62,8 @@ public final class PasswordResetHandler
 
   private void requestReset(HttpExchange ex)
       throws IOException {
-    Map<String, String> body = JsonUtils.parseJson(readBody(ex.getRequestBody()));
+    Map<String, String> body = jsonMapOrBadRequest(ex);
+    if (body == null) return;
     String username = body == null ? null : body.get("username");
     Map<String, Object> resp = new LinkedHashMap<>();
     resp.put("status", "accepted");
@@ -87,7 +87,8 @@ public final class PasswordResetHandler
 
   private void confirmReset(HttpExchange ex)
       throws IOException {
-    Map<String, String> body = JsonUtils.parseJson(readBody(ex.getRequestBody()));
+    Map<String, String> body = jsonMapOrBadRequest(ex);
+    if (body == null) return;
     String token = body == null ? null : body.get("token");
     String newPassword = body == null ? null : body.get("newPassword");
     if (isNullOrBlank(token) || isNullOrBlank(newPassword)) {

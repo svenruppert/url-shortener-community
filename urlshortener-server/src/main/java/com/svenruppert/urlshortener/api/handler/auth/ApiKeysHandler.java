@@ -10,7 +10,6 @@ import com.svenruppert.urlshortener.api.security.CurrentSubject;
 import com.svenruppert.urlshortener.api.utils.ErrorResponses;
 import com.svenruppert.urlshortener.api.utils.SuccessResponses;
 import com.svenruppert.urlshortener.core.JacksonJson;
-import com.svenruppert.urlshortener.core.JsonUtils;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -19,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonMapOrBadRequest;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ME_API_KEYS;
 
 /**
@@ -54,7 +53,8 @@ public final class ApiKeysHandler
     String path = ex.getRequestURI().getPath();
 
     if ("POST".equalsIgnoreCase(method) && PATH_ME_API_KEYS.equals(path)) {
-      Map<String, String> body = JsonUtils.parseJson(readBody(ex.getRequestBody()));
+      Map<String, String> body = jsonMapOrBadRequest(ex);
+      if (body == null) return;
       String label = body == null ? null : body.get("label");
       String key = ApiKeyStore.INSTANCE.issue(userId, label);
       logger().info("api key issued for user id={}", userId);

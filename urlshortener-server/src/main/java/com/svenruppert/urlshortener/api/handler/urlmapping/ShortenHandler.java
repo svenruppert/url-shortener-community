@@ -22,7 +22,7 @@ import com.svenruppert.urlshortener.api.security.LinkOwnershipStore;
 import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
-import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.parseOrBadRequest;
 import static com.svenruppert.urlshortener.core.StringUtils.isNullOrBlank;
 
 /**
@@ -55,7 +55,8 @@ public class ShortenHandler
     if (!RequestMethodUtils.requirePost(ex)) return;
     try {
       final String body = readBody(ex.getRequestBody());
-      ShortenRequest req = fromJson(body, ShortenRequest.class);
+      ShortenRequest req = parseOrBadRequest(ex, body, ShortenRequest.class);
+      if (req == null) return;
       if (isNullOrBlank(req.getUrl())) {
         ErrorResponses.badRequest(ex, "Missing 'url'");
         return;

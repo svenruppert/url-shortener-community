@@ -17,7 +17,7 @@ import com.svenruppert.dependencies.core.net.HttpStatus;
 import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
-import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.parseOrBadRequest;
 import static com.svenruppert.urlshortener.core.StringUtils.isNullOrBlank;
 
 /**
@@ -52,7 +52,8 @@ public class ToggleActiveHandler
 
     try {
       final String body = readBody(ex.getRequestBody());
-      ToggleActiveRequest req = fromJson(body, ToggleActiveRequest.class);
+      ToggleActiveRequest req = parseOrBadRequest(ex, body, ToggleActiveRequest.class);
+      if (req == null) return;
       var shortCode = req.shortCode();
       if (isNullOrBlank(shortCode)) {
         ErrorResponses.badRequest(ex, "Missing 'shortCode'");

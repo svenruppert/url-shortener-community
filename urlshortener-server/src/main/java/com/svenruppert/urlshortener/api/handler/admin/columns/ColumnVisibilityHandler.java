@@ -12,10 +12,9 @@ import java.util.Map;
 
 import static com.svenruppert.dependencies.core.net.HttpStatus.*;
 import static com.svenruppert.urlshortener.api.utils.JsonWriter.writeJson;
-import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonBodyOrBadRequest;
 import static com.svenruppert.urlshortener.api.utils.RequestMethodUtils.allow;
 import static com.svenruppert.urlshortener.api.utils.RequestMethodUtils.methodNotAllowed;
-import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
 import static com.svenruppert.urlshortener.core.StringUtils.isBlank;
 
 @RequiresPermission("preferencesColumns")
@@ -47,7 +46,8 @@ public class ColumnVisibilityHandler
   private void handleLoad(HttpExchange ex)
       throws IOException {
     logger().info("handleLoad..");
-    var req = fromJson(readBody(ex.getRequestBody()), ColumnInfoRequest.class);
+    var req = jsonBodyOrBadRequest(ex, ColumnInfoRequest.class);
+    if (req == null) return;
     if (isBlank(req.userId()) || isBlank(req.viewId())) {
       writeJson(ex, BAD_REQUEST, Map.of("error", "userId and viewId required"));
       return;
@@ -60,7 +60,8 @@ public class ColumnVisibilityHandler
   private void handleDeleteAll(HttpExchange ex)
       throws IOException {
     logger().info("handleDeleteAll..");
-    var req = fromJson(readBody(ex.getRequestBody()), ColumnInfoRequest.class);
+    var req = jsonBodyOrBadRequest(ex, ColumnInfoRequest.class);
+    if (req == null) return;
     store.delete(req.userId(), req.viewId());
     ex.sendResponseHeaders(NO_CONTENT.code(), -1);
   }

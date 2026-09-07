@@ -10,14 +10,13 @@ import com.svenruppert.urlshortener.api.utils.ErrorResponses;
 import com.svenruppert.urlshortener.api.utils.SuccessResponses;
 import com.svenruppert.urlshortener.core.AliasPolicy;
 import com.svenruppert.urlshortener.core.JacksonJson;
-import com.svenruppert.urlshortener.core.JsonUtils;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonMapOrBadRequest;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ADMIN_ALIASES;
 
 /**
@@ -44,7 +43,8 @@ public final class AliasReserveHandler
     String path = ex.getRequestURI().getPath();
 
     if ("POST".equalsIgnoreCase(method) && RESERVE.equals(path)) {
-      Map<String, String> body = JsonUtils.parseJson(readBody(ex.getRequestBody()));
+      Map<String, String> body = jsonMapOrBadRequest(ex);
+      if (body == null) return;
       String alias = body == null ? null : body.get("alias");
       AliasPolicy.Validation v = AliasPolicy.validate(alias);
       if (v.failed()) {

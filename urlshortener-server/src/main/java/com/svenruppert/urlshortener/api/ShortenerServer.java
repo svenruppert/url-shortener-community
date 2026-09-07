@@ -9,6 +9,7 @@ import eu.jsentinel.jcustos.dx.rest.bootstrap.RestSecurity;
 import eu.jsentinel.jcustos.dx.runtime.JCustosBootstrapMode;
 import eu.jsentinel.jcustos.dx.runtime.JCustosRuntime;
 import com.svenruppert.urlshortener.api.filter.CorsPreflightFilter;
+import com.svenruppert.urlshortener.api.filter.FailSafeFilter;
 import com.svenruppert.urlshortener.api.filter.SecurityHeadersFilter;
 import com.svenruppert.urlshortener.api.handler.RedirectHandler;
 import com.svenruppert.urlshortener.api.handler.auth.BootstrapSetupHandler;
@@ -227,8 +228,12 @@ public class ShortenerServer
 
     logger().info("Starting URL Shortener server (redirect) with parameters: host={}, port={}", hostRedirect, portRedirect);
     this.serverRedirect = HttpServer.create(new InetSocketAddress(hostRedirect, portRedirect), 0);
-    serverRedirect.createContext(PATH_REDIRECT, new RedirectHandler(urlMappingStore, statisticsStore))
-        .getFilters().add(new SecurityHeadersFilter());
+    var redirectFilters =
+        serverRedirect.createContext(PATH_REDIRECT, new RedirectHandler(urlMappingStore, statisticsStore))
+            .getFilters();
+    // Outermost, so it also covers a failure inside another filter.
+    redirectFilters.add(new FailSafeFilter());
+    redirectFilters.add(new SecurityHeadersFilter());
 
     logger().info("Starting URL Shortener server (admin) with parameters: host={}, port={}", ADMIN_SERVER_HOST, ADMIN_SERVER_PORT);
     this.serverAdmin = HttpServer.create(new InetSocketAddress(ADMIN_SERVER_HOST, ADMIN_SERVER_PORT), 0);
@@ -367,6 +372,8 @@ public class ShortenerServer
   /** Registers a Bearer-protected context (permission via @Authorize). */
   private static void secured(HttpServer server, String path, HttpHandler handler) {
     var filters = server.createContext(path, SecurityHttpHandler.secure(handler)).getFilters();
+    // Outermost, so it also covers a failure inside another filter.
+    filters.add(new FailSafeFilter());
     filters.add(new SecurityHeadersFilter());
     filters.add(new CorsPreflightFilter());
     filters.add(new MaintenanceFilter());
@@ -375,6 +382,8 @@ public class ShortenerServer
   /** Registers a public context (login/logout). */
   private static void open(HttpServer server, String path, HttpHandler handler) {
     var filters = server.createContext(path, handler).getFilters();
+    // Outermost, so it also covers a failure inside another filter.
+    filters.add(new FailSafeFilter());
     filters.add(new SecurityHeadersFilter());
     filters.add(new CorsPreflightFilter());
   }

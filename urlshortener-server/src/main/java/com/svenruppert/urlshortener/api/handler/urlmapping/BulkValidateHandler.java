@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
-import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.parseOrBadRequest;
 
 /**
  * POST /api/validate/bulk
@@ -69,7 +69,8 @@ public class BulkValidateHandler implements HttpHandler, HasLogger {
 
     try {
       final String body = readBody(ex.getRequestBody());
-      final BulkValidateRequest req = fromJson(body, BulkValidateRequest.class);
+      final BulkValidateRequest req = parseOrBadRequest(ex, body, BulkValidateRequest.class);
+      if (req == null) return;
 
       if (req.getUrls() == null || req.getUrls().isEmpty()) {
         ErrorResponses.badRequest(ex, "Missing or empty 'urls' list");

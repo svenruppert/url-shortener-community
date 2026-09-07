@@ -26,7 +26,7 @@ import com.svenruppert.urlshortener.api.security.OwnerGuard;
 import com.svenruppert.urlshortener.core.DefaultValues;
 
 import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
-import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.parseOrBadRequest;
 
 /**
  * POST /api/shorten/bulk
@@ -74,7 +74,8 @@ public class BulkShortenHandler implements HttpHandler, HasLogger {
 
     try {
       final String body = readBody(ex.getRequestBody());
-      final BulkShortenRequest req = fromJson(body, BulkShortenRequest.class);
+      final BulkShortenRequest req = parseOrBadRequest(ex, body, BulkShortenRequest.class);
+      if (req == null) return;
 
       if (req.getUrls() == null || req.getUrls().isEmpty()) {
         ErrorResponses.badRequest(ex, "Missing or empty 'urls' list");

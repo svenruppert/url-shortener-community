@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.EnumSet;
 
-import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonBodyOrBadRequest;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ADMIN_USERS;
 import static com.svenruppert.urlshortener.core.StringUtils.isNullOrBlank;
 
@@ -104,7 +104,8 @@ public class UsersHandler
 
   private void create(HttpExchange ex)
       throws IOException {
-    CreateUserRequest req = JacksonJson.fromJson(readBody(ex.getRequestBody()), CreateUserRequest.class);
+    CreateUserRequest req = jsonBodyOrBadRequest(ex, CreateUserRequest.class);
+    if (req == null) return;
     if (req == null || isNullOrBlank(req.username()) || isNullOrBlank(req.password())) {
       ErrorResponses.badRequest(ex, "username and password are required");
       return;

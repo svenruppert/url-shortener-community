@@ -25,7 +25,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonMapOrBadRequest;
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_ADMIN_LINK_OWNER;
 import static com.svenruppert.urlshortener.core.StringUtils.isNullOrBlank;
 
@@ -63,7 +63,9 @@ public class LinkOwnerHandler
         return;
       }
 
-      Map<String, String> body = JsonUtils.parseJson(readBody(ex.getRequestBody()));
+      Map<String, String> body = jsonMapOrBadRequest(ex);
+
+      if (body == null) return;
       String rawUserId = body == null ? null : body.get("userId");
       Long newOwnerId = parseUserId(rawUserId);
       if (newOwnerId == null) {

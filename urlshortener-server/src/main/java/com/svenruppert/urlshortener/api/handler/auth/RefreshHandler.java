@@ -12,14 +12,13 @@ import com.svenruppert.urlshortener.api.utils.ErrorResponses;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
 import com.svenruppert.urlshortener.api.utils.SuccessResponses;
 import com.svenruppert.urlshortener.core.JacksonJson;
-import com.svenruppert.urlshortener.core.JsonUtils;
 import com.svenruppert.urlshortener.core.auth.AccessTokenResponse;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonMapOrBadRequest;
 import static com.svenruppert.urlshortener.core.StringUtils.isNullOrBlank;
 
 /**
@@ -36,7 +35,8 @@ public final class RefreshHandler
   public void handle(HttpExchange ex)
       throws IOException {
     if (!RequestMethodUtils.requirePost(ex)) return;
-    Map<String, String> body = JsonUtils.parseJson(readBody(ex.getRequestBody()));
+    Map<String, String> body = jsonMapOrBadRequest(ex);
+    if (body == null) return;
     String refreshToken = body == null ? null : body.get("refreshToken");
     if (isNullOrBlank(refreshToken)) {
       ErrorResponses.badRequest(ex, "refreshToken is required");

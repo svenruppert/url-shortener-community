@@ -1,5 +1,7 @@
 package com.svenruppert.urlshortener.api.handler.urlmapping;
 
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.parseOrBadRequest;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
@@ -21,7 +23,6 @@ import java.util.Optional;
 import com.svenruppert.dependencies.core.net.HttpStatus;
 import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
-import static com.svenruppert.urlshortener.core.JsonUtils.fromJson;
 
 
 @RequiresPermission("editLink")
@@ -50,7 +51,8 @@ public class EditMappingHandler
 
     try {
       final String body = readBody(ex.getRequestBody());
-      ShortenRequest req = fromJson(body, ShortenRequest.class);
+      ShortenRequest req = parseOrBadRequest(ex, body, ShortenRequest.class);
+      if (req == null) return;
       String shortCode = req.getShortURL();
       if (shortCode == null || shortCode.isBlank()) {
         ErrorResponses.badRequest(ex, "Missing shortCode in path");

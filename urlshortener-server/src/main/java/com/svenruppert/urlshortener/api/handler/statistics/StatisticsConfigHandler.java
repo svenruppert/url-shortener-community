@@ -1,12 +1,13 @@
 package com.svenruppert.urlshortener.api.handler.statistics;
 
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.parseOrBadRequest;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import eu.jsentinel.jcustos.authorization.annotations.RequiresPermission;
 import com.svenruppert.urlshortener.api.store.statistics.StatisticsStore;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
-import com.svenruppert.urlshortener.core.JsonUtils;
 import com.svenruppert.urlshortener.core.statistics.StatisticsConfig;
 import com.svenruppert.urlshortener.core.statistics.StatisticsConfigResponse;
 
@@ -71,7 +72,8 @@ public class StatisticsConfigHandler
     logger().info("StatisticsConfigHandler PUT body: {}", body);
 
     try {
-      ConfigUpdateRequest request = JsonUtils.fromJson(body, ConfigUpdateRequest.class);
+      ConfigUpdateRequest request = parseOrBadRequest(exchange, body, ConfigUpdateRequest.class);
+      if (request == null) return;
 
       if (request.hotWindowDays() < 1 ||
           request.writerBatchSize() < 1 ||

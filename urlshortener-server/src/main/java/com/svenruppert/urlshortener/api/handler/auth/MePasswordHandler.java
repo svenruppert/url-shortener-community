@@ -14,13 +14,12 @@ import com.svenruppert.urlshortener.api.security.services.PasswordPreflight;
 import com.svenruppert.urlshortener.api.utils.ErrorResponses;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
 import com.svenruppert.urlshortener.api.utils.SuccessResponses;
-import com.svenruppert.urlshortener.core.JsonUtils;
 import com.svenruppert.urlshortener.core.auth.ChangePasswordRequest;
 
 import java.io.IOException;
 import java.util.Optional;
 
-import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonBodyOrBadRequest;
 import static com.svenruppert.urlshortener.core.StringUtils.isNullOrBlank;
 
 /**
@@ -41,7 +40,8 @@ public class MePasswordHandler
       return;
     }
     try {
-      ChangePasswordRequest req = JsonUtils.fromJson(readBody(ex.getRequestBody()), ChangePasswordRequest.class);
+      ChangePasswordRequest req = jsonBodyOrBadRequest(ex, ChangePasswordRequest.class);
+      if (req == null) return;
       if (req == null || isNullOrBlank(req.currentPassword()) || isNullOrBlank(req.newPassword())) {
         ErrorResponses.badRequest(ex, "currentPassword and newPassword are required");
         return;

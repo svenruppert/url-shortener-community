@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.readBody;
+import static com.svenruppert.urlshortener.api.utils.RequestBodyUtils.jsonMapOrBadRequest;
 import static com.svenruppert.urlshortener.core.StringUtils.isNullOrBlank;
 
 /**
@@ -47,7 +47,8 @@ public class LoginHandler
       throws IOException {
     if (!RequestMethodUtils.requirePost(ex)) return;
     try {
-      Map<String, String> body = JsonUtils.parseJson(readBody(ex.getRequestBody()));
+      Map<String, String> body = jsonMapOrBadRequest(ex);
+      if (body == null) return;
       String username = body.get("username");
       String password = body.get("password");
       if (isNullOrBlank(username) || isNullOrBlank(password)) {
