@@ -56,7 +56,7 @@ public final class SessionsHandler
       ex.sendResponseHeaders(HttpStatus.NO_CONTENT.code(), -1);
       return;
     }
-    ErrorResponses.methodNotAllowed(ex, "GET, DELETE");
+    ErrorResponses.unmatchedRoute(ex, "GET, DELETE", "unknown sessions route");
   }
 
   private void list(HttpExchange ex)

@@ -51,7 +51,7 @@ public final class RequestBodyUtils {
       while ((read = reader.read(buffer)) != -1) {
         total += read;
         if (total > MAX_BODY_SIZE_BYTES) {
-          throw new IOException("Request body too large (" + total + " bytes). Limit is " +
+          throw new BodyTooLargeException("Request body too large (" + total + " bytes). Limit is " +
                                     MAX_BODY_SIZE_BYTES + " bytes.");
         }
         sb.append(buffer, 0, read);
@@ -152,11 +152,28 @@ public final class RequestBodyUtils {
     while ((read = in.read(buf)) != -1) {
       total += read;
       if (total > maxBytes) {
-        throw new IOException("Request body too large (" + total + " bytes). Limit is " + maxBytes);
+        throw new BodyTooLargeException(
+            "Request body too large (" + total + " bytes). Limit is " + maxBytes);
       }
       bos.write(buf, 0, read);
     }
     return bos.toByteArray();
   }
 
+
+  /**
+   * The caller sent more than the endpoint accepts.
+   *
+   * <p>Its own type, because "too large" is a 413 and every other read failure
+   * is not. Both size limits used to throw a plain IOException, so the two
+   * import endpoints answered the same situation differently — 413 in one,
+   * 400 in the other.
+   */
+  public static final class BodyTooLargeException
+      extends IOException {
+
+    public BodyTooLargeException(String message) {
+      super(message);
+    }
+  }
 }

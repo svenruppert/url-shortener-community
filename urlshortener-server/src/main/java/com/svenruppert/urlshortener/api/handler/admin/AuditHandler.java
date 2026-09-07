@@ -38,7 +38,16 @@ public class AuditHandler
     try {
       Map<String, List<String>> params = QueryUtils.parseQueryParams(ex.getRequestURI().getRawQuery());
       String subject = first(params, "subject");
-      int limit = parseLimit(first(params, "limit"));
+      int limit;
+      try {
+        limit = parseLimit(first(params, "limit"));
+      } catch (IllegalArgumentException badLimit) {
+        // ?limit=abc used to be swallowed and silently turned into 500 entries.
+        // A parameter the caller cannot have meant should be reported, the way
+        // the statistics handlers report an unreadable date.
+        ErrorResponses.invalidParameter(ex, "limit");
+        return;
+      }
 
       AuditQuery query = (subject == null || subject.isBlank())
           ? AuditQuery.all()
@@ -70,13 +79,19 @@ public class AuditHandler
     return "";
   }
 
+  /**
+   * @throws IllegalArgumentException if the parameter is present but unreadable
+   *     or not positive — the caller gets a 400 rather than a silent default
+   */
   private static int parseLimit(String raw) {
     if (raw == null) return DEFAULT_LIMIT;
+    int v;
     try {
-      int v = Integer.parseInt(raw.trim());
-      return v > 0 ? v : DEFAULT_LIMIT;
-    } catch (NumberFormatException e) {
-      return DEFAULT_LIMIT;
+      v = Integer.parseInt(raw.trim());
+    } catch (NumberFormatException notANumber) {
+      throw new IllegalArgumentException("limit is not a number: " + raw, notANumber);
     }
+    if (v <= 0) throw new IllegalArgumentException("limit must be positive: " + v);
+    return v;
   }
 }

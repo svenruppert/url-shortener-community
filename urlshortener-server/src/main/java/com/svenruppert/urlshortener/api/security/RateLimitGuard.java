@@ -28,15 +28,30 @@ public final class RateLimitGuard {
   public static final RateLimitGuard INSTANCE = fromProfile();
 
   private final RateLimitPolicy policy; // null == disabled
+  private final Duration window;        // null == disabled
 
   /** Active guard with an explicit limit/window (also used by tests). */
   public RateLimitGuard(int limit, Duration window) {
     this.policy = new InMemoryRateLimitPolicy(
         new InMemoryRateLimitStore(), NoopJCustosAuditService.INSTANCE, limit, window);
+    this.window = window;
   }
 
   private RateLimitGuard() {
     this.policy = null;
+    this.window = null;
+  }
+
+  /**
+   * Seconds a throttled caller should wait, for the {@code Retry-After} header
+   * a 429 is expected to carry (RFC 9110 §10.2.3). Without it a bot retries
+   * immediately and keeps itself throttled; the window is the honest upper
+   * bound, since the counter empties at its end.
+   *
+   * @return the window in seconds, at least 1; {@code 0} when limiting is off
+   */
+  public long retryAfterSeconds() {
+    return window == null ? 0 : Math.max(1L, window.toSeconds());
   }
 
   public boolean enabled() {

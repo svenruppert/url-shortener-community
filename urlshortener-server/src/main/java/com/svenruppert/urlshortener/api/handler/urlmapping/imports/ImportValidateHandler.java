@@ -7,7 +7,9 @@ import eu.jsentinel.jcustos.authorization.annotations.RequiresPermission;
 import com.svenruppert.urlshortener.api.store.imports.ImportStaging;
 import com.svenruppert.urlshortener.api.store.imports.ImportStagingStore;
 import com.svenruppert.urlshortener.api.store.urlmapping.UrlMappingStore;
+import com.svenruppert.dependencies.core.net.HttpStatus;
 import com.svenruppert.urlshortener.api.utils.ErrorResponses;
+import com.svenruppert.urlshortener.api.utils.RequestBodyUtils;
 import com.svenruppert.urlshortener.api.utils.RequestMethodUtils;
 import com.svenruppert.urlshortener.api.utils.SuccessResponses;
 import com.svenruppert.urlshortener.core.JsonUtils;
@@ -159,6 +161,11 @@ public final class ImportValidateHandler
       String body = buildPreviewFullJson(stagingId, staging);
       SuccessResponses.okJson(ex, body);
 
+    } catch (RequestBodyUtils.BodyTooLargeException tooLarge) {
+      // Same situation StatisticsImportHandler answers with 413 — an upload over
+      // the limit is not a malformed request.
+      logger().warn("Import validate rejected — {}", tooLarge.getMessage());
+      ErrorResponses.withStatus(ex, HttpStatus.CONTENT_TOO_LARGE, tooLarge.getMessage());
     } catch (Exception e) {
       logger().warn("Import validate failed", e);
       ErrorResponses.badRequest(ex, String.valueOf(e.getMessage()));

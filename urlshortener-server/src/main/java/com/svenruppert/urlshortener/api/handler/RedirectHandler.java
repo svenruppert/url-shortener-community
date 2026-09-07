@@ -49,6 +49,13 @@ public class RedirectHandler
     // Per-IP rate limiting (P120); no-op unless a production/strict profile is active.
     if (!RateLimitGuard.INSTANCE.allow("redirect:" + RateLimitGuard.clientIp(exchange))) {
       logger().info("rate limit exceeded (redirect)");
+      // RFC 9110 §10.2.3: say when to come back. Without it a bot retries at
+      // once and keeps itself throttled — and this path serves end users and
+      // crawlers, not only API clients.
+      long retryAfter = RateLimitGuard.INSTANCE.retryAfterSeconds();
+      if (retryAfter > 0) {
+        exchange.getResponseHeaders().set("Retry-After", String.valueOf(retryAfter));
+      }
       exchange.sendResponseHeaders(HttpStatus.TOO_MANY_REQUESTS.code(), -1);
       return;
     }

@@ -87,6 +87,6 @@ public final class AliasReserveHandler
       ex.sendResponseHeaders(removed ? HttpStatus.NO_CONTENT.code() : HttpStatus.NOT_FOUND.code(), -1);
       return;
     }
-    ErrorResponses.methodNotAllowed(ex, "GET, POST, DELETE");
+    ErrorResponses.unmatchedRoute(ex, "GET, POST, DELETE", "unknown alias-reservation route");
   }
 }

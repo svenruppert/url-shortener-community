@@ -5,6 +5,7 @@ import com.svenruppert.dependencies.core.net.HttpStatus;
 import com.svenruppert.urlshortener.core.JsonUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static com.svenruppert.dependencies.core.net.HttpStatus.*;
 import static com.svenruppert.urlshortener.api.utils.JsonWriter.writeJson;
@@ -97,6 +98,13 @@ public final class ErrorResponses {
 
   public static void unauthorized(HttpExchange ex)
       throws IOException {
+    // RFC 9110 §11.6.1: a 401 MUST carry at least one WWW-Authenticate
+    // challenge. Generic clients read it to pick a scheme — curl --anyauth and
+    // most SDK retry layers do — and without it they cannot tell "log in" from
+    // "you have no business here". The API accepts a Bearer token or an
+    // X-API-Key; only the former is a registered HTTP scheme, so that is what
+    // the challenge names.
+    ex.getResponseHeaders().set("WWW-Authenticate", "Bearer realm=\"url-shortener\"");
     write(ex, UNAUTHORIZED, errorJson("unauthorized", "authentication required"));
   }
 
@@ -118,6 +126,32 @@ public final class ErrorResponses {
   // ---------------------------------------------------------------------------
   // 405 – Method Not Allowed
   // ---------------------------------------------------------------------------
+
+  /**
+   * Fall-through for a dispatcher whose request matched no branch.
+   *
+   * <p>Answering 405 for everything misreports the common case: when the method
+   * is one this resource serves, it was the <em>path</em> that did not match, and
+   * that is a 404. {@code GET /api/me/api-keys/123} is not "method not allowed" —
+   * GET is fine, the sub-resource does not exist. The {@code Allow} header a 405
+   * carries makes it worse, because it names the resource group rather than the
+   * path the caller asked for.
+   *
+   * @param allowHeader the methods this resource serves, e.g. {@code "GET, POST, DELETE"}
+   * @param unknownWhat what was not found, for the 404 message
+   */
+  public static void unmatchedRoute(HttpExchange ex, String allowHeader, String unknownWhat)
+      throws IOException {
+    String method = ex.getRequestMethod();
+    boolean methodIsServed = Arrays.stream(allowHeader.split(","))
+        .map(String::trim)
+        .anyMatch(m -> m.equalsIgnoreCase(method));
+    if (methodIsServed) {
+      notFound(ex, unknownWhat);
+    } else {
+      methodNotAllowed(ex, allowHeader);
+    }
+  }
 
   public static void methodNotAllowed(HttpExchange ex, String allowHeader)
       throws IOException {

@@ -37,8 +37,11 @@ public class ColumnVisibilitySingleHandler
     switch (ex.getRequestMethod()) {
       case "PUT" -> handleSingleEdit(ex);
       case "DELETE" -> handleSingleDelete(ex);
-      case "OPTIONS" -> allow(ex, "PUT, OPTIONS");
-      default -> methodNotAllowed(ex, "PUT, OPTIONS");
+      // DELETE is served two lines up, so it belongs in Allow — a client doing
+      // method discovery via OPTIONS was never told it exists. The sibling
+      // ColumnVisibilityHandler lists its methods correctly.
+      case "OPTIONS" -> allow(ex, "PUT, DELETE, OPTIONS");
+      default -> methodNotAllowed(ex, "PUT, DELETE, OPTIONS");
     }
   }
 

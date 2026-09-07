@@ -58,10 +58,30 @@ public final class JsonWriter
     if (rawJson == null) rawJson = "null";
     byte[] bytes = rawJson.getBytes(StandardCharsets.UTF_8);
     ex.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+
+    // Every response of the admin API — error and success alike — passes through
+    // here, so this is the one place that has to know when a body is forbidden.
+    // A HEAD response carries the status and headers of the GET but no content,
+    // and 204/304 carry none by definition. Passing a length anyway is what the
+    // JDK reports as "sendResponseHeaders: being invoked with a content length
+    // for a HEAD request"; -1 is how you say "no body" here.
+    if (bodyIsForbidden(ex, status)) {
+      ex.sendResponseHeaders(status.code(), -1);
+      ex.getResponseBody().close();
+      return;
+    }
+
     ex.sendResponseHeaders(status.code(), bytes.length);
     try (OutputStream os = ex.getResponseBody()) {
       os.write(bytes);
     }
+  }
+
+  /** True when HTTP forbids a body for this request/response combination. */
+  private static boolean bodyIsForbidden(HttpExchange ex, HttpStatus status) {
+    return "HEAD".equalsIgnoreCase(ex.getRequestMethod())
+           || status.code() == HttpStatus.NO_CONTENT.code()
+           || status.code() == HttpStatus.NOT_MODIFIED.code();
   }
 
   /**

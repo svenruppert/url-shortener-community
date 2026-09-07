@@ -101,6 +101,12 @@ public final class SecurityHttpHandler
     // is active.
     if (!RateLimitGuard.INSTANCE.allow("api:" + RateLimitGuard.clientIp(exchange))) {
       logger().info("rate limit exceeded (api) for {}", exchange.getRequestURI().getPath());
+      // RFC 9110 section 10.2.3: a 429 should say when to come back.
+      // LoginHandler already does this from its lockout window.
+      long retryAfter = RateLimitGuard.INSTANCE.retryAfterSeconds();
+      if (retryAfter > 0) {
+        exchange.getResponseHeaders().set("Retry-After", String.valueOf(retryAfter));
+      }
       ErrorResponses.withStatus(exchange, HttpStatus.TOO_MANY_REQUESTS, "rate limit exceeded");
       return;
     }

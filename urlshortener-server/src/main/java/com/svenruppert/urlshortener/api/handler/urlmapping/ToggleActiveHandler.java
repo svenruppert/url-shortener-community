@@ -13,6 +13,7 @@ import com.svenruppert.urlshortener.core.urlmapping.ToggleActive.ToggleActiveReq
 import com.svenruppert.urlshortener.core.urlmapping.ToggleActive.ToggleActiveResponse;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 import com.svenruppert.dependencies.core.net.HttpStatus;
 import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
@@ -75,9 +76,22 @@ public class ToggleActiveHandler
         logger().info("Toggling active status successfully");
         SuccessResponses.ok(ex, mapping.getOrThrow());
       } else {
-        mapping.
-            peekFailure(failed -> logger().info("Toggling active status failed: {}", failed));
-        ErrorResponses.invalidParameter(ex, "Toggling active status failed");
+        AtomicReference<String> reason = new AtomicReference<>("toggling active status failed");
+        mapping.peekFailure(failed -> {
+          reason.set(failed);
+          logger().info("Toggling active status failed: {}", failed);
+        });
+        // The store reports a missing alias as an ordinary failure string, and
+        // this used to become a 400 — a malformed-request answer to a perfectly
+        // well-formed request. The Javadoc above has promised 404 all along, and
+        // DeleteMappingHandler and EditMappingHandler answer the same case that
+        // way. Ask the store which of the two it is instead of guessing from the
+        // failure text.
+        if (!store.existsByCode(shortCode)) {
+          ErrorResponses.notFound(ex, "short code not found");
+        } else {
+          ErrorResponses.badRequest(ex, reason.get());
+        }
       }
     } catch (RuntimeException e) {
       logger().warn("catch - {}", e.toString());
