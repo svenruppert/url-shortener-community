@@ -10,6 +10,11 @@ import java.util.Objects;
  * Create request for a single link. Plug-in metadata (campaign/tags/label)
  * no longer lives here (V00.18.00 P085, D2) — plug-ins parse their own
  * fields from the raw request JSON; unknown fields are ignored on parse.
+ *
+ * <p>{@code password} is the optional per-link password in clear text (it travels
+ * over HTTPS and is hashed server-side before storage). {@code null} means the
+ * link is not password-protected. On edit the field carries dedicated null
+ * semantics — see {@code EditMappingHandler}.
  */
 public final class ShortenRequest {
   private String url;
@@ -17,15 +22,21 @@ public final class ShortenRequest {
   private String shortURL;
   private Instant expiresAt;
   private Boolean active;
+  private String password;
 
   public ShortenRequest() {
   }
 
   public ShortenRequest(String url, String shortURL, Instant expiresAt, Boolean active) {
+    this(url, shortURL, expiresAt, active, null);
+  }
+
+  public ShortenRequest(String url, String shortURL, Instant expiresAt, Boolean active, String password) {
     this.url = url;
     this.shortURL = shortURL;
     this.expiresAt = expiresAt;
     this.active = active;
+    this.password = password;
   }
 
   public Instant getExpiresAt() {
@@ -64,6 +75,14 @@ public final class ShortenRequest {
     this.active = active;
   }
 
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
   @Override
   public String toString() {
     return "ShortenRequest{" +
@@ -71,6 +90,7 @@ public final class ShortenRequest {
         ", shortURL='" + shortURL + '\'' +
         ", expiresAt='" + expiresAt + '\'' +
         ", active='" + active + '\'' +
+        ", password='" + (password == null ? null : "***") + '\'' +
         '}';
   }
 
@@ -78,11 +98,11 @@ public final class ShortenRequest {
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;
     ShortenRequest that = (ShortenRequest) o;
-    return Objects.equals(url, that.url) && Objects.equals(shortURL, that.shortURL) && Objects.equals(expiresAt, that.expiresAt) && Objects.equals(active, that.active);
+    return Objects.equals(url, that.url) && Objects.equals(shortURL, that.shortURL) && Objects.equals(expiresAt, that.expiresAt) && Objects.equals(active, that.active) && Objects.equals(password, that.password);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(url, shortURL, expiresAt, active);
+    return Objects.hash(url, shortURL, expiresAt, active, password);
   }
 }

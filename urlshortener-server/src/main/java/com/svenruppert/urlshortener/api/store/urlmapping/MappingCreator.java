@@ -53,7 +53,11 @@ public final class MappingCreator
   }
 
   public Result<ShortUrlMapping, String> create(Instant createdAt, String alias, String url, Instant expiredAt, Boolean active) {
-    logger().info("create - createdAt='{}' alias='{}' / url='{}' / expiredAt='{}'", createdAt, alias, url, expiredAt);
+    return create(createdAt, alias, url, expiredAt, active, null);
+  }
+
+  public Result<ShortUrlMapping, String> create(Instant createdAt, String alias, String url, Instant expiredAt, Boolean active, String passwordHash) {
+    logger().info("create - createdAt='{}' alias='{}' / url='{}' / expiredAt='{}' / protected={}", createdAt, alias, url, expiredAt, passwordHash != null);
     final String shortCode;
     if (!isNullOrBlank(alias)) {
       var aliasCheck = AliasPolicy.validate(alias);
@@ -94,7 +98,7 @@ public final class MappingCreator
       return Result.failure(errorJson);
     }
 
-    var mapping = new ShortUrlMapping(shortCode, url, createdAt, expiredAt, active);
+    var mapping = new ShortUrlMapping(shortCode, url, createdAt, expiredAt, active, passwordHash);
     logger().info("mapping to store .. {}", mapping);
     store.accept(mapping);
     logger().info("mapping stored .. {}", mapping);
@@ -105,9 +109,13 @@ public final class MappingCreator
    * Main method: creates mapping with optional alias.
    */
   public Result<ShortUrlMapping, String> create(String alias, String url, Instant expiredAt, Boolean active) {
-    logger().info("createMapping - alias='{}' / url='{}' / expiredAt='{}'", alias, url, expiredAt);
+    return create(alias, url, expiredAt, active, null);
+  }
+
+  public Result<ShortUrlMapping, String> create(String alias, String url, Instant expiredAt, Boolean active, String passwordHash) {
+    logger().info("createMapping - alias='{}' / url='{}' / expiredAt='{}' / protected={}", alias, url, expiredAt, passwordHash != null);
     var createdAt = Instant.now(clock);
-    return create(createdAt, alias, url, expiredAt, active);
+    return create(createdAt, alias, url, expiredAt, active, passwordHash);
   }
 
   @FunctionalInterface

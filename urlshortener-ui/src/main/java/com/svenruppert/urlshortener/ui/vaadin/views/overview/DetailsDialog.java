@@ -31,6 +31,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -78,6 +79,8 @@ public class DetailsDialog
   private static final String K_F_CREATED = "overview.details.field.createdOn";
   private static final String K_F_EXPIRES = "overview.details.field.expires";
   private static final String K_F_ACTIVE = "overview.details.field.active";
+  private static final String K_F_PASSWORD = "overview.details.field.password";
+  private static final String K_F_REMOVE_PASSWORD = "overview.details.field.removePassword";
 
   private static final String K_NO_EXPIRY = "overview.details.noExpiry"; // No expiry date
 
@@ -131,6 +134,8 @@ public class DetailsDialog
   private final Button saveBtn = new Button(new Icon(VaadinIcon.CHECK));
   private final Button cancelBtn = new Button(new Icon(VaadinIcon.CLOSE));
   private final DateTimePicker expiresField = new DateTimePicker();
+  private final PasswordField passwordField = new PasswordField();
+  private final Checkbox cbRemovePassword = new Checkbox();
 
   private final URLShortenerClient client;
   private final ShortUrlMapping item;
@@ -211,8 +216,10 @@ public class DetailsDialog
         new FormLayout.ResponsiveStep("0", 1),
         new FormLayout.ResponsiveStep("600px", 2)
     );
-    form.add(tfShort, tfCreated, tfUrl, cbActive, tfExpires, buildExpiresRow(), statusPill);
+    form.add(tfShort, tfCreated, tfUrl, cbActive, tfExpires, buildExpiresRow(), statusPill,
+        passwordField, cbRemovePassword);
     form.setColspan(tfUrl, 2);
+    form.setColspan(passwordField, 2);
     pluginSections.forEach(section -> {
       form.add(section.component());
       form.setColspan(section.component(), 2);
@@ -293,6 +300,8 @@ public class DetailsDialog
     cancelBtn.getElement().setAttribute("title", tr(K_TT_CANCEL, "Cancel"));
 
     expiresField.setLabel(tr(K_F_EXPIRES, "Expires"));
+    passwordField.setLabel(tr(K_F_PASSWORD, "New password (blank = unchanged)"));
+    cbRemovePassword.setLabel(tr(K_F_REMOVE_PASSWORD, "Remove password protection"));
   }
 
   private void configureFields() {
@@ -320,6 +329,19 @@ public class DetailsDialog
     statusPill.setText(statusText.text());
     statusPill.getElement().getThemeList().add(statusText.theme());
 
+    // Password controls live only in edit mode (shown via switchToEdit). The
+    // current password/hash is never sent to the client, so there is no value
+    // to prefill — a blank field means "leave unchanged", the checkbox clears.
+    passwordField.setWidthFull();
+    passwordField.setVisible(false);
+    cbRemovePassword.setVisible(false);
+    cbRemovePassword.addValueChangeListener(ev -> {
+      boolean remove = Boolean.TRUE.equals(ev.getValue());
+      passwordField.setEnabled(!remove);
+      if (remove) {
+        passwordField.clear();
+      }
+    });
   }
 
   /** Loads the tag registry (as suggestions) and the link's current tags (as the value). */
@@ -383,6 +405,14 @@ public class DetailsDialog
     expiresField.setVisible(enable);
     expiresField.setReadOnly(!enable);
 
+    passwordField.setVisible(enable);
+    cbRemovePassword.setVisible(enable);
+    if (enable) {
+      passwordField.clear();
+      passwordField.setEnabled(true);
+      cbRemovePassword.setValue(false);
+    }
+
     editBtn.setVisible(!enable);
     saveBtn.setVisible(enable);
     cancelBtn.setVisible(enable);
@@ -402,7 +432,19 @@ public class DetailsDialog
       LocalDateTime ldt = expiresField.getValue();
       Instant expires = (ldt == null) ? null : ldt.atZone(ZoneId.systemDefault()).toInstant();
 
-      boolean ok = client.edit(item.shortCode(), newUrl, expires, cbActive.getValue());
+      // Password change intent → client/server null semantics:
+      //   checkbox ticked  -> "" (remove protection)
+      //   field non-blank  -> set/replace
+      //   otherwise        -> null (leave unchanged)
+      final String passwordArg;
+      if (Boolean.TRUE.equals(cbRemovePassword.getValue())) {
+        passwordArg = "";
+      } else {
+        String pw = passwordField.getValue();
+        passwordArg = (pw != null && !pw.isBlank()) ? pw : null;
+      }
+
+      boolean ok = client.edit(item.shortCode(), newUrl, expires, cbActive.getValue(), passwordArg);
 
       // Plug-in sections persist their own edits independently.
       boolean pluginChanged = false;

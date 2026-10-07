@@ -26,6 +26,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -68,6 +69,7 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
   private static final String K_FIELD_EXPIRES_DATE = "create.field.expiresDate";
   private static final String K_FIELD_NO_EXPIRY = "create.field.noExpiry";
   private static final String K_FIELD_ACTIVE = "create.field.active";
+  private static final String K_FIELD_PASSWORD = "create.field.password";
 
   private static final String K_BTN_SAVE = "common.save";
   private static final String K_BTN_RESET = "common.reset";
@@ -86,6 +88,7 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
   private final DateTimePicker expiresDateTime = new DateTimePicker();
   private final Checkbox noExpiry = new Checkbox();
   private final Checkbox cbActive = new Checkbox();
+  private final PasswordField passwordField = new PasswordField();
 
   // Open-core seam (V00.18.00 P085): plug-in sections (e.g. campaign/tags/
   // label) render inside the form and apply their metadata post-create.
@@ -119,7 +122,8 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
 
     FormLayout form = new FormLayout();
     form.addClassName(C_FORM);
-    form.add(urlField, noExpiry, cbActive, expiresDateTime);
+    form.add(urlField, noExpiry, cbActive, expiresDateTime, passwordField);
+    form.setColspan(passwordField, 2);
     form.setResponsiveSteps(
         new FormLayout.ResponsiveStep("0", 1),
         new FormLayout.ResponsiveStep("900px", 2)
@@ -186,7 +190,8 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
               alias,
               urlField.getValue(),
               expiresAt.orElse(null),
-              activeState
+              activeState,
+              passwordField.getValue()
           );
           if (customMapping != null) {
             editor.markSaved(alias);
@@ -244,6 +249,7 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
     expiresDateTime.setLabel(tr(K_FIELD_EXPIRES_DATE, "Expires (date)"));
     noExpiry.setLabel(tr(K_FIELD_NO_EXPIRY, "No expiry"));
     cbActive.setLabel(tr(K_FIELD_ACTIVE, "Active"));
+    passwordField.setLabel(tr(K_FIELD_PASSWORD, "Password (optional)"));
   }
 
   private void configureExpiryFields() {
@@ -282,6 +288,7 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
     urlField.clear();
     noExpiry.clear();
     expiresDateTime.clear();
+    passwordField.clear();
     binder.setBean(new ShortenRequest(null, null, null, null));
     urlField.setInvalid(false);
   }

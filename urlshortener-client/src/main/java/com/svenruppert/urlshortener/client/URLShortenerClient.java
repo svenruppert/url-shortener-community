@@ -673,9 +673,18 @@ public class URLShortenerClient implements HasLogger {
                                              String url,
                                              Instant expiredAtOrNull,
                                              Boolean activeOrNull) throws IOException {
+    return createCustomMapping(shortURL, url, expiredAtOrNull, activeOrNull, null);
+  }
 
-    logger().info("Create custom mapping shortURL='{}' url='{}' expiredAt='{}' active='{}'",
-                  shortURL, url, expiredAtOrNull, activeOrNull);
+  public ShortUrlMapping createCustomMapping(String shortURL,
+                                             String url,
+                                             Instant expiredAtOrNull,
+                                             Boolean activeOrNull,
+                                             String passwordOrNull) throws IOException {
+
+    logger().info("Create custom mapping shortURL='{}' url='{}' expiredAt='{}' active='{}' protected='{}'",
+                  shortURL, url, expiredAtOrNull, activeOrNull,
+                  passwordOrNull != null && !passwordOrNull.isBlank());
 
     var urlValidation = UrlValidator.validate(url);
     if (!urlValidation.valid()) {
@@ -691,7 +700,7 @@ public class URLShortenerClient implements HasLogger {
     }
 
     final ShortenRequest shortenRequest =
-        new ShortenRequest(url, shortURL, expiredAtOrNull, activeOrNull);
+        new ShortenRequest(url, shortURL, expiredAtOrNull, activeOrNull, passwordOrNull);
 
     final String jsonBody = toJson(shortenRequest);
     logger().info("createCustomMapping - body - '{}'", jsonBody);
@@ -745,9 +754,23 @@ public class URLShortenerClient implements HasLogger {
                       String newUrl,
                       Instant expiresAtOrNull,
                       Boolean activeOrNull) throws IOException {
+    return edit(shortCode, newUrl, expiresAtOrNull, activeOrNull, null);
+  }
 
-    logger().info("Edit mapping shortCode='{}' url='{}' expiredAt='{}' active='{}'",
-                  shortCode, newUrl, expiresAtOrNull, activeOrNull);
+  /**
+   * Edit variant with a per-link password. Null semantics (resolved server-side):
+   * {@code null} keeps the current protection, {@code ""} removes it, any other
+   * value sets/replaces it. The password is never logged in clear text.
+   */
+  public boolean edit(String shortCode,
+                      String newUrl,
+                      Instant expiresAtOrNull,
+                      Boolean activeOrNull,
+                      String passwordOrNull) throws IOException {
+
+    logger().info("Edit mapping shortCode='{}' url='{}' expiredAt='{}' active='{}' passwordChange='{}'",
+                  shortCode, newUrl, expiresAtOrNull, activeOrNull,
+                  passwordOrNull == null ? "keep" : (passwordOrNull.isBlank() ? "clear" : "set"));
 
     if (shortCode == null || shortCode.isBlank()) {
       throw new IllegalArgumentException("shortCode must not be null/blank");
@@ -760,7 +783,7 @@ public class URLShortenerClient implements HasLogger {
     logger().info("edit - {}", uri);
 
     final ShortenRequest req =
-        new ShortenRequest(newUrl, shortCode, expiresAtOrNull, activeOrNull);
+        new ShortenRequest(newUrl, shortCode, expiresAtOrNull, activeOrNull, passwordOrNull);
     final String body = toJson(req);
     logger().info("edit - request body - '{}'", body);
 

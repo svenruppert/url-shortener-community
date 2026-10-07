@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Optional;
 import com.svenruppert.dependencies.core.net.HttpStatus;
+import com.svenruppert.urlshortener.api.security.AppPasswordHashing;
 import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
 
@@ -84,7 +85,22 @@ public class EditMappingHandler
 
       final Instant newExpires = req.getExpiresAt();
       final Boolean active = req.getActive();
-      final Result<ShortUrlMapping, String> updated = urlMappingStore.editMapping(shortCode, req.getUrl(), newExpires, active);
+
+      // Per-link password null semantics (distinct from expiry):
+      //   password == null  -> field omitted -> keep existing protection
+      //   password is blank  -> explicit clear -> remove protection
+      //   password non-blank -> set/replace -> store the fresh hash
+      final String pw = req.getPassword();
+      final String resolvedPasswordHash;
+      if (pw == null) {
+        resolvedPasswordHash = currentOpt.get().getPasswordHash();
+      } else if (pw.isBlank()) {
+        resolvedPasswordHash = null;
+      } else {
+        resolvedPasswordHash = AppPasswordHashing.hasher().hash(pw.toCharArray());
+      }
+
+      final Result<ShortUrlMapping, String> updated = urlMappingStore.editMapping(shortCode, req.getUrl(), newExpires, active, resolvedPasswordHash);
 
       if (updated.isFailure()) {
         updated.peekFailure(msg -> {

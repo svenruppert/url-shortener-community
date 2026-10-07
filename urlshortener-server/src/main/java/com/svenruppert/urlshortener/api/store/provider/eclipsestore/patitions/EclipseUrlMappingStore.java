@@ -45,28 +45,46 @@ public class EclipseUrlMappingStore
 
   @Override
   public Result<ShortUrlMapping, String> createMapping(Instant createdAt, String shortCode, String originalUrl, Instant expiredAt, Boolean active) {
-    logger().info("createMapping - createdAt: {} - shortCode: {} - originalUrl: {} - expiredAt: {} - active: {}", createdAt, shortCode, originalUrl, expiredAt, active);
+    return createMapping(createdAt, shortCode, originalUrl, expiredAt, active, null);
+  }
+
+  @Override
+  public Result<ShortUrlMapping, String> createMapping(Instant createdAt, String shortCode, String originalUrl, Instant expiredAt, Boolean active, String passwordHash) {
+    logger().info("createMapping - createdAt: {} - shortCode: {} - originalUrl: {} - expiredAt: {} - active: {} - protected: {}", createdAt, shortCode, originalUrl, expiredAt, active, passwordHash != null);
     var originalOrDefaultActive = active != null ? active : true;
-    return creator.create(createdAt, shortCode, originalUrl, expiredAt, originalOrDefaultActive);
+    return creator.create(createdAt, shortCode, originalUrl, expiredAt, originalOrDefaultActive, passwordHash);
   }
 
   @Override
   public Result<ShortUrlMapping, String> createMapping(String shortCode, String originalUrl, Instant expiredAt, Boolean active) {
-    logger().info("createMapping - shortCode: {} - originalUrl: {} - expiredAt: {} - active: {}", shortCode, originalUrl, expiredAt, active);
+    return createMapping(shortCode, originalUrl, expiredAt, active, null);
+  }
+
+  @Override
+  public Result<ShortUrlMapping, String> createMapping(String shortCode, String originalUrl, Instant expiredAt, Boolean active, String passwordHash) {
+    logger().info("createMapping - shortCode: {} - originalUrl: {} - expiredAt: {} - active: {} - protected: {}", shortCode, originalUrl, expiredAt, active, passwordHash != null);
     var originalOrDefaultActive = active != null ? active : true;
-    return creator.create(shortCode, originalUrl, expiredAt, originalOrDefaultActive);
+    return creator.create(shortCode, originalUrl, expiredAt, originalOrDefaultActive, passwordHash);
   }
 
   @Override
   public Result<ShortUrlMapping, String> editMapping(String shortCode, String url, Instant expiredAt, Boolean active) {
-    logger().info("editMapping - shortCode: {} - originalUrl: {} - expiredAt: {} - active: {}", shortCode, url, expiredAt, active);
+    // Plain edit preserves any existing password protection (null-param = keep).
+    var existing = dataRoot().shortUrlMappings().get(shortCode);
+    var keepHash = existing != null ? existing.getPasswordHash() : null;
+    return editMapping(shortCode, url, expiredAt, active, keepHash);
+  }
+
+  @Override
+  public Result<ShortUrlMapping, String> editMapping(String shortCode, String url, Instant expiredAt, Boolean active, String passwordHash) {
+    logger().info("editMapping - shortCode: {} - originalUrl: {} - expiredAt: {} - active: {} - protected: {}", shortCode, url, expiredAt, active, passwordHash != null);
     var existsByCode = existsByCode(shortCode);
     if (existsByCode) {
       var urlMappings = dataRoot().shortUrlMappings();
       var shortUrlMappingOLD = urlMappings.get(shortCode);
       var originalOrNewUrl = url != null ? url : shortUrlMappingOLD.originalUrl();
       var originalOrNewActive = active != null ? active : shortUrlMappingOLD.active();
-      var shortUrlMapping = new ShortUrlMapping(shortCode, originalOrNewUrl, shortUrlMappingOLD.createdAt(), expiredAt, originalOrNewActive);
+      var shortUrlMapping = new ShortUrlMapping(shortCode, originalOrNewUrl, shortUrlMappingOLD.createdAt(), expiredAt, originalOrNewActive, passwordHash);
       urlMappings.put(shortUrlMapping.shortCode(), shortUrlMapping);
       storage.store(dataRoot().shortUrlMappings());
       return Result.success(shortUrlMapping);

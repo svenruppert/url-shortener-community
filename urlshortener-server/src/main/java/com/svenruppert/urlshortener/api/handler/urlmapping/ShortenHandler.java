@@ -18,6 +18,7 @@ import com.svenruppert.urlshortener.core.validation.UrlValidator;
 
 import java.io.IOException;
 import com.svenruppert.dependencies.core.net.HttpStatus;
+import com.svenruppert.urlshortener.api.security.AppPasswordHashing;
 import com.svenruppert.urlshortener.api.security.LinkOwnershipStore;
 import com.svenruppert.urlshortener.api.security.OwnerGuard;
 
@@ -71,11 +72,19 @@ public class ShortenHandler
       }
 
 
+      // Optional per-link password: hash the clear-text (HTTPS) before it reaches
+      // the store; a blank/absent password means the link is not protected.
+      final String pw = req.getPassword();
+      final String passwordHash = (pw != null && !pw.isBlank())
+          ? AppPasswordHashing.hasher().hash(pw.toCharArray())
+          : null;
+
       logger().info("ShortenHandler - createMapping start");
       final Result<ShortUrlMapping, String> urlMappingResult = store.createMapping(req.getShortURL(),
                                                                                    req.getUrl(),
                                                                                    req.getExpiresAt(),
-                                                                                   req.getActive());
+                                                                                   req.getActive(),
+                                                                                   passwordHash);
       logger().info("ShortenHandler - createMapping stop");
       urlMappingResult
           .peek(success -> {
