@@ -194,6 +194,51 @@ class RedirectPasswordE2ETest
     assertNoLeak(list.body(), secret);
   }
 
+  @Test
+  void challengePageHonoursAcceptLanguage()
+      throws Exception {
+    String code = createProtected(PASSWORD);
+    var en = redirectWithLang("/" + code, "en");
+    assertEquals(UNAUTHORIZED.code(), en.statusCode());
+    assertTrue(en.body().contains("This link is password-protected"),
+        "English heading expected: " + en.body());
+    assertTrue(en.body().contains("lang=\"en\""), "html lang must be en");
+
+    var de = redirectWithLang("/" + code, "de-DE,de;q=0.9");
+    assertTrue(de.body().contains("Dieser Link ist passwortgeschützt"),
+        "German heading expected: " + de.body());
+    assertTrue(de.body().contains("lang=\"de\""), "html lang must be de");
+  }
+
+  @Test
+  void challengePageFallsBackToEnglish()
+      throws Exception {
+    String code = createProtected(PASSWORD);
+    var unknown = redirectWithLang("/" + code, "xx");
+    assertTrue(unknown.body().contains("This link is password-protected"),
+        "unknown language falls back to English: " + unknown.body());
+    var none = redirectWithLang("/" + code, null);
+    assertTrue(none.body().contains("This link is password-protected"),
+        "absent header falls back to English: " + none.body());
+  }
+
+  @Test
+  void listCarriesProtectedFlagForTheUi()
+      throws Exception {
+    createProtected(PASSWORD);
+    var plain = createLink("{\"url\":\"" + TARGET + "\"}");
+    assertEquals(CREATED.code(), plain.statusCode(), plain.body());
+    var list = send(HttpRequest.newBuilder(URI.create(baseUrlAdmin + PATH_ADMIN_LIST_ALL))
+        .header(AUTHORIZATION_HEADER, BEARER_PREFIX + adminToken)
+        .GET().build());
+    assertEquals(OK.code(), list.statusCode(), list.body());
+    assertTrue(list.body().contains("\"passwordProtected\":\"true\""),
+        "list must flag a protected link: " + list.body());
+    assertTrue(list.body().contains("\"passwordProtected\":\"false\""),
+        "list must flag an unprotected link: " + list.body());
+    assertFalse(list.body().contains("passwordHash"), "hash must not leak into the list");
+  }
+
   private static void assertNoLeak(String body, String secret) {
     assertFalse(body.contains(secret), "plaintext password leaked: " + body);
     assertFalse(body.contains("passwordHash"), "passwordHash field leaked: " + body);
@@ -244,6 +289,15 @@ class RedirectPasswordE2ETest
         .header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED.withCharsetUtf8())
         .POST(HttpRequest.BodyPublishers.ofString(formBody, StandardCharsets.UTF_8))
         .build());
+  }
+
+  private static HttpResponse<String> redirectWithLang(String path, String acceptLanguage)
+      throws Exception {
+    var builder = HttpRequest.newBuilder(URI.create(baseUrlRedirect + path)).GET();
+    if (acceptLanguage != null) {
+      builder.header("Accept-Language", acceptLanguage);
+    }
+    return send(builder.build());
   }
 
   private static String login()

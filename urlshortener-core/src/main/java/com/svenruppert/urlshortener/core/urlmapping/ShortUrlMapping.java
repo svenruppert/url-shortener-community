@@ -16,6 +16,12 @@ public final class ShortUrlMapping {
   private  Instant expiresAt;
   private  boolean active;
   private  String passwordHash;
+  // Transport-only flag mirroring (passwordHash != null). The hash itself is
+  // @JsonIgnore'd and never leaves the server, so a client that needs to know
+  // whether a link is protected reads this serialized boolean instead. It is
+  // derived in the canonical constructor and is NEVER consulted for access
+  // enforcement — RedirectHandler always checks passwordHash().isPresent().
+  private  boolean passwordProtected;
 
   public ShortUrlMapping() {
   }
@@ -44,6 +50,7 @@ public final class ShortUrlMapping {
     this.expiresAt = expiresAt;
     this.active = active;
     this.passwordHash = passwordHash;
+    this.passwordProtected = passwordHash != null;
   }
 
   public String getShortCode() {
@@ -99,6 +106,20 @@ public final class ShortUrlMapping {
   /** Present when the link is password-protected; the value is the opaque stored hash. */
   public Optional<String> passwordHash() {
     return Optional.ofNullable(passwordHash);
+  }
+
+  /**
+   * Serialized protection flag that survives the round-trip to the client even
+   * though {@link #getPasswordHash()} is {@code @JsonIgnore}'d. On the server it
+   * is derived from the hash in the constructor; on a deserialized client object
+   * it carries the value the server sent. Never used for enforcement.
+   */
+  public boolean isPasswordProtected() {
+    return passwordProtected;
+  }
+
+  public void setPasswordProtected(boolean passwordProtected) {
+    this.passwordProtected = passwordProtected;
   }
 
   // --- COPY-WITH methods ---

@@ -18,6 +18,9 @@ import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_REDIRECT;
 
@@ -206,11 +209,11 @@ public class RedirectHandler
 
   private static final String FORM_TEMPLATE = """
       <!doctype html>
-      <html lang="de">
+      <html lang="{{LANG}}">
       <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Passwort erforderlich</title>
+      <title>{{TITLE}}</title>
       <style>
         body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f7;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
         form{background:#fff;padding:2rem;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);max-width:20rem;width:90%}
@@ -222,26 +225,56 @@ public class RedirectHandler
       </head>
       <body>
       <form method="post" action="{{ACTION}}">
-      <h1>Dieser Link ist passwortgeschützt</h1>
+      <h1>{{HEADING}}</h1>
       {{ERROR}}
-      <input type="password" name="password" autofocus autocomplete="current-password" aria-label="Passwort">
-      <button type="submit">Weiter</button>
+      <input type="password" name="password" autofocus autocomplete="current-password" aria-label="{{PASSWORD_LABEL}}">
+      <button type="submit">{{SUBMIT}}</button>
       </form>
       </body>
       </html>
       """;
 
+  /** Locales the challenge page ships translations for; everything else → English. */
+  private static final List<Locale> SUPPORTED_LOCALES =
+      List.of(Locale.ENGLISH, Locale.GERMAN, Locale.of("fi"));
+
   /**
-   * Sends the 401 password-challenge page. {@code error} adds a "wrong password"
-   * line after a failed attempt. The page is user-facing content (German, the
-   * product language); the redirect server has no i18n provider of its own.
+   * Resolves the challenge page language from the request's {@code Accept-Language}
+   * header, restricted to {@link #SUPPORTED_LOCALES}. A missing, blank or
+   * unparseable header, or no supported match, falls back to English.
+   */
+  private static Locale resolveLocale(HttpExchange exchange) {
+    final String header = exchange.getRequestHeaders().getFirst("Accept-Language");
+    if (header == null || header.isBlank()) {
+      return Locale.ENGLISH;
+    }
+    try {
+      final Locale match = Locale.lookup(Locale.LanguageRange.parse(header), SUPPORTED_LOCALES);
+      return match != null ? match : Locale.ENGLISH;
+    } catch (IllegalArgumentException malformedHeader) {
+      return Locale.ENGLISH;
+    }
+  }
+
+  /**
+   * Sends the 401 password-challenge page in the viewer's language. {@code error}
+   * adds a "wrong password" line after a failed attempt. Strings come from the
+   * {@code i18n/redirect_password} resource bundle keyed off {@code Accept-Language};
+   * the redirect origin has no Vaadin i18n provider of its own.
    */
   private void sendPasswordForm(HttpExchange exchange, String path, boolean error)
       throws IOException {
+    final Locale locale = resolveLocale(exchange);
+    final ResourceBundle messages = ResourceBundle.getBundle("i18n.redirect_password", locale);
     final String errorBlock = error
-        ? "<p class=\"error\">Falsches Passwort. Bitte erneut versuchen.</p>"
+        ? "<p class=\"error\">" + htmlAttribute(messages.getString("error")) + "</p>"
         : "";
     final String html = FORM_TEMPLATE
+        .replace("{{LANG}}", htmlAttribute(locale.getLanguage()))
+        .replace("{{TITLE}}", htmlAttribute(messages.getString("title")))
+        .replace("{{HEADING}}", htmlAttribute(messages.getString("heading")))
+        .replace("{{PASSWORD_LABEL}}", htmlAttribute(messages.getString("passwordLabel")))
+        .replace("{{SUBMIT}}", htmlAttribute(messages.getString("submit")))
         .replace("{{ACTION}}", htmlAttribute(path))
         .replace("{{ERROR}}", errorBlock);
     final byte[] body = html.getBytes(StandardCharsets.UTF_8);

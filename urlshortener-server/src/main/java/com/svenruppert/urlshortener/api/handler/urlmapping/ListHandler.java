@@ -288,7 +288,10 @@ public class ListHandler
         "originalUrl", m.originalUrl(),
         "createdAt", m.createdAt().toString(),
         "expiresAt", m.expiresAt().map(Instant::toString).orElse(""),
-        "active", m.active() + ""
+        "active", m.active() + "",
+        // Transport-only flag so the UI can show a "protected" badge; the hash
+        // itself is never serialized (getPasswordHash is @JsonIgnore'd).
+        "passwordProtected", m.isPasswordProtected() + ""
     );
   }
 }

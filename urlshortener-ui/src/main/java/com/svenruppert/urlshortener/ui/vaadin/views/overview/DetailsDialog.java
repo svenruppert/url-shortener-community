@@ -81,6 +81,9 @@ public class DetailsDialog
   private static final String K_F_ACTIVE = "overview.details.field.active";
   private static final String K_F_PASSWORD = "overview.details.field.password";
   private static final String K_F_REMOVE_PASSWORD = "overview.details.field.removePassword";
+  private static final String K_F_PASSWORD_PROTECTED = "overview.details.field.passwordProtected";
+  private static final String K_V_YES = "overview.details.value.yes";
+  private static final String K_V_NO = "overview.details.value.no";
 
   private static final String K_NO_EXPIRY = "overview.details.noExpiry"; // No expiry date
 
@@ -119,6 +122,7 @@ public class DetailsDialog
   private final TextField tfExpires = new TextField();
   private final Checkbox cbActive = new Checkbox();
   private final Span statusPill = new Span();
+  private final TextField tfProtected = new TextField();
 
   // Open-core seam (V00.18.00 P085): plug-in sections (e.g. the tag field)
   // render in the form and follow the dialog's edit/save/cancel cycle.
@@ -217,7 +221,7 @@ public class DetailsDialog
         new FormLayout.ResponsiveStep("600px", 2)
     );
     form.add(tfShort, tfCreated, tfUrl, cbActive, tfExpires, buildExpiresRow(), statusPill,
-        passwordField, cbRemovePassword);
+        tfProtected, passwordField, cbRemovePassword);
     form.setColspan(tfUrl, 2);
     form.setColspan(passwordField, 2);
     pluginSections.forEach(section -> {
@@ -302,6 +306,7 @@ public class DetailsDialog
     expiresField.setLabel(tr(K_F_EXPIRES, "Expires"));
     passwordField.setLabel(tr(K_F_PASSWORD, "New password (blank = unchanged)"));
     cbRemovePassword.setLabel(tr(K_F_REMOVE_PASSWORD, "Remove password protection"));
+    tfProtected.setLabel(tr(K_F_PASSWORD_PROTECTED, "Password protection"));
   }
 
   private void configureFields() {
@@ -328,6 +333,13 @@ public class DetailsDialog
     var statusText = computeStatusText(expiresAt);
     statusPill.setText(statusText.text());
     statusPill.getElement().getThemeList().add(statusText.theme());
+
+    // Read-only "password protection: yes/no" indicator (view mode only). Driven
+    // by the transported passwordProtected flag — the hash is never sent here.
+    tfProtected.setValue(item.isPasswordProtected()
+        ? tr(K_V_YES, "Yes")
+        : tr(K_V_NO, "No"));
+    tfProtected.setReadOnly(true);
 
     // Password controls live only in edit mode (shown via switchToEdit). The
     // current password/hash is never sent to the client, so there is no value
@@ -399,6 +411,9 @@ public class DetailsDialog
   private void switchToEdit(boolean enable) {
     tfUrl.setReadOnly(!enable);
     tfExpires.setVisible(!enable);
+    // The read-only protection indicator belongs to view mode; the password
+    // field + "remove protection" checkbox take over in edit mode.
+    tfProtected.setVisible(!enable);
     cbActive.setReadOnly(!enable);
     pluginSections.forEach(section -> section.editMode(enable));
 
