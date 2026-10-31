@@ -82,6 +82,8 @@ public class OverviewView
   private static final String C_BOTTOM_BAR = "overview-view__bottombar";
   private static final String C_PAGING_BAR = "overview-view__pagingbar";
   private static final String C_EXPORT_ANCHOR = "overview-view__export-anchor";
+  private static final String C_PAGEINFO = "overview-view__pageinfo";
+  private static final String C_ACTIONS_START = "overview-view__actions-start";
   private static final String C_GRID = "overview-view__grid";
   private static final String C_URL_ANCHOR = "overview-view__url";
   private static final String C_SHORTCODE = "overview-view__shortcode";
@@ -184,7 +186,14 @@ public class OverviewView
 
     exportAnchor.addClassName(C_EXPORT_ANCHOR);
 
-    var pagingBar = new HorizontalLayout(prevBtn, nextBtn, pageInfo, btnImport, btnExport, btnSettings);
+    // Give the page info its own box — a raw Text node would butt against the
+    // Import button — and set the action trio apart from the paging controls
+    // (GUI makeover 00.21.00 spacing fix).
+    Span pageInfoBox = new Span(pageInfo);
+    pageInfoBox.addClassName(C_PAGEINFO);
+    btnImport.addClassName(C_ACTIONS_START);
+
+    var pagingBar = new HorizontalLayout(prevBtn, nextBtn, pageInfoBox, btnImport, btnExport, btnSettings);
     pagingBar.addClassName(C_PAGING_BAR);
     pagingBar.setDefaultVerticalComponentAlignment(CENTER);
 

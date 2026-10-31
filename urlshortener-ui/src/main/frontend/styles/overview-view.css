@@ -10,8 +10,24 @@
 
 /* Paging bar (optional tidy layout) */
 .overview-view__pagingbar {
-    gap: var(--lumo-space-s);
+    /* The Aura theme does not define --lumo-* tokens, so use fixed spacing
+       (values verified live in the running app). */
+    gap: 1rem;
     align-items: center;
+    /* Keep the cluster off the table's right edge (GUI makeover 00.21.00). */
+    padding-inline-end: 0.5rem;
+}
+
+/* Page info sits between the paging arrows and the action buttons — give it
+   its own breathing room so it does not touch the Import button. */
+.overview-view__pageinfo {
+    padding-inline: 0.5rem;
+    white-space: nowrap;
+}
+
+/* Separate the action trio (Import / Export / settings) from the paging part. */
+.overview-view__actions-start {
+    margin-inline-start: 0.75rem;
 }
 
 /* URL column: ellipsis (moved from anchor inline style) */
