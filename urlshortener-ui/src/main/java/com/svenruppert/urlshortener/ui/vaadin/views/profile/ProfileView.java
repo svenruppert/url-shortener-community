@@ -82,6 +82,10 @@ public class ProfileView
     setSpacing(true);
     setPadding(true);
 
+    // jSentinel brand accent (lime-gold) at the top of the view.
+    var brandBar = new com.vaadin.flow.component.html.Div();
+    brandBar.addClassName("js-brand-bar");
+    add(brandBar);
     add(new H2(tr(K_TITLE, "My Profile")));
 
     Optional<AppUser> current = SubjectStores.subjectStore().currentSubject(AppUser.class);
