@@ -118,7 +118,7 @@ public class AboutView
 
     UnorderedList featureList = new UnorderedList(
         new ListItem(withIcon(VaadinIcon.CHECK, "Responsive layout & cards")),
-        new ListItem(withIcon(VaadinIcon.CHECK, "Lumo-themed badges & icons")),
+        new ListItem(withIcon(VaadinIcon.CHECK, "Aura-themed badges & icons")),
         new ListItem(withIcon(VaadinIcon.CHECK, "Clean typography & spacing")),
         new ListItem(withIcon(VaadinIcon.CHECK, "Accessible links and readable contrast"))
     );
@@ -135,7 +135,7 @@ public class AboutView
     Div footer = new Div();
     footer.addClassName("about-footer");
     footer.add(new Icon(VaadinIcon.INFO_CIRCLE_O),
-               new Text("Demo UI built with Vaadin Flow & Lumo"));
+               new Text("Demo UI built with Vaadin Flow & Aura"));
 
     container.add(hero, grid, footer);
     root.add(container);
