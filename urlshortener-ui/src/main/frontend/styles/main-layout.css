@@ -12,4 +12,55 @@
     .right {
         margin-left: auto;
     }
+
+    /* Navbar quick-search pill (GUI makeover 00.21.00) — opens the global
+       Ctrl/Cmd-K palette. */
+    .quick-search {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 520px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--lumo-contrast-20pct);
+        background: var(--lumo-contrast-5pct);
+        color: var(--lumo-secondary-text-color);
+        cursor: pointer;
+    }
+    .quick-search:hover {
+        background: var(--lumo-contrast-10pct);
+    }
+    .quick-search .quick-search__label {
+        flex: 1;
+    }
+    .quick-search .kbd {
+        font-size: var(--lumo-font-size-xs);
+        border: 1px solid var(--lumo-contrast-20pct);
+        border-radius: var(--lumo-border-radius-s);
+        padding: 1px 6px;
+        background: var(--lumo-base-color);
+    }
+
+    /* Grouped drawer navigation + pinned identity footer. */
+    .nav-groups {
+        gap: 4px;
+    }
+    .identity {
+        border-top: 1px solid var(--lumo-contrast-10pct);
+        padding: var(--lumo-space-s) var(--lumo-space-m);
+        display: flex;
+        flex-direction: column;
+        gap: var(--lumo-space-s);
+    }
+    .identity .js-actor {
+        display: flex;
+        align-items: center;
+        gap: var(--lumo-space-s);
+    }
+    .identity .identity-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--lumo-space-xs);
+        flex-wrap: wrap;
+    }
 }

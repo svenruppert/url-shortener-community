@@ -140,7 +140,6 @@ public class SearchBar
     container().add(buildSearchBar());
 
     applyI18n();
-    addShortCuts();
     addListeners();
   }
 
@@ -364,19 +363,6 @@ public class SearchBar
         logger().warn("resetBtn.addClickListener failed {}", e.getMessage());
       }
     });
-  }
-
-  private void addShortCuts() {
-    var current = UI.getCurrent();
-    if (current == null) return;
-
-    current.addShortcutListener(_ -> {
-      if (globalSearch.isEnabled()) globalSearch.focus();
-    }, Key.KEY_K, KeyModifier.CONTROL);
-
-    current.addShortcutListener(_ -> {
-      if (globalSearch.isEnabled()) globalSearch.focus();
-    }, Key.KEY_K, KeyModifier.META);
   }
 
   private void setSimpleSearchEnabled(boolean enabled) {

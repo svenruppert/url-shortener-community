@@ -1,0 +1,27 @@
+/* Global quick-search palette (GUI makeover 00.21.00).
+   The js-row / js-pill vocabulary is themed by the jSentinel design system;
+   only palette-specific tweaks live here. */
+.js-quicksearch__head {
+    width: 100%;
+    padding-bottom: var(--lumo-space-s);
+}
+
+.js-quicksearch__results {
+    width: 100%;
+}
+
+.js-quicksearch__row {
+    cursor: pointer;
+}
+
+.js-quicksearch__row:hover {
+    background: var(--lumo-contrast-5pct);
+}
+
+.js-quicksearch__row .js-row-meta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 440px;
+    display: inline-block;
+}
