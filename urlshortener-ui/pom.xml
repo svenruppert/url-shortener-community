@@ -52,6 +52,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- jSentinel design system: Aura brand overrides + js-* components (GUI makeover 00.21.00) -->
+        <dependency>
+            <groupId>eu.jsentinel.design</groupId>
+            <artifactId>jSentinel-design-vaadin</artifactId>
+            <version>00.02.01</version>
+        </dependency>
+
 <!--        <dependency>-->
 <!--            <groupId>com.vaadin</groupId>-->
 <!--            <artifactId>vaadin-dev-server</artifactId>-->

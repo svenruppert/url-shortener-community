@@ -3,6 +3,7 @@ package com.svenruppert.urlshortener.ui.vaadin;
 
 
 import com.svenruppert.dependencies.core.logger.HasLogger;
+import eu.jsentinel.design.vaadin.ColorSchemeToggle;
 import eu.jsentinel.jcustos.authorization.api.SubjectStores;
 import com.svenruppert.urlshortener.client.AuthClient;
 import com.svenruppert.urlshortener.ui.vaadin.components.StoreIndicator;
@@ -29,6 +30,7 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -83,6 +85,11 @@ public class MainLayout
   private void createHeader() {
     H1 appTitle = new H1(tr(K_APP_TITLE, "URL Shortener"));
     appTitle.addClassName(C_APP_TITLE);
+    appTitle.addClassName("js-brand-name");
+
+    // Light/dark switch from the jSentinel design system (GUI makeover 00.21.00).
+    ColorSchemeToggle colorScheme = new ColorSchemeToggle(
+        mode -> tr("scheme." + mode.name().toLowerCase(Locale.ROOT), mode.name()));
 
     SideNav views = getPrimaryNavigation();
     Scroller scroller = new Scroller(views);
@@ -110,9 +117,9 @@ public class MainLayout
         UI.getCurrent().navigate(LoginView.class);
       });
       logoutButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-      headerRow = new HorizontalLayout(toggle, appTitle, spacer, languageSwitch, storeIndicator, logoutButton);
+      headerRow = new HorizontalLayout(toggle, appTitle, spacer, languageSwitch, colorScheme, storeIndicator, logoutButton);
     } else {
-      headerRow = new HorizontalLayout(toggle, appTitle, spacer, languageSwitch, storeIndicator);
+      headerRow = new HorizontalLayout(toggle, appTitle, spacer, languageSwitch, colorScheme, storeIndicator);
     }
 
     headerRow.addClassName(C_HEADER_ROW);
@@ -122,7 +129,9 @@ public class MainLayout
     headerRow.setPadding(true);
     headerRow.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
 
-    VerticalLayout viewHeader = new VerticalLayout(headerRow);
+    Div brandBar = new Div();
+    brandBar.addClassName("js-brand-bar");
+    VerticalLayout viewHeader = new VerticalLayout(brandBar, headerRow);
     viewHeader.setPadding(false);
     viewHeader.setSpacing(false);
 
