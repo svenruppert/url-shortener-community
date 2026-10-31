@@ -327,12 +327,10 @@ public class DetailsDialog
     tfExpires.setValue(expiresAt.map(DATE_TIME_FMT::format).orElse(tr(K_NO_EXPIRY, "No expiry date")));
     tfExpires.setReadOnly(true);
 
-    statusPill.getElement().getThemeList().add("badge");
-    statusPill.getElement().getThemeList().add("pill");
-    statusPill.getElement().getThemeList().add("small");
     var statusText = computeStatusText(expiresAt);
     statusPill.setText(statusText.text());
-    statusPill.getElement().getThemeList().add(statusText.theme());
+    statusPill.addClassName("js-pill");
+    statusPill.addClassName(switch (statusText.theme()) { case "error" -> "js-pill--danger"; case "warning" -> "js-pill--warning"; case "success" -> "js-pill--success"; default -> "js-pill--neutral"; });
 
     // Read-only "password protection: yes/no" indicator (view mode only). Driven
     // by the transported passwordProtected flag — the hash is never sent here.
