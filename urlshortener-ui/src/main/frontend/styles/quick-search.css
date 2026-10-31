@@ -3,7 +3,7 @@
    only palette-specific tweaks live here. */
 .js-quicksearch__head {
     width: 100%;
-    padding-bottom: var(--lumo-space-s);
+    padding-bottom: 0.5rem;
 }
 
 .js-quicksearch__results {
@@ -15,7 +15,8 @@
 }
 
 .js-quicksearch__row:hover {
-    background: var(--lumo-contrast-5pct);
+    /* Aura defines no --lumo-* tokens; adapt to light/dark via currentColor. */
+    background: color-mix(in srgb, currentColor 6%, transparent);
 }
 
 .js-quicksearch__row .js-row-meta {
