@@ -67,6 +67,10 @@ public class SetupView
     setPadding(true);
     setMaxWidth("30em");
 
+    // jSentinel brand accent (lime-gold) at the top of the view.
+    var brandBar = new com.vaadin.flow.component.html.Div();
+    brandBar.addClassName("js-brand-bar");
+    add(brandBar);
     add(new H2(tr(K_TITLE, "Initial setup")));
     add(new Paragraph(tr(K_INTRO,
         "No administrator exists yet. Paste the one-time bootstrap token "

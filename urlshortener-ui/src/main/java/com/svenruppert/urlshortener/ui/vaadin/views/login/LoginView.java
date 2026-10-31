@@ -42,6 +42,11 @@ public class LoginView
 
   private final AuthClient authClient = new AuthClient();
 
+  /** Brand the sign-in page with the jSentinel glow background. */
+  public LoginView() {
+    addClassName("js-login-page");
+  }
+
   /**
    * On a fresh instance no admin exists yet — send the operator to the
    * {@link SetupView} instead of a login form they could never pass.
