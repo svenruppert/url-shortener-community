@@ -29,6 +29,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -164,6 +165,11 @@ public class OverviewView
     setSizeFull();
     setPadding(true);
     setSpacing(true);
+
+    // Brand accent bar (jSentinel design language): a thin lime-gold gradient line.
+    var brandBar = new Div();
+    brandBar.addClassName("js-brand-bar");
+    add(brandBar);
 
     // headline is translated in applyI18n()
     add(new H2(tr(K_OVERVIEW_H2, "URL Shortener – Overview")));
@@ -408,8 +414,9 @@ public class OverviewView
           var statusText = computeStatusText(m.expiresAt());
           var pill = new Span();
           pill.setText(statusText.text());
-          pill.getElement().getThemeList().add("badge pill small");
-          pill.getElement().getThemeList().add(statusText.theme());
+          // jSentinel status pill (replaces the Lumo badge theme) — same text and meaning.
+          pill.addClassName("js-pill");
+          pill.addClassName(jsPillVariant(statusText.theme()));
           return pill;
         })
         .setHeader("") // header will be set via key in configureGrid()
@@ -417,6 +424,16 @@ public class OverviewView
         .setAutoWidth(true)
         .setResizable(true)
         .setFlexGrow(0);
+  }
+
+  /** Maps the expiry status theme to a jSentinel pill variant class. */
+  private static String jsPillVariant(String theme) {
+    return switch (theme) {
+      case "error" -> "js-pill--danger";
+      case "warning" -> "js-pill--warning";
+      case "success" -> "js-pill--success";
+      default -> "js-pill--neutral";
+    };
   }
 
   private void configureColumActive() {
