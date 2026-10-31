@@ -103,6 +103,7 @@
         <jetty.version>12.1.7</jetty.version>
         <warName>ROOT</warName>
         <restServiceName>urlshortener</restServiceName>
+        <urlshortener.admin.port>9090</urlshortener.admin.port>
         <eclipse-store.version>4.1.0</eclipse-store.version>
         <jsentinel.version>00.82.00</jsentinel.version>
         <icu4j.version>78.3</icu4j.version>

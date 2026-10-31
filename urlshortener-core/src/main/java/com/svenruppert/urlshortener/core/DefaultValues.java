@@ -8,7 +8,9 @@ public final class DefaultValues {
   //TODO - must be editable by user
   public static final String SHORTCODE_BASE_URL = "https://8g8.eu/";
 
-  public static final int ADMIN_SERVER_PORT = 9090;
+  // Admin/REST port, overridable via -Durlshortener.admin.port (default 9090) so the
+  // server and the E2E suite can avoid a port already taken by another local instance.
+  public static final int ADMIN_SERVER_PORT = Integer.getInteger("urlshortener.admin.port", 9090);
   public static final String ADMIN_SERVER_HOST = "localhost";
   public static final String ADMIN_SERVER_PROTOCOL = "http";
   public static final String ADMIN_SERVER_URL = ADMIN_SERVER_PROTOCOL + "://" + ADMIN_SERVER_HOST + ":" + ADMIN_SERVER_PORT;

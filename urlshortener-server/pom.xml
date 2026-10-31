@@ -111,6 +111,9 @@
                          and mvn clean resets all persistence state. -->
                     <systemPropertyVariables>
                         <app.storage.dir>${project.build.directory}/test-data</app.storage.dir>
+                        <!-- Admin/REST port for the in-process E2E servers; override with
+                             -Durlshortener.admin.port to dodge a port already taken locally. -->
+                        <urlshortener.admin.port>${urlshortener.admin.port}</urlshortener.admin.port>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
