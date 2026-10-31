@@ -153,6 +153,11 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
     setSpacing(true);
     setPadding(true);
 
+    // jSentinel brand accent (lime-gold) at the top of the view.
+    var brandBar = new com.vaadin.flow.component.html.Div();
+    brandBar.addClassName("js-brand-bar");
+    add(brandBar);
+
     add(new H2(tr(K_TITLE, "Bulk Create Short Links")));
 
     // TextArea — input buffer only; cleared after each Validate action
@@ -633,22 +638,23 @@ public class BulkCreateView extends VerticalLayout implements HasLogger, I18nSup
 
         // Active badge
         final var activeBadge = new Span(info.isActive() ? "\u2713 Active" : "\u2717 Inactive");
-        activeBadge.getElement().getThemeList().add("badge pill small");
-        activeBadge.getElement().getThemeList().add(info.isActive() ? "success" : "error");
+        activeBadge.addClassName("js-pill");
+        activeBadge.addClassName(info.isActive() ? "js-pill--success" : "js-pill--danger");
         linkRow.add(activeBadge);
 
         // Expiry badge
         final var expiryStatus = ExpiryBadgeFactory
             .computeStatusText(Optional.ofNullable(info.getExpiresAt()));
         final var expiryBadge = new Span(expiryStatus.text());
-        expiryBadge.getElement().getThemeList().add("badge pill small");
-        expiryBadge.getElement().getThemeList().add(expiryStatus.theme());
+        expiryBadge.addClassName("js-pill");
+        expiryBadge.addClassName(switch (expiryStatus.theme()) { case "error" -> "js-pill--danger"; case "warning" -> "js-pill--warning"; case "success" -> "js-pill--success"; default -> "js-pill--neutral"; });
         linkRow.add(expiryBadge);
 
         // Protocol variant warning
         if (info.isProtocolVariant()) {
           final var variantBadge = new Span("\u26a0 Protocol variant");
-          variantBadge.getElement().getThemeList().add("badge pill small error");
+          variantBadge.addClassName("js-pill");
+          variantBadge.addClassName("js-pill--danger");
           variantBadge.getElement().setProperty("title",
               "This shortlink targets the http/https counterpart of your URL");
           linkRow.add(variantBadge);

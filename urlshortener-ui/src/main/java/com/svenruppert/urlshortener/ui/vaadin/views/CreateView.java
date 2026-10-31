@@ -104,6 +104,11 @@ public class CreateView extends VerticalLayout implements HasLogger, I18nSupport
     setPadding(true);
     setSizeFull();
 
+    // jSentinel brand accent (lime-gold) at the top of the view.
+    var brandBar = new com.vaadin.flow.component.html.Div();
+    brandBar.addClassName("js-brand-bar");
+    add(brandBar);
+
     applyI18n();
 
     urlField.setWidthFull();
