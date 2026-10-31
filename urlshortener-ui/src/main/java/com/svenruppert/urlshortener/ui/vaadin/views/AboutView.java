@@ -39,6 +39,10 @@ public class AboutView
   public AboutView() {
     Div root = getContent();
     root.addClassName(C_ROOT);
+    // jSentinel brand accent (lime-gold) at the top of the page.
+    var brandBar = new com.vaadin.flow.component.html.Div();
+    brandBar.addClassName("js-brand-bar");
+    root.add(brandBar);
 
     VerticalLayout container = new VerticalLayout();
     container.addClassName(C_CONTAINER);
@@ -54,7 +58,8 @@ public class AboutView
     hero.setAlignItems(Alignment.START);
 
     Span versionBadge = new Span("Version 1.0.0");
-    versionBadge.getElement().setAttribute("theme", "badge primary pill");
+    versionBadge.addClassName("js-pill");
+    versionBadge.addClassName("js-pill--accent");
 
     H1 title = new H1("About");
     Paragraph subtitle = new Paragraph("Vaadin Flow Demo Application");
