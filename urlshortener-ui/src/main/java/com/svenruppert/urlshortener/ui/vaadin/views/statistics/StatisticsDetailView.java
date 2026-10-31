@@ -103,6 +103,10 @@ public class StatisticsDetailView
 
     configureGrid();
 
+    // jSentinel brand accent (lime-gold) at the top of the view.
+    var brandBar = new com.vaadin.flow.component.html.Div();
+    brandBar.addClassName("js-brand-bar");
+    add(brandBar);
     add(buildHeader(), statisticsToolbar, buildInfoBar(), grid);
   }
 

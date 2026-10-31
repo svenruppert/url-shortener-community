@@ -53,6 +53,10 @@ public class AuditView
     setSizeFull();
     setPadding(true);
 
+    // jSentinel brand accent (lime-gold) at the top of the view.
+    var brandBar = new com.vaadin.flow.component.html.Div();
+    brandBar.addClassName("js-brand-bar");
+    add(brandBar);
     add(new H2(tr(K_TITLE, "Audit log")));
 
     subjectFilter.setPlaceholder(tr(K_SUBJECT, "Subject filter"));
