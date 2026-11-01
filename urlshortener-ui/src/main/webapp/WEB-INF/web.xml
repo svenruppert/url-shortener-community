@@ -8,6 +8,15 @@
         <servlet-class>com.svenruppert.urlshortener.ui.vaadin.AppServlet</servlet-class>
         <async-supported>true</async-supported>
         <load-on-startup>1</load-on-startup>
+        <!-- Custom I18NProvider that merges the community base bundle with
+             per-plug-in bundles contributed via I18nBundleContribution, so
+             enterprise translation keys live in their own plug-in jars rather
+             than in the community translation files. Vaadin 25 reads this
+             init-param (META-INF/services for I18NProvider is ignored). -->
+        <init-param>
+            <param-name>i18n.provider</param-name>
+            <param-value>com.svenruppert.urlshortener.ui.vaadin.tools.MergingI18NProvider</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>Vaadin Servlet</servlet-name>
