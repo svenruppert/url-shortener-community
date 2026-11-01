@@ -33,6 +33,8 @@ import com.svenruppert.urlshortener.api.security.ApiRestSubjectResolver;
 import com.svenruppert.urlshortener.api.security.SecurityHttpHandler;
 import com.svenruppert.urlshortener.api.security.bootstrap.BootstrapBuilder;
 import com.svenruppert.urlshortener.api.security.bootstrap.BootstrapWiring;
+import com.svenruppert.urlshortener.api.security.storage.AppStoragePaths;
+import com.svenruppert.urlshortener.api.security.storage.LegacyFrameworkStoreMigration;
 import com.svenruppert.urlshortener.api.handler.admin.StoreInfoHandler;
 import com.svenruppert.urlshortener.api.handler.admin.columns.ColumnVisibilityBulkHandler;
 import com.svenruppert.urlshortener.api.handler.admin.columns.ColumnVisibilityHandler;
@@ -333,6 +335,12 @@ public class ShortenerServer
     if (!SECURITY_BOOTSTRAPPED.compareAndSet(false, true)) {
       return;
     }
+    // One-time migration shim: a data set from the jSentinel era carries an
+    // orphaned framework store under the old directory name that jCustos would
+    // silently ignore. Make that transition loud and archive it aside before
+    // the jCustos storage pair opens. Removable once the single installation
+    // that needs it has migrated.
+    LegacyFrameworkStoreMigration.retireOrphanedLegacyStore(AppStoragePaths.baseDir());
     // Discover the @JCustosAutoService-registered Authn/Authz via SPI
     // and pass them explicitly — RestSecurity.bootstrap() does not
     // auto-discover them, and without this the resolver has no
