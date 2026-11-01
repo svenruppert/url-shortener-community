@@ -13,7 +13,7 @@
 
     <groupId>com.svenruppert.urlshortener</groupId>
     <artifactId>urlshortener-community-root</artifactId>
-    <version>00.19.00-SNAPSHOT</version>
+    <version>00.21.00</version>
     <packaging>pom</packaging>
 
 
@@ -177,22 +177,22 @@
             <dependency>
                 <groupId>com.svenruppert.urlshortener</groupId>
                 <artifactId>urlshortener-core</artifactId>
-                <version>00.19.00-SNAPSHOT</version>
+                <version>00.21.00</version>
             </dependency>
             <dependency>
                 <groupId>com.svenruppert.urlshortener</groupId>
                 <artifactId>urlshortener-server</artifactId>
-                <version>00.19.00-SNAPSHOT</version>
+                <version>00.21.00</version>
             </dependency>
             <dependency>
                 <groupId>com.svenruppert.urlshortener</groupId>
                 <artifactId>urlshortener-client</artifactId>
-                <version>00.19.00-SNAPSHOT</version>
+                <version>00.21.00</version>
             </dependency>
             <dependency>
                 <groupId>com.svenruppert.urlshortener</groupId>
                 <artifactId>urlshortener-ui</artifactId>
-                <version>00.19.00-SNAPSHOT</version>
+                <version>00.21.00</version>
             </dependency>
 
             <dependency>
