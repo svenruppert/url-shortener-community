@@ -1,0 +1,7 @@
+/* Login page spacing (GUI makeover 00.21.00).
+   The jcustos login form stacks the "Remember me" checkbox flush against the
+   password field above and the Sign In button below (zero margin). Give it
+   vertical breathing room. */
+.js-login-page vaadin-checkbox {
+    margin-block: 0.75rem;
+}

@@ -642,7 +642,9 @@ public class OverviewView
     confirm.addThemeVariants(ButtonVariant.LUMO_PRIMARY, LUMO_ERROR);
 
     Button cancel = new Button(tr(K_COMMON_CANCEL, "Cancel"), _ -> dialog.close());
-    dialog.add(new HorizontalLayout(confirm, cancel));
+    // Put the actions in the dialog footer so they are set apart from the
+    // question text (consistent with the other dialogs).
+    dialog.getFooter().add(confirm, cancel);
     dialog.open();
   }
 

@@ -13,6 +13,7 @@ import com.svenruppert.urlshortener.ui.vaadin.views.Notifications;
 import com.svenruppert.urlshortener.ui.vaadin.views.overview.OverviewView;
 import com.svenruppert.urlshortener.ui.vaadin.views.setup.SetupView;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
@@ -31,6 +32,7 @@ import java.util.Objects;
  * navigation gating.
  */
 @Route(LoginView.PATH)
+@CssImport("./styles/login.css")
 public class LoginView
     extends eu.jsentinel.jcustos.authorization.LoginView
     implements I18nSupport, HasDynamicTitle, BeforeEnterObserver {
