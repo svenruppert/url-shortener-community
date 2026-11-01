@@ -1,14 +1,9 @@
-.statistics-view {
-  padding: var(--lumo-space-m);
-}
-
 .statistics-view__grid {
   flex: 1;
   min-height: 400px;
 }
 
 .statistics-view__url {
-  color: var(--lumo-primary-color);
   text-decoration: none;
   max-width: 400px;
   overflow: hidden;
@@ -22,16 +17,9 @@
 }
 
 .statistics-view__shortcode {
-  font-family: var(--lumo-font-family-monospace, monospace);
   font-weight: 500;
 }
 
 .statistics-view__count {
   font-weight: 600;
-  color: var(--lumo-primary-text-color);
-}
-
-.statistics-view__pagingbar {
-  padding: var(--lumo-space-s) 0;
-  gap: var(--lumo-space-m);
 }

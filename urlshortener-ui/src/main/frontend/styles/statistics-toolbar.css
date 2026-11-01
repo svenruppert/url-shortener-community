@@ -1,9 +1,3 @@
-.statistics-toolbar {
-  padding: var(--lumo-space-s);
-  background: var(--lumo-contrast-5pct);
-  border-radius: var(--lumo-border-radius-m);
-}
-
 .statistics-toolbar__date-range {
   width: 140px;
 }

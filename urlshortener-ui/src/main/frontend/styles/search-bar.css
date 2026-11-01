@@ -7,7 +7,6 @@
 .search-bar__top {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--lumo-space-s);
 }
 
 /* Global search wants to take space */
@@ -45,7 +44,6 @@
 .search-bar__adv-wrap {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--lumo-space-s);
     width: 100%;
     align-items: flex-start;
 }
@@ -59,7 +57,6 @@
 /* Sort toolbar on the right */
 .search-bar__sortbar {
     display: flex;
-    gap: var(--lumo-space-xs);
     align-items: flex-end;
     flex: 0 0 auto;
 }

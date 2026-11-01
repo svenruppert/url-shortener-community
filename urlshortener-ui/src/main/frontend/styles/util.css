@@ -25,7 +25,5 @@
 }
 
 .u-warn-icon {
-  color: var(--lumo-error-color);
-  font-size: var(--lumo-icon-size-s);
   flex-shrink: 0;
 }
