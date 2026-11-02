@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import com.svenruppert.urlshortener.api.extension.LinkTargetGuards;
 
 import static com.svenruppert.urlshortener.core.DefaultValues.PATH_REDIRECT;
 
@@ -117,6 +118,15 @@ public class RedirectHandler
     if (!mapping.active()) {
       logger().info("Short code {} is inactive", code);
       exchange.sendResponseHeaders(HttpStatus.NOT_FOUND.code(), -1);
+      return;
+    }
+
+    // Open-core seam (V00.23.00 P100): a plug-in may block the redirect when
+    // the target is banned. No guard registered = never blocks.
+    var ban = LinkTargetGuards.firstVeto(mapping.originalUrl());
+    if (ban.isPresent()) {
+      logger().info("Short code {} target blocked by guard: {}", code, ban.get());
+      exchange.sendResponseHeaders(HttpStatus.FORBIDDEN.code(), -1);
       return;
     }
 

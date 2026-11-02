@@ -3,6 +3,7 @@ package com.svenruppert.urlshortener.api.store.urlmapping;
 import com.svenruppert.dependencies.core.logger.HasLogger;
 import com.svenruppert.functional.result.Result;
 import com.svenruppert.urlshortener.api.ShortCodeGenerator;
+import com.svenruppert.urlshortener.api.extension.LinkTargetGuards;
 import com.svenruppert.urlshortener.core.AliasPolicy;
 import com.svenruppert.urlshortener.core.RedirectCycleDetector;
 import com.svenruppert.urlshortener.core.urlmapping.ShortUrlMapping;
@@ -95,6 +96,15 @@ public final class MappingCreator
     if (RedirectCycleDetector.formsCycle(SHORTCODE_BASE_URL, targetResolver, shortCode, url)) {
       var errorJson = errorMapper.apply(new ErrorInfo("409", "redirect target forms a cycle", "REDIRECT_CYCLE"));
       logger().warn("redirect cycle detected - createMapping - shortCode='{}' url='{}' - {}", shortCode, url, errorJson);
+      return Result.failure(errorJson);
+    }
+
+    // Open-core seam (V00.23.00 P100): a plug-in may veto the target (e.g. a
+    // managed banned-targets list). No guard registered = never vetoes.
+    Optional<String> ban = LinkTargetGuards.firstVeto(url);
+    if (ban.isPresent()) {
+      var errorJson = errorMapper.apply(new ErrorInfo("403", ban.get(), "TARGET_BANNED"));
+      logger().warn("target banned - createMapping - url='{}' - {}", url, errorJson);
       return Result.failure(errorJson);
     }
 
